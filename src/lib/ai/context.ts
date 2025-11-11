@@ -30,6 +30,16 @@ export interface UserContext {
     role: 'user' | 'assistant'
     content: string
   }>
+  relevantMemories?: Array<{
+    content: string
+    role: 'user' | 'assistant'
+    similarity: number
+    createdAt: Date
+  }>
+  recentSummaries?: {
+    daily: string[]
+    weekly: string[]
+  }
 }
 
 /**
@@ -110,6 +120,63 @@ export async function assembleUserContext(
 }
 
 /**
+ * Assembles enhanced user context with RAG (Retrieval Augmented Generation)
+ * Includes relevant memories from past conversations via vector search
+ */
+export async function assembleUserContextWithRAG(
+  userId: string,
+  conversationId: string,
+  currentMessage: string,
+  messageLimit: number = 10,
+  memoryLimit: number = 5
+): Promise<UserContext> {
+  // Get base context
+  const context = await assembleUserContext(userId, conversationId, messageLimit)
+
+  try {
+    // Import memory utilities (dynamic to avoid circular deps)
+    const { generateEmbedding, searchSimilarMessages } = await import('@/lib/memory/embeddings')
+    const { getRecentSummaries } = await import('@/lib/memory/summaries')
+
+    // Generate embedding for current message
+    const queryEmbedding = await generateEmbedding(currentMessage)
+
+    // Search for relevant past messages
+    const relevantMessages = await searchSimilarMessages(
+      userId,
+      queryEmbedding,
+      memoryLimit,
+      conversationId // Exclude current conversation
+    )
+
+    // Add relevant memories to context
+    if (relevantMessages.length > 0) {
+      context.relevantMemories = relevantMessages.map((m) => ({
+        content: m.content,
+        role: m.role,
+        similarity: m.similarity,
+        createdAt: m.createdAt,
+      }))
+    }
+
+    // Get recent summaries
+    const summaries = await getRecentSummaries(userId, 7)
+
+    if (summaries.dailySummaries.length > 0 || summaries.weeklySummaries.length > 0) {
+      context.recentSummaries = {
+        daily: summaries.dailySummaries.map((s) => s.summary_text),
+        weekly: summaries.weeklySummaries.map((s) => s.summary_text),
+      }
+    }
+  } catch (error) {
+    console.error('Failed to fetch RAG context:', error)
+    // Continue without RAG if it fails
+  }
+
+  return context
+}
+
+/**
  * Formats user context into a readable string for the system prompt
  */
 export function formatUserContext(context: UserContext): string {
@@ -158,6 +225,39 @@ export function formatUserContext(context: UserContext): string {
       if (goal.description) parts.push(`   ${goal.description}`)
       if (goal.category) parts.push(`   Category: ${goal.category}`)
       if (goal.targetDate) parts.push(`   Target: ${goal.targetDate}`)
+    })
+    parts.push('')
+  }
+
+  // Recent Summaries
+  if (context.recentSummaries) {
+    if (context.recentSummaries.weekly.length > 0) {
+      parts.push(`RECENT PROGRESS (Last Week):`)
+      context.recentSummaries.weekly.forEach((summary) => {
+        parts.push(`- ${summary}`)
+      })
+      parts.push('')
+    }
+
+    if (context.recentSummaries.daily.length > 0) {
+      parts.push(`RECENT SESSIONS (Last 7 Days):`)
+      context.recentSummaries.daily.slice(0, 3).forEach((summary) => {
+        parts.push(`- ${summary}`)
+      })
+      parts.push('')
+    }
+  }
+
+  // Relevant Memories (from RAG)
+  if (context.relevantMemories && context.relevantMemories.length > 0) {
+    parts.push(`RELEVANT PAST DISCUSSIONS:`)
+    parts.push(`(Similar topics from previous conversations)`)
+    context.relevantMemories.forEach((memory, index) => {
+      const daysAgo = Math.floor(
+        (Date.now() - memory.createdAt.getTime()) / (1000 * 60 * 60 * 24)
+      )
+      const timeAgo = daysAgo === 0 ? 'today' : daysAgo === 1 ? 'yesterday' : `${daysAgo} days ago`
+      parts.push(`${index + 1}. [${timeAgo}] ${memory.content.slice(0, 200)}${memory.content.length > 200 ? '...' : ''}`)
     })
     parts.push('')
   }
