@@ -1,0 +1,12 @@
+# Icons should be added here
+# Generate icons using: https://realfavicongenerator.net/
+# Or use tools like Figma, Photoshop, or online generators
+
+# Required icon sizes:
+# - 72x72, 96x96, 128x128, 144x144, 152x152 (various mobile devices)
+# - 192x192, 512x512 (Android requirements, maskable)
+# - apple-touch-icon.png (180x180 for iOS)
+# - favicon.ico (32x32, multi-resolution)
+
+# Temporary: The PWA will work without icons but will show default browser icons
+# For production, add proper branded icons to /public/icons/

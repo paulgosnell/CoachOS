@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <!-- Background -->
+  <rect width="512" height="512" rx="128" fill="#0A0A0A"/>
+
+  <!-- Gradient Definition -->
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#C0C0C8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#707078;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Coach OS "C" Letter -->
+  <path d="M 320 140 Q 370 140 400 170 Q 430 200 430 256 Q 430 312 400 342 Q 370 372 320 372 L 190 372 Q 140 372 110 342 Q 80 312 80 256 Q 80 200 110 170 Q 140 140 190 140 L 320 140 Z M 190 200 Q 170 200 158 212 Q 146 224 146 256 Q 146 288 158 300 Q 170 312 190 312 L 240 312 L 240 200 L 190 200 Z"
+        fill="url(#grad)"
+        stroke="url(#grad)"
+        stroke-width="2"/>
+
+  <!-- Inner coaching element (speech bubble dot) -->
+  <circle cx="180" cy="256" r="20" fill="#0C2340"/>
+  <circle cx="256" cy="256" r="20" fill="#0C2340"/>
+  <circle cx="332" cy="256" r="20" fill="#0C2340"/>
+</svg>
