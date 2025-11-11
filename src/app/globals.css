@@ -3,9 +3,6 @@
 @tailwind utilities;
 
 @layer base {
-  /* Import Inter font */
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
   /* Root styles */
   html {
     @apply scroll-smooth;
@@ -13,7 +10,7 @@
 
   body {
     @apply bg-titanium-950 text-gray-200 antialiased;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
   }
 
   /* Focus styles */
