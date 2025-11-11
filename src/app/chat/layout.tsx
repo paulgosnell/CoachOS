@@ -78,6 +78,7 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
         .from('conversations')
         .insert({
           user_id: user.id,
+          session_type: 'quick-checkin',
           title: 'New Conversation',
         })
         .select()

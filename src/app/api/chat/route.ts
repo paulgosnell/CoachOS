@@ -43,6 +43,7 @@ export async function POST(req: Request) {
     // Save user message to database
     const { error: userMsgError } = await supabase.from('messages').insert({
       conversation_id: conversationId,
+      user_id: user.id,
       role: 'user',
       content: message,
     })
@@ -102,6 +103,7 @@ export async function POST(req: Request) {
         try {
           await supabase.from('messages').insert({
             conversation_id: conversationId,
+            user_id: user.id,
             role: 'assistant',
             content: fullResponse,
           })
