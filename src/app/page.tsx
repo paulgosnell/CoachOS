@@ -1,3 +1,8 @@
+'use client'
+
+import { Suspense, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import {
   ArrowRight,
@@ -12,8 +17,38 @@ import {
   CheckCircle2,
 } from 'lucide-react'
 
+function EmailConfirmationHandler() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
+  useEffect(() => {
+    const code = searchParams.get('code')
+    if (code) {
+      const handleConfirmation = async () => {
+        const supabase = createClient()
+        const { error } = await supabase.auth.exchangeCodeForSession(code)
+
+        if (!error) {
+          router.push('/onboarding')
+        } else {
+          console.error('Confirmation error:', error)
+          router.replace('/')
+        }
+      }
+
+      handleConfirmation()
+    }
+  }, [searchParams, router])
+
+  return null
+}
+
 export default function HomePage() {
   return (
+    <>
+      <Suspense fallback={null}>
+        <EmailConfirmationHandler />
+      </Suspense>
     <main className="min-h-screen">
       {/* Hero Section */}
       <section className="relative flex min-h-screen items-center justify-center overflow-hidden">
@@ -500,5 +535,6 @@ export default function HomePage() {
         </div>
       </section>
     </main>
+    </>
   )
 }
