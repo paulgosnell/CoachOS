@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
-import { assembleUserContext } from '@/lib/ai/context'
+import { assembleUserContextWithRAG } from '@/lib/ai/context'
 import { generateSystemPrompt } from '@/lib/ai/prompts'
+import { processMessageEmbedding } from '@/lib/memory/embeddings'
 import OpenAI from 'openai'
 
 // Allow streaming responses up to 30 seconds
@@ -41,20 +42,35 @@ export async function POST(req: Request) {
     }
 
     // Save user message to database
-    const { error: userMsgError } = await supabase.from('messages').insert({
-      conversation_id: conversationId,
-      user_id: user.id,
-      role: 'user',
-      content: message,
-    })
+    const { data: userMessage, error: userMsgError } = await supabase
+      .from('messages')
+      .insert({
+        conversation_id: conversationId,
+        user_id: user.id,
+        role: 'user',
+        content: message,
+      })
+      .select()
+      .single()
 
     if (userMsgError) {
       console.error('Failed to save user message:', userMsgError)
       return new Response('Failed to save message', { status: 500 })
     }
 
-    // Assemble user context
-    const context = await assembleUserContext(user.id, conversationId, 20)
+    // Generate embedding for user message (async, don't await)
+    if (userMessage) {
+      processMessageEmbedding(
+        userMessage.id,
+        conversationId,
+        user.id,
+        message,
+        'user'
+      ).catch((err) => console.error('Failed to process user message embedding:', err))
+    }
+
+    // Assemble user context with RAG (semantic search for relevant past conversations)
+    const context = await assembleUserContextWithRAG(user.id, conversationId, message, 20, 5)
 
     // Generate system prompt
     const systemPrompt = generateSystemPrompt(context)
@@ -101,18 +117,33 @@ export async function POST(req: Request) {
 
         // Save complete response to database
         try {
-          await supabase.from('messages').insert({
-            conversation_id: conversationId,
-            user_id: user.id,
-            role: 'assistant',
-            content: fullResponse,
-          })
+          const { data: assistantMessage } = await supabase
+            .from('messages')
+            .insert({
+              conversation_id: conversationId,
+              user_id: user.id,
+              role: 'assistant',
+              content: fullResponse,
+            })
+            .select()
+            .single()
 
           // Update conversation timestamp
           await supabase
             .from('conversations')
             .update({ updated_at: new Date().toISOString() })
             .eq('id', conversationId)
+
+          // Generate embedding for assistant message (async, don't await)
+          if (assistantMessage) {
+            processMessageEmbedding(
+              assistantMessage.id,
+              conversationId,
+              user.id,
+              fullResponse,
+              'assistant'
+            ).catch((err) => console.error('Failed to process assistant message embedding:', err))
+          }
         } catch (error) {
           console.error('Failed to save assistant message:', error)
         }

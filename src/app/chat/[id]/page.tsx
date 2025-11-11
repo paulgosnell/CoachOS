@@ -7,6 +7,7 @@ import { MessageInput } from '@/components/chat/MessageInput'
 import { TypingIndicator } from '@/components/chat/TypingIndicator'
 import { VoiceRecorder } from '@/components/voice/VoiceRecorder'
 import { AudioPlayer } from '@/components/voice/AudioPlayer'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { createClient } from '@/lib/supabase/client'
 import { Loader2, Mic, Keyboard } from 'lucide-react'
 
@@ -208,9 +209,10 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="flex h-full flex-col">
-      {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-4 md:p-6">
+    <ErrorBoundary>
+      <div className="flex h-full flex-col">
+        {/* Messages Area */}
+        <div className="flex-1 overflow-y-auto p-4 md:p-6">
         <div className="mx-auto max-w-4xl space-y-6">
           {messages.length === 0 ? (
             <div className="flex h-full items-center justify-center py-12 text-center">
@@ -297,5 +299,6 @@ export default function ChatPage() {
         </div>
       </div>
     </div>
+    </ErrorBoundary>
   )
 }
