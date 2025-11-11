@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { MessageBubble } from '@/components/chat/MessageBubble'
 import { MessageInput } from '@/components/chat/MessageInput'
+import { TypingIndicator } from '@/components/chat/TypingIndicator'
 import { createClient } from '@/lib/supabase/client'
 import { Loader2 } from 'lucide-react'
 
@@ -22,6 +23,8 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [isStreaming, setIsStreaming] = useState(false)
+  const [streamingMessage, setStreamingMessage] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -31,7 +34,7 @@ export default function ChatPage() {
 
   useEffect(() => {
     scrollToBottom()
-  }, [messages])
+  }, [messages, streamingMessage])
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -118,58 +121,59 @@ export default function ChatPage() {
 
   const handleSendMessage = async (content: string) => {
     try {
-      const supabase = createClient()
+      setIsStreaming(true)
+      setStreamingMessage('')
 
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('Not authenticated')
-
-      // Save user message
-      const { data: userMessage, error: userMsgError } = await supabase
-        .from('messages')
-        .insert({
-          conversation_id: conversationId,
-          role: 'user',
-          content,
-        })
-        .select()
-        .single()
-
-      if (userMsgError) throw userMsgError
-
-      // Add user message to state immediately
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: userMessage.id,
-          role: 'user',
-          content: userMessage.content,
-          createdAt: new Date(userMessage.created_at),
+      // Call AI API with streaming
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-      ])
+        body: JSON.stringify({
+          conversationId,
+          message: content,
+        }),
+      })
 
-      // TODO: Call AI API to get response
-      // For now, add a placeholder response
-      setTimeout(async () => {
-        const { data: assistantMessage, error: assistantMsgError } = await supabase
-          .from('messages')
-          .insert({
-            conversation_id: conversationId,
-            role: 'assistant',
-            content: "I'm here to help! (AI integration coming in Phase 4)",
-          })
-          .select()
-          .single()
+      if (!response.ok) {
+        throw new Error('Failed to get response from coach')
+      }
 
-        if (assistantMsgError) throw assistantMsgError
-      }, 500)
+      // Handle streaming response
+      const reader = response.body?.getReader()
+      const decoder = new TextDecoder()
 
-      // Update conversation timestamp
-      await supabase
-        .from('conversations')
-        .update({ updated_at: new Date().toISOString() })
-        .eq('id', conversationId)
+      if (!reader) throw new Error('No response body')
+
+      let fullMessage = ''
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        const chunk = decoder.decode(value)
+        const lines = chunk.split('\n')
+
+        for (const line of lines) {
+          if (line.startsWith('0:')) {
+            // Extract the text from the streaming format
+            const text = line.slice(2).replace(/^"/, '').replace(/"$/, '')
+            fullMessage += text
+            setStreamingMessage(fullMessage)
+          }
+        }
+      }
+
+      setIsStreaming(false)
+      setStreamingMessage('')
+
+      // Reload messages to get the saved version from database
+      await loadMessages()
     } catch (err: any) {
       console.error('Failed to send message:', err)
+      setIsStreaming(false)
+      setStreamingMessage('')
       throw err
     }
   }
@@ -212,21 +216,36 @@ export default function ChatPage() {
               </div>
             </div>
           ) : (
-            messages.map((message) => (
-              <MessageBubble
-                key={message.id}
-                role={message.role}
-                content={message.content}
-                timestamp={message.createdAt}
-              />
-            ))
+            <>
+              {messages.map((message) => (
+                <MessageBubble
+                  key={message.id}
+                  role={message.role}
+                  content={message.content}
+                  timestamp={message.createdAt}
+                />
+              ))}
+
+              {/* Show streaming message */}
+              {streamingMessage && (
+                <MessageBubble
+                  key="streaming"
+                  role="assistant"
+                  content={streamingMessage}
+                  timestamp={new Date()}
+                />
+              )}
+
+              {/* Show typing indicator when waiting for first chunk */}
+              {isStreaming && !streamingMessage && <TypingIndicator />}
+            </>
           )}
           <div ref={messagesEndRef} />
         </div>
       </div>
 
       {/* Message Input */}
-      <MessageInput onSend={handleSendMessage} />
+      <MessageInput onSend={handleSendMessage} disabled={isStreaming} />
     </div>
   )
 }
