@@ -43,3 +43,26 @@ yarn-error.log*
 
 # OS generated files
 Thumbs.db
+
+# Node.js
+node_modules/
+/.pnp
+.pnp.js
+
+# Next.js
+/.next/
+/out/
+.next
+
+# Production
+/build
+
+# Testing
+/coverage
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Vercel
+.vercel
