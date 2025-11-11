@@ -1,0 +1,12 @@
+# Apple Touch Icon Placeholder
+#
+# For production, replace this with a 180x180 PNG icon
+# Generate using: https://realfavicongenerator.net/
+#
+# This file serves as a placeholder reminder to add the actual icon
+# The icon should be named: apple-touch-icon.png
+#
+# Coach OS branding colors:
+# Background: #0A0A0A (titanium-950)
+# Primary: #C0C0C8 (silver)
+# Accent: #0C2340 (deep-blue)

@@ -1,0 +1,9 @@
+# Favicon Placeholder
+#
+# For production, replace this with a multi-resolution .ico file
+# Standard sizes: 16x16, 32x32, 48x48
+#
+# Generate using: https://realfavicongenerator.net/
+# Or convert from SVG: https://convertio.co/svg-ico/
+#
+# The icon should be named: favicon.ico

@@ -1,0 +1,10 @@
+# robots.txt for Coach OS
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /auth/callback
+Disallow: /dashboard
+Disallow: /chat/
+Disallow: /onboarding/
+
+Sitemap: https://coachos.app/sitemap.xml
