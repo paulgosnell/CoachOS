@@ -5,8 +5,10 @@ import { useRouter, useParams } from 'next/navigation'
 import { MessageBubble } from '@/components/chat/MessageBubble'
 import { MessageInput } from '@/components/chat/MessageInput'
 import { TypingIndicator } from '@/components/chat/TypingIndicator'
+import { VoiceRecorder } from '@/components/voice/VoiceRecorder'
+import { AudioPlayer } from '@/components/voice/AudioPlayer'
 import { createClient } from '@/lib/supabase/client'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Mic, Keyboard } from 'lucide-react'
 
 interface Message {
   id: string
@@ -25,6 +27,7 @@ export default function ChatPage() {
   const [error, setError] = useState<string | null>(null)
   const [isStreaming, setIsStreaming] = useState(false)
   const [streamingMessage, setStreamingMessage] = useState('')
+  const [voiceMode, setVoiceMode] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -178,6 +181,11 @@ export default function ChatPage() {
     }
   }
 
+  const handleVoiceTranscription = async (text: string) => {
+    // When voice is transcribed, send it as a message
+    await handleSendMessage(text)
+  }
+
   if (loading) {
     return (
       <div className="flex h-full items-center justify-center">
@@ -223,6 +231,7 @@ export default function ChatPage() {
                   role={message.role}
                   content={message.content}
                   timestamp={message.createdAt}
+                  showAudio={voiceMode && message.role === 'assistant'}
                 />
               ))}
 
@@ -233,6 +242,7 @@ export default function ChatPage() {
                   role="assistant"
                   content={streamingMessage}
                   timestamp={new Date()}
+                  showAudio={false}
                 />
               )}
 
@@ -244,8 +254,48 @@ export default function ChatPage() {
         </div>
       </div>
 
-      {/* Message Input */}
-      <MessageInput onSend={handleSendMessage} disabled={isStreaming} />
+      {/* Input Mode Toggle & Input */}
+      <div className="border-t border-white/5 bg-titanium-900/80">
+        {/* Mode Toggle */}
+        <div className="flex justify-center border-b border-white/5 py-2">
+          <div className="inline-flex rounded-lg bg-titanium-950 p-1">
+            <button
+              onClick={() => setVoiceMode(false)}
+              className={`flex items-center gap-2 rounded-md px-4 py-2 text-sm transition-colors ${
+                !voiceMode
+                  ? 'bg-deep-blue-800 text-silver'
+                  : 'text-gray-400 hover:text-silver'
+              }`}
+            >
+              <Keyboard className="h-4 w-4" />
+              Text
+            </button>
+            <button
+              onClick={() => setVoiceMode(true)}
+              className={`flex items-center gap-2 rounded-md px-4 py-2 text-sm transition-colors ${
+                voiceMode
+                  ? 'bg-deep-blue-800 text-silver'
+                  : 'text-gray-400 hover:text-silver'
+              }`}
+            >
+              <Mic className="h-4 w-4" />
+              Voice
+            </button>
+          </div>
+        </div>
+
+        {/* Input Area */}
+        <div className="p-4">
+          {voiceMode ? (
+            <VoiceRecorder
+              onTranscription={handleVoiceTranscription}
+              disabled={isStreaming}
+            />
+          ) : (
+            <MessageInput onSend={handleSendMessage} disabled={isStreaming} />
+          )}
+        </div>
+      </div>
     </div>
   )
 }

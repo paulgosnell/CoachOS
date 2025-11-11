@@ -1,12 +1,14 @@
 import { User, Bot } from 'lucide-react'
+import { AudioPlayer } from '@/components/voice/AudioPlayer'
 
 interface MessageBubbleProps {
   role: 'user' | 'assistant'
   content: string
   timestamp: Date
+  showAudio?: boolean
 }
 
-export function MessageBubble({ role, content, timestamp }: MessageBubbleProps) {
+export function MessageBubble({ role, content, timestamp, showAudio = false }: MessageBubbleProps) {
   const isUser = role === 'user'
 
   return (
@@ -36,6 +38,13 @@ export function MessageBubble({ role, content, timestamp }: MessageBubbleProps) 
           }`}
         >
           <p className="whitespace-pre-wrap text-sm leading-relaxed">{content}</p>
+
+          {/* Audio Player for assistant messages */}
+          {!isUser && showAudio && (
+            <div className="mt-3 pt-3 border-t border-white/10">
+              <AudioPlayer text={content} />
+            </div>
+          )}
         </div>
 
         {/* Timestamp */}
