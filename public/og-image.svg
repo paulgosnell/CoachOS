@@ -1,0 +1,66 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="1200" height="630" fill="#0A0A0A"/>
+
+  <!-- Gradient Overlay -->
+  <defs>
+    <radialGradient id="bgGradient" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#0C2340;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#000000;stop-opacity:1" />
+    </radialGradient>
+    <linearGradient id="textGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#FFFFFF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#C0C0C8;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bgGradient)"/>
+
+  <!-- Coach OS Logo/Icon -->
+  <g transform="translate(100, 150)">
+    <!-- Stylized "C" for Coach -->
+    <circle cx="40" cy="40" r="35" stroke="#C0C0C8" stroke-width="8" fill="none" stroke-dasharray="150 50"/>
+    <circle cx="30" cy="40" r="8" fill="#0C2340"/>
+    <circle cx="50" cy="40" r="8" fill="#0C2340"/>
+    <circle cx="40" cy="52" r="8" fill="#0C2340"/>
+  </g>
+
+  <!-- Main Heading -->
+  <text x="100" y="300" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="72" font-weight="700" fill="url(#textGradient)">
+    Coach OS
+  </text>
+
+  <!-- Subheading -->
+  <text x="100" y="370" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="42" font-weight="600" fill="#E8E8ED">
+    Your Business Coach
+  </text>
+  <text x="100" y="425" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="42" font-weight="600" fill="#E8E8ED">
+    In Your Pocket
+  </text>
+
+  <!-- Feature Pills -->
+  <g transform="translate(100, 480)">
+    <!-- Pill 1 -->
+    <rect x="0" y="0" width="180" height="50" rx="25" fill="rgba(255, 255, 255, 0.05)" stroke="rgba(255, 255, 255, 0.1)" stroke-width="1"/>
+    <text x="90" y="32" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="18" font-weight="600" fill="#C0C0C8" text-anchor="middle">
+      GPT-4o Powered
+    </text>
+
+    <!-- Pill 2 -->
+    <rect x="200" y="0" width="200" height="50" rx="25" fill="rgba(255, 255, 255, 0.05)" stroke="rgba(255, 255, 255, 0.1)" stroke-width="1"/>
+    <text x="300" y="32" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="18" font-weight="600" fill="#C0C0C8" text-anchor="middle">
+      Long-Term Memory
+    </text>
+
+    <!-- Pill 3 -->
+    <rect x="420" y="0" width="180" height="50" rx="25" fill="rgba(255, 255, 255, 0.05)" stroke="rgba(255, 255, 255, 0.1)" stroke-width="1"/>
+    <text x="510" y="32" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="18" font-weight="600" fill="#C0C0C8" text-anchor="middle">
+      Voice Interface
+    </text>
+  </g>
+
+  <!-- Bottom URL -->
+  <text x="100" y="590" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="20" font-weight="500" fill="#707078">
+    coach-os-agent.vercel.app
+  </text>
+</svg>
