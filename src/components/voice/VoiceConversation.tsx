@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useConversation } from '@elevenlabs/react'
 import { Mic, Phone, PhoneOff, Loader2, MessageSquare } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 
 interface VoiceConversationProps {
   config: {
@@ -16,17 +17,96 @@ interface VoiceConversationProps {
 export function VoiceConversation({ config, router }: VoiceConversationProps) {
   const [error, setError] = useState<string | null>(null)
   const [transcript, setTranscript] = useState<Array<{ role: string; message: string }>>([])
+  const conversationIdRef = useRef<string | null>(null)
+  const supabase = createClient()
+
+  // Save message to database
+  const saveMessage = async (role: string, content: string) => {
+    if (!conversationIdRef.current) return
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      await supabase.from('messages').insert({
+        conversation_id: conversationIdRef.current,
+        user_id: user.id,
+        role: role === 'user' ? 'user' : 'assistant',
+        content,
+        content_type: 'voice',
+      })
+    } catch (err) {
+      console.error('Failed to save message:', err)
+    }
+  }
 
   const conversation = useConversation({
-    onConnect: () => {
+    onConnect: async () => {
       console.log('Connected to ElevenLabs')
+
+      // Create a new conversation in the database
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) return
+
+        const { data, error: convError } = await supabase
+          .from('conversations')
+          .insert({
+            user_id: user.id,
+            session_type: 'voice',
+            title: 'Voice Session',
+          })
+          .select()
+          .single()
+
+        if (convError) throw convError
+        conversationIdRef.current = data.id
+      } catch (err) {
+        console.error('Failed to create conversation:', err)
+      }
     },
-    onDisconnect: () => {
+    onDisconnect: async () => {
       console.log('Disconnected from ElevenLabs')
+
+      // Update conversation end time and extract action items
+      if (conversationIdRef.current) {
+        try {
+          await supabase
+            .from('conversations')
+            .update({ ended_at: new Date().toISOString() })
+            .eq('id', conversationIdRef.current)
+
+          // Extract action items from voice conversation
+          if (transcript.length > 0) {
+            try {
+              await fetch('/api/actions/extract', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  conversationId: conversationIdRef.current,
+                  messages: transcript.map((t) => ({
+                    role: t.role,
+                    content: t.message,
+                  })),
+                }),
+              })
+            } catch (err) {
+              console.error('Failed to extract action items:', err)
+            }
+          }
+        } catch (err) {
+          console.error('Failed to update conversation:', err)
+        }
+      }
     },
     onMessage: (message) => {
       console.log('Message:', message)
+
+      // Save to local state (not displayed, but kept for reference)
       setTranscript((prev) => [...prev, { role: message.source, message: message.message }])
+
+      // Save to database
+      saveMessage(message.source, message.message)
     },
     onError: (error) => {
       console.error('Conversation error:', error)
@@ -150,23 +230,7 @@ export function VoiceConversation({ config, router }: VoiceConversationProps) {
           )}
         </div>
 
-        {/* Transcript */}
-        {transcript.length > 0 && (
-          <div className="mt-8 w-full max-w-2xl">
-            <h3 className="mb-4 text-sm font-medium text-silver-light">Conversation</h3>
-            <div className="space-y-2 rounded-lg border border-white/5 bg-titanium-900/50 p-4 text-sm">
-              {transcript.map((item, index) => (
-                <div
-                  key={index}
-                  className={`${item.role === 'user' ? 'text-silver' : 'text-deep-blue-300'}`}
-                >
-                  <span className="font-medium">{item.role === 'user' ? 'You' : 'Coach'}:</span>{' '}
-                  {item.message}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+        {/* Transcript removed - transcripts are saved but not displayed during voice sessions */}
       </div>
 
       {/* Tips */}

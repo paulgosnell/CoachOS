@@ -15,6 +15,8 @@ import {
   Zap,
   BarChart3,
   CheckCircle2,
+  ListTodo,
+  Mic,
 } from 'lucide-react'
 
 function EmailConfirmationHandler() {
@@ -338,6 +340,109 @@ export default function HomePage() {
                 <li className="flex items-start gap-2">
                   <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-silver-dark" />
                   <span>Stop ineffective behaviors</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Action Items Feature */}
+      <section className="relative border-t border-white/5 py-24">
+        <div className="container mx-auto px-6">
+          <div className="mb-16 text-center">
+            <h2 className="mb-4 text-4xl font-bold md:text-5xl">
+              Never Lose Track of <span className="text-gradient">What Matters</span>
+            </h2>
+            <p className="mx-auto max-w-2xl text-lg text-silver-light">
+              Automatically captures action items from every conversation - voice or text
+            </p>
+          </div>
+
+          <div className="grid gap-8 lg:grid-cols-2">
+            {/* Auto Action Extraction */}
+            <div className="card">
+              <div className="mb-6">
+                <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-deep-blue-800 to-silver-darker">
+                  <ListTodo className="h-6 w-6 text-silver" />
+                </div>
+                <h3 className="text-2xl font-semibold">Automatic Action Extraction</h3>
+              </div>
+              <p className="mb-6 text-silver-light">
+                Like having a Granola-style AI assistant in every coaching session. Coach OS automatically identifies and captures your commitments, so nothing falls through the cracks.
+              </p>
+              <ul className="space-y-3">
+                <li className="flex items-start gap-3">
+                  <CheckCircle2 className="mt-1 h-5 w-5 flex-shrink-0 text-silver" />
+                  <div>
+                    <p className="font-semibold">Works in text, voice, and voice notes</p>
+                    <p className="text-sm text-gray-400">
+                      Every conversation mode extracts action items
+                    </p>
+                  </div>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle2 className="mt-1 h-5 w-5 flex-shrink-0 text-silver" />
+                  <div>
+                    <p className="font-semibold">Clean, actionable format</p>
+                    <p className="text-sm text-gray-400">
+                      "Email Sarah by Friday" not "maybe think about emailing"
+                    </p>
+                  </div>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle2 className="mt-1 h-5 w-5 flex-shrink-0 text-silver" />
+                  <div>
+                    <p className="font-semibold">Automatic follow-up</p>
+                    <p className="text-sm text-gray-400">
+                      Coach remembers and checks in on your commitments
+                    </p>
+                  </div>
+                </li>
+              </ul>
+            </div>
+
+            {/* Brain Dump Mode */}
+            <div className="card relative overflow-hidden">
+              <div className="absolute right-4 top-4 rounded-full bg-deep-blue-800/80 px-3 py-1 text-xs font-semibold text-silver">
+                COMING SOON
+              </div>
+              <div className="mb-6">
+                <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-deep-blue-800 to-silver-darker">
+                  <Mic className="h-6 w-6 text-silver" />
+                </div>
+                <h3 className="text-2xl font-semibold">Brain Dump Mode</h3>
+              </div>
+              <p className="mb-6 text-silver-light">
+                Overwhelmed? Just need to get everything out of your head? One-way voice capture lets you offload thoughts without a conversation.
+              </p>
+              <ul className="space-y-3">
+                <li className="flex items-start gap-3">
+                  <CheckCircle2 className="mt-1 h-5 w-5 flex-shrink-0 text-silver" />
+                  <div>
+                    <p className="font-semibold">Quick capture when you're in a rush</p>
+                    <p className="text-sm text-gray-400">
+                      No back-and-forth, just offload and go
+                    </p>
+                  </div>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle2 className="mt-1 h-5 w-5 flex-shrink-0 text-silver" />
+                  <div>
+                    <p className="font-semibold">Coach processes async</p>
+                    <p className="text-sm text-gray-400">
+                      Formats into action items and surfaces later
+                    </p>
+                  </div>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle2 className="mt-1 h-5 w-5 flex-shrink-0 text-silver" />
+                  <div>
+                    <p className="font-semibold">Perfect for morning brain dumps</p>
+                    <p className="text-sm text-gray-400">
+                      Clear your head before your day starts
+                    </p>
+                  </div>
                 </li>
               </ul>
             </div>

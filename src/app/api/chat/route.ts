@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { assembleUserContextWithRAG } from '@/lib/ai/context'
 import { generateSystemPrompt } from '@/lib/ai/prompts'
 import { processMessageEmbedding } from '@/lib/memory/embeddings'
+import { extractActionItems, saveActionItems } from '@/lib/ai/actions'
 import OpenAI from 'openai'
 
 // Allow streaming responses up to 30 seconds
@@ -143,6 +144,20 @@ export async function POST(req: Request) {
               fullResponse,
               'assistant'
             ).catch((err) => console.error('Failed to process assistant message embedding:', err))
+          }
+
+          // Check if response contains action items (📋 emoji indicates action items)
+          if (fullResponse.includes('📋')) {
+            // Extract and save action items from the conversation
+            const recentMessages = [
+              ...context.recentHistory.slice(-5), // Last 5 messages for context
+              { role: 'user', content: message },
+              { role: 'assistant', content: fullResponse },
+            ]
+
+            extractActionItems(conversationId, user.id, recentMessages)
+              .then((actions) => saveActionItems(conversationId, user.id, actions))
+              .catch((err) => console.error('Failed to extract/save action items:', err))
           }
         } catch (error) {
           console.error('Failed to save assistant message:', error)
