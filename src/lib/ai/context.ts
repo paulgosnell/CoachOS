@@ -257,7 +257,26 @@ export function formatUserContext(context: UserContext): string {
         (Date.now() - memory.createdAt.getTime()) / (1000 * 60 * 60 * 24)
       )
       const timeAgo = daysAgo === 0 ? 'today' : daysAgo === 1 ? 'yesterday' : `${daysAgo} days ago`
-      parts.push(`${index + 1}. [${timeAgo}] ${memory.content.slice(0, 200)}${memory.content.length > 200 ? '...' : ''}`)
+
+      // Sentence-aware truncation: find the last sentence boundary within 250 chars
+      let truncated = memory.content
+      if (memory.content.length > 250) {
+        const chunk = memory.content.slice(0, 250)
+        const lastPeriod = chunk.lastIndexOf('.')
+        const lastQuestion = chunk.lastIndexOf('?')
+        const lastExclaim = chunk.lastIndexOf('!')
+        const lastBoundary = Math.max(lastPeriod, lastQuestion, lastExclaim)
+
+        if (lastBoundary > 100) {
+          // Found a sentence boundary - use it
+          truncated = memory.content.slice(0, lastBoundary + 1) + '..'
+        } else {
+          // No good boundary - just cut at 250
+          truncated = memory.content.slice(0, 250) + '...'
+        }
+      }
+
+      parts.push(`${index + 1}. [${timeAgo}] ${truncated}`)
     })
     parts.push('')
   }
