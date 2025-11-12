@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { MessageSquare, Calendar, Target, ArrowRight, MessageCircle, Mic, ListTodo, Phone } from 'lucide-react'
+import { MessageSquare, Calendar, Target, ArrowRight, MessageCircle, Mic, ListTodo, Phone, Settings } from 'lucide-react'
 import { FeedbackModal } from '@/components/FeedbackModal'
 
 interface DashboardClientProps {
@@ -27,12 +27,20 @@ export function DashboardClient({ profile, goalsCount, conversationsCount }: Das
             </h1>
           </div>
 
-          <button
-            onClick={() => setFeedbackOpen(true)}
-            className="text-silver-light transition-colors hover:text-silver"
-          >
-            <MessageCircle className="h-5 w-5" />
-          </button>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/settings"
+              className="text-silver-light transition-colors hover:text-silver"
+            >
+              <Settings className="h-5 w-5" />
+            </Link>
+            <button
+              onClick={() => setFeedbackOpen(true)}
+              className="text-silver-light transition-colors hover:text-silver"
+            >
+              <MessageCircle className="h-5 w-5" />
+            </button>
+          </div>
         </div>
 
         {/* Dashboard Cards - Cleaner spacing */}
