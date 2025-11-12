@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { useConversation } from '@elevenlabs/react'
-import { Mic, Phone, PhoneOff, Loader2, ArrowLeft, Play, Square } from 'lucide-react'
+import { Mic, Phone, Loader2, ArrowLeft, Play, Square } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Toast } from '@/components/Toast'
 
