@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useConversation } from '@11labs/react'
+import { useConversation } from '@elevenlabs/react'
 import { Mic, MicOff, Phone, PhoneOff, Loader2, MessageSquare } from 'lucide-react'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { createClient } from '@/lib/supabase/client'
