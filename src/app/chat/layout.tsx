@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { ConversationList } from '@/components/chat/ConversationList'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { createClient } from '@/lib/supabase/client'
-import { Phone } from 'lucide-react'
 
 interface Conversation {
   id: string
@@ -105,19 +104,6 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
             conversations={conversations}
             onNewConversation={handleNewConversation}
           />
-          {/* Voice Coach CTA */}
-          <div className="border-t border-white/5 bg-titanium-900/80 p-4">
-            <button
-              onClick={() => router.push('/voice-coach')}
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-deep-blue-700 px-4 py-3 font-medium text-silver transition-colors hover:bg-deep-blue-600"
-            >
-              <Phone className="h-5 w-5" />
-              Voice Coach
-            </button>
-            <p className="mt-2 text-center text-xs text-silver-light">
-              Talk naturally with your coach
-            </p>
-          </div>
         </aside>
 
         {/* Main Chat Area */}

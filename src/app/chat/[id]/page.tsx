@@ -30,12 +30,15 @@ export default function ChatPage() {
   const [streamingMessage, setStreamingMessage] = useState('')
   const [voiceMode, setVoiceMode] = useState(false)
   const [greeting, setGreeting] = useState<string | null>(null)
+  const [showMobileMenu, setShowMobileMenu] = useState(false)
+  const [conversations, setConversations] = useState<Array<{ id: string; title: string; updated_at: string }>>([])
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     loadMessages()
     subscribeToMessages()
     loadGreeting()
+    loadConversations()
   }, [conversationId])
 
   const loadGreeting = async () => {
@@ -52,6 +55,27 @@ export default function ChatPage() {
       console.error('Failed to load greeting:', err)
       // Fallback greeting
       setGreeting("Hey! What would you like to work on today?")
+    }
+  }
+
+  const loadConversations = async () => {
+    try {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data } = await supabase
+        .from('conversations')
+        .select('id, title, updated_at')
+        .eq('user_id', user.id)
+        .order('updated_at', { ascending: false })
+        .limit(20)
+
+      if (data) {
+        setConversations(data)
+      }
+    } catch (err) {
+      console.error('Failed to load conversations:', err)
     }
   }
 
@@ -259,8 +283,53 @@ export default function ChatPage() {
             <ArrowLeft className="h-5 w-5" />
           </button>
           <p className="text-sm font-medium text-silver">Chat</p>
-          <div className="w-5" />
+          <button
+            onClick={() => setShowMobileMenu(true)}
+            className="text-silver-light transition-colors hover:text-silver"
+          >
+            <Menu className="h-5 w-5" />
+          </button>
         </div>
+
+        {/* Mobile Conversation Menu Drawer */}
+        {showMobileMenu && (
+          <div className="fixed inset-0 z-50 lg:hidden">
+            <div
+              className="absolute inset-0 bg-black/60"
+              onClick={() => setShowMobileMenu(false)}
+            />
+            <div className="absolute right-0 top-0 h-full w-80 bg-titanium-900 shadow-xl">
+              <div className="flex items-center justify-between border-b border-white/5 p-4">
+                <h2 className="text-lg font-semibold text-silver">Conversations</h2>
+                <button
+                  onClick={() => setShowMobileMenu(false)}
+                  className="text-silver-light transition-colors hover:text-silver"
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="overflow-y-auto p-2" style={{ height: 'calc(100% - 64px)' }}>
+                {conversations.map((conv) => (
+                  <button
+                    key={conv.id}
+                    onClick={() => {
+                      router.push(`/chat/${conv.id}`)
+                      setShowMobileMenu(false)
+                    }}
+                    className={`w-full rounded-lg p-3 text-left transition-colors hover:bg-white/5 ${
+                      conv.id === conversationId ? 'bg-white/10' : ''
+                    }`}
+                  >
+                    <p className="truncate text-sm text-silver">{conv.title}</p>
+                    <p className="mt-1 text-xs text-gray-500">
+                      {new Date(conv.updated_at).toLocaleDateString()}
+                    </p>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Messages Area */}
         <div className="flex-1 overflow-y-auto p-4 md:p-6">

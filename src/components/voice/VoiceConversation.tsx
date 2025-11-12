@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { useConversation } from '@elevenlabs/react'
-import { Mic, Phone, PhoneOff, Loader2, ArrowLeft } from 'lucide-react'
+import { Mic, Phone, PhoneOff, Loader2, ArrowLeft, Play, Square } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Toast } from '@/components/Toast'
 
@@ -192,9 +192,9 @@ export function VoiceConversation({ config, router }: VoiceConversationProps) {
 
             <button
               onClick={endConversation}
-              className="flex h-14 w-14 items-center justify-center rounded-full bg-red-600 text-white shadow-lg transition-all hover:bg-red-700 active:scale-95"
+              className="flex h-14 w-14 items-center justify-center rounded-lg bg-red-600 text-white shadow-lg transition-all hover:bg-red-700 active:scale-95"
             >
-              <PhoneOff className="h-6 w-6" />
+              <Square className="h-6 w-6" />
             </button>
           </div>
         ) : (
@@ -206,9 +206,9 @@ export function VoiceConversation({ config, router }: VoiceConversationProps) {
 
             <button
               onClick={startConversation}
-              className="flex h-16 w-16 items-center justify-center rounded-full bg-deep-blue-700 text-silver shadow-lg transition-all hover:bg-deep-blue-600 active:scale-95"
+              className="flex h-16 w-16 items-center justify-center rounded-lg bg-deep-blue-700 text-silver shadow-lg transition-all hover:bg-deep-blue-600 active:scale-95"
             >
-              <Phone className="h-8 w-8" />
+              <Play className="h-8 w-8" />
             </button>
 
             {/* Minimal Tips - Only show 2 key ones */}
