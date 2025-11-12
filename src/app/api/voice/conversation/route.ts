@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
-import { assembleUserContext } from '@/lib/ai/context'
-import { generateSystemPrompt } from '@/lib/ai/prompts'
+
+const ELEVENLABS_AGENT_ID = 'agent_1601k9wcf2dpfwmbdzxqew0f2pjx'
 
 export async function POST(req: Request) {
   try {
@@ -22,25 +22,16 @@ export async function POST(req: Request) {
       )
     }
 
-    // Assemble full user context (profile, goals, business, RAG memories)
-    const context = await assembleUserContext(
-      user.id,
-      '', // No current message for initial setup
-      5 // memoryLimit
+    // Get a signed URL for the agent conversation
+    const response = await fetch(
+      `https://api.elevenlabs.io/v1/convai/conversation/get_signed_url?agent_id=${ELEVENLABS_AGENT_ID}`,
+      {
+        method: 'GET',
+        headers: {
+          'xi-api-key': process.env.ELEVENLABS_API_KEY,
+        },
+      }
     )
-
-    // Generate the Coach OS system prompt with full context
-    const systemPrompt = generateSystemPrompt(context)
-    const firstName = context.profile.fullName.split(' ')[0]
-
-    // Create a conversation with ElevenLabs using their REST API
-    // https://elevenlabs.io/docs/api-reference/get-signed-url
-    const response = await fetch('https://api.elevenlabs.io/v1/convai/conversation/get_signed_url', {
-      method: 'GET',
-      headers: {
-        'xi-api-key': process.env.ELEVENLABS_API_KEY,
-      },
-    })
 
     if (!response.ok) {
       const errorData = await response.text()
@@ -50,12 +41,11 @@ export async function POST(req: Request) {
 
     const data = await response.json()
 
-    // Return the signed URL and context for the frontend
+    // Return the signed URL for the frontend
     return new Response(
       JSON.stringify({
         signedUrl: data.signed_url,
-        systemPrompt,
-        firstName,
+        agentId: ELEVENLABS_AGENT_ID,
       }),
       {
         headers: { 'Content-Type': 'application/json' },
