@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { MessageSquare, Calendar, Target, ArrowRight, MessageCircle, Mic, ListTodo } from 'lucide-react'
+import { MessageSquare, Calendar, Target, ArrowRight, MessageCircle, Mic, ListTodo, Phone } from 'lucide-react'
 import { FeedbackModal } from '@/components/FeedbackModal'
 
 interface DashboardClientProps {
@@ -37,20 +37,38 @@ export function DashboardClient({ profile, goalsCount, conversationsCount }: Das
 
         {/* Dashboard Cards - Cleaner spacing */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          <Link
-            href="/chat/new"
-            className="card group cursor-pointer transition-all hover:border-silver/30"
-          >
-            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-deep-blue-800/50">
-              <MessageSquare className="h-5 w-5 text-silver" />
-            </div>
-            <h3 className="mb-1 text-base font-semibold text-silver">
-              Quick Check-in
-            </h3>
-            <p className="text-sm text-silver-light">
-              Start a conversation
-            </p>
-          </Link>
+          {/* Split Chat/Voice Card */}
+          <div className="card p-0 overflow-hidden">
+            <Link
+              href="/chat/new"
+              className="group flex flex-1 flex-col p-4 transition-all hover:bg-white/5"
+            >
+              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-deep-blue-800/50">
+                <MessageSquare className="h-5 w-5 text-silver" />
+              </div>
+              <h3 className="mb-1 text-base font-semibold text-silver">
+                Chat
+              </h3>
+              <p className="text-sm text-silver-light">
+                Text conversation
+              </p>
+            </Link>
+            <div className="border-t border-white/5" />
+            <Link
+              href="/voice-coach"
+              className="group flex flex-1 flex-col p-4 transition-all hover:bg-white/5"
+            >
+              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-deep-blue-800/50">
+                <Phone className="h-5 w-5 text-silver" />
+              </div>
+              <h3 className="mb-1 text-base font-semibold text-silver">
+                Voice
+              </h3>
+              <p className="text-sm text-silver-light">
+                Live conversation
+              </p>
+            </Link>
+          </div>
 
           <Link
             href="/tasks"

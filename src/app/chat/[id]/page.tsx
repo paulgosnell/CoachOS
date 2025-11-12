@@ -240,12 +240,7 @@ export default function ChatPage() {
             <ArrowLeft className="h-5 w-5" />
           </button>
           <p className="text-sm font-medium text-silver">Chat</p>
-          <button
-            onClick={() => router.push('/voice-coach')}
-            className="text-silver-light transition-colors hover:text-silver"
-          >
-            <Phone className="h-5 w-5" />
-          </button>
+          <div className="w-5" />
         </div>
 
         {/* Messages Area */}
@@ -316,7 +311,7 @@ export default function ChatPage() {
               className="flex items-center justify-center gap-2 text-xs text-silver-light transition-colors hover:text-silver"
             >
               <Mic className="h-3 w-3" />
-              Use voice instead
+              Send voice note instead
             </button>
           </div>
         )}
