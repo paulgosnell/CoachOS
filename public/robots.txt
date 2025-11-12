@@ -7,4 +7,5 @@ Disallow: /dashboard
 Disallow: /chat/
 Disallow: /onboarding/
 
-Sitemap: https://coachos.app/sitemap.xml
+# Sitemap
+Sitemap: https://coach-os-agent.vercel.app/sitemap.xml

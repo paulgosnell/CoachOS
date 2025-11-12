@@ -1,0 +1,46 @@
+# Open Graph Image Placeholder
+
+## Convert SVG to PNG
+
+The og-image.svg file needs to be converted to og-image.png (1200x630px) for social media.
+
+### Option 1: Using Online Tools
+1. Go to https://svgtopng.com/ or https://cloudconvert.com/svg-to-png
+2. Upload `og-image.svg`
+3. Set dimensions: 1200 x 630 pixels
+4. Download as `og-image.png`
+5. Replace this file
+
+### Option 2: Using Command Line (ImageMagick)
+```bash
+# Install ImageMagick if needed
+brew install imagemagick  # macOS
+# or
+sudo apt-get install imagemagick  # Linux
+
+# Convert
+convert -background none -size 1200x630 og-image.svg og-image.png
+```
+
+### Option 3: Using Figma/Design Tool
+1. Import `og-image.svg` into Figma
+2. Set frame to 1200 x 630px
+3. Export as PNG (2x for retina)
+4. Save as `og-image.png`
+
+## Design Notes
+
+**Dimensions:** 1200 x 630 pixels (Facebook/LinkedIn/Twitter standard)
+**Background:** #0A0A0A (titanium-950)
+**Primary Text:** White gradient to silver
+**Features:** GPT-4o, Long-Term Memory, Voice Interface
+**Format:** PNG (required for social networks)
+
+## Testing
+
+After creating og-image.png, test with:
+- Facebook Sharing Debugger: https://developers.facebook.com/tools/debug/
+- Twitter Card Validator: https://cards-dev.twitter.com/validator
+- LinkedIn Post Inspector: https://www.linkedin.com/post-inspector/
+
+All tools should show the 1200x630 image correctly.

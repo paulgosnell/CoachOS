@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { ConversationList } from '@/components/chat/ConversationList'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { createClient } from '@/lib/supabase/client'
 
 interface Conversation {
@@ -78,6 +79,7 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
         .from('conversations')
         .insert({
           user_id: user.id,
+          session_type: 'quick-checkin',
           title: 'New Conversation',
         })
         .select()
@@ -94,9 +96,10 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
   }
 
   return (
-    <div className="flex h-screen bg-titanium-950">
-      {/* Sidebar - Hidden on mobile, shown on desktop */}
-      <aside className="hidden w-80 lg:block">
+    <ErrorBoundary>
+      <div className="flex h-screen bg-titanium-950">
+        {/* Sidebar - Hidden on mobile, shown on desktop */}
+        <aside className="hidden w-80 lg:block">
         <ConversationList
           conversations={conversations}
           onNewConversation={handleNewConversation}
@@ -106,5 +109,6 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
       {/* Main Chat Area */}
       <main className="flex flex-1 flex-col">{children}</main>
     </div>
+    </ErrorBoundary>
   )
 }
