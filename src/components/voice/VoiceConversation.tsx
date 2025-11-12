@@ -4,6 +4,7 @@ import { useState, useRef } from 'react'
 import { useConversation } from '@elevenlabs/react'
 import { Mic, Phone, PhoneOff, Loader2, MessageSquare } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { Toast } from '@/components/Toast'
 
 interface VoiceConversationProps {
   config: {
@@ -17,6 +18,8 @@ interface VoiceConversationProps {
 export function VoiceConversation({ config, router }: VoiceConversationProps) {
   const [error, setError] = useState<string | null>(null)
   const [transcript, setTranscript] = useState<Array<{ role: string; message: string }>>([])
+  const [showToast, setShowToast] = useState(false)
+  const [toastMessage, setToastMessage] = useState('')
   const conversationIdRef = useRef<string | null>(null)
   const supabase = createClient()
 
@@ -79,7 +82,7 @@ export function VoiceConversation({ config, router }: VoiceConversationProps) {
           // Extract action items from voice conversation
           if (transcript.length > 0) {
             try {
-              await fetch('/api/actions/extract', {
+              const response = await fetch('/api/actions/extract', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -90,6 +93,14 @@ export function VoiceConversation({ config, router }: VoiceConversationProps) {
                   })),
                 }),
               })
+
+              if (response.ok) {
+                const data = await response.json()
+                if (data.actionCount > 0) {
+                  setToastMessage(`📋 ${data.actionCount} task${data.actionCount > 1 ? 's' : ''} captured`)
+                  setShowToast(true)
+                }
+              }
             } catch (err) {
               console.error('Failed to extract action items:', err)
             }
@@ -208,6 +219,13 @@ export function VoiceConversation({ config, router }: VoiceConversationProps) {
           </div>
         )}
       </div>
+
+      {/* Toast Notification */}
+      <Toast
+        message={toastMessage}
+        show={showToast}
+        onClose={() => setShowToast(false)}
+      />
     </div>
   )
 }
