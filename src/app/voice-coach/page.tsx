@@ -27,7 +27,7 @@ export default function VoiceCoachPage() {
     },
     onError: (error) => {
       console.error('Conversation error:', error)
-      setError(error.message || 'Connection error occurred')
+      setError(typeof error === 'string' ? error : 'Connection error occurred')
     },
   })
 
