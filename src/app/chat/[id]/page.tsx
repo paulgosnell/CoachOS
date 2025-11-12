@@ -9,7 +9,7 @@ import { VoiceRecorder } from '@/components/voice/VoiceRecorder'
 import { AudioPlayer } from '@/components/voice/AudioPlayer'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { createClient } from '@/lib/supabase/client'
-import { Loader2, Mic, Keyboard } from 'lucide-react'
+import { Loader2, Mic, Keyboard, ArrowLeft, Phone, Menu } from 'lucide-react'
 
 interface Message {
   id: string
@@ -231,6 +231,24 @@ export default function ChatPage() {
   return (
     <ErrorBoundary>
       <div className="flex h-full flex-col">
+        {/* Mobile Header with Navigation */}
+        <div className="flex items-center justify-between border-b border-white/5 bg-titanium-900/80 p-4 lg:hidden">
+          <button
+            onClick={() => router.push('/dashboard')}
+            className="flex items-center gap-2 text-silver-light transition-colors hover:text-silver"
+          >
+            <ArrowLeft className="h-5 w-5" />
+            <span className="text-sm">Back</span>
+          </button>
+          <button
+            onClick={() => router.push('/voice-coach')}
+            className="flex items-center gap-2 rounded-lg bg-deep-blue-700 px-3 py-2 text-sm font-medium text-silver transition-colors hover:bg-deep-blue-600"
+          >
+            <Phone className="h-4 w-4" />
+            Voice
+          </button>
+        </div>
+
         {/* Messages Area */}
         <div className="flex-1 overflow-y-auto p-4 md:p-6">
         <div className="mx-auto max-w-4xl space-y-6">
