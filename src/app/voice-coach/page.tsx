@@ -12,6 +12,7 @@ export default function VoiceCoachPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [signedUrl, setSignedUrl] = useState<string | null>(null)
+  const [overrides, setOverrides] = useState<any>(null)
   const [transcript, setTranscript] = useState<Array<{ role: string; message: string }>>([])
 
   const conversation = useConversation({
@@ -61,10 +62,12 @@ export default function VoiceCoachPage() {
 
       const data = await response.json()
       setSignedUrl(data.signedUrl)
+      setOverrides(data.overrides)
 
-      // Start the conversation using ElevenLabs SDK
+      // Start the conversation using ElevenLabs SDK with overrides
       await conversation.startSession({
         signedUrl: data.signedUrl,
+        ...data.overrides,
       })
 
       setLoading(false)

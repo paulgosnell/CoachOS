@@ -1,4 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
+import { assembleUserContext } from '@/lib/ai/context'
+import { generateSystemPrompt } from '@/lib/ai/prompts'
 
 const ELEVENLABS_AGENT_ID = 'agent_1601k9wcf2dpfwmbdzxqew0f2pjx'
 
@@ -22,7 +24,18 @@ export async function POST(req: Request) {
       )
     }
 
-    // Get a signed URL for the agent conversation
+    // Assemble full user context (profile, goals, business, RAG memories)
+    const context = await assembleUserContext(
+      user.id,
+      '', // No current message for initial setup
+      5 // memoryLimit
+    )
+
+    // Generate the Coach OS system prompt with full context
+    const systemPrompt = generateSystemPrompt(context)
+    const firstName = context.profile.fullName.split(' ')[0]
+
+    // Get a signed URL for the agent conversation with prompt override
     const response = await fetch(
       `https://api.elevenlabs.io/v1/convai/conversation/get_signed_url?agent_id=${ELEVENLABS_AGENT_ID}`,
       {
@@ -41,11 +54,19 @@ export async function POST(req: Request) {
 
     const data = await response.json()
 
-    // Return the signed URL for the frontend
+    // Return the signed URL and overrides for the frontend
     return new Response(
       JSON.stringify({
         signedUrl: data.signed_url,
         agentId: ELEVENLABS_AGENT_ID,
+        overrides: {
+          agent: {
+            prompt: {
+              prompt: systemPrompt,
+            },
+            first_message: `Hey ${firstName}! Ready to dive in?`,
+          },
+        },
       }),
       {
         headers: { 'Content-Type': 'application/json' },
