@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { MessageSquare, Calendar, Target, ArrowRight, MessageCircle } from 'lucide-react'
+import { MessageSquare, Calendar, Target, ArrowRight, MessageCircle, Mic, ListTodo } from 'lucide-react'
 import { FeedbackModal } from '@/components/FeedbackModal'
 
 interface DashboardClientProps {
@@ -58,6 +58,40 @@ export function DashboardClient({ profile, goalsCount, conversationsCount }: Das
                 {conversationsCount} conversation{conversationsCount !== 1 ? 's' : ''} total
               </p>
             )}
+          </Link>
+
+          <Link
+            href="/tasks"
+            className="card group cursor-pointer transition-all hover:border-silver/30 hover:shadow-lg"
+          >
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-deep-blue-800 to-silver-darker">
+              <ListTodo className="h-6 w-6 text-silver" />
+            </div>
+            <h3 className="mb-2 flex items-center justify-between text-lg font-semibold">
+              Task Manager
+              <ArrowRight className="h-5 w-5 opacity-0 transition-opacity group-hover:opacity-100" />
+            </h3>
+            <p className="text-sm text-silver-light">
+              Manage action items from your coaching sessions
+            </p>
+            <p className="mt-3 text-xs text-gray-500">Coming soon</p>
+          </Link>
+
+          <Link
+            href="/brain-dump"
+            className="card group cursor-pointer transition-all hover:border-silver/30 hover:shadow-lg"
+          >
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-deep-blue-800 to-silver-darker">
+              <Mic className="h-6 w-6 text-silver" />
+            </div>
+            <h3 className="mb-2 flex items-center justify-between text-lg font-semibold">
+              Brain Dump
+              <ArrowRight className="h-5 w-5 opacity-0 transition-opacity group-hover:opacity-100" />
+            </h3>
+            <p className="text-sm text-silver-light">
+              Quick capture your thoughts and to-dos
+            </p>
+            <p className="mt-3 text-xs text-gray-500">Coming soon</p>
           </Link>
 
           <Link
