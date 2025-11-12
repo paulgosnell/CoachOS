@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { Target, Calendar, ArrowLeft, CheckCircle2, Circle } from 'lucide-react'
+import { MobileHeader } from '@/components/MobileHeader'
 
 export default async function GoalsPage() {
   const supabase = await createClient()
@@ -26,22 +27,25 @@ export default async function GoalsPage() {
   const completedGoals = goals?.filter((g) => g.status === 'completed') || []
 
   return (
-    <div className="min-h-screen p-6">
-      <div className="container mx-auto max-w-4xl">
-        {/* Header */}
-        <div className="mb-8">
-          <Link
-            href="/dashboard"
-            className="mb-4 inline-flex items-center gap-2 text-sm text-silver-light hover:text-silver"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Dashboard
-          </Link>
-          <h1 className="mb-2 text-3xl font-bold">Your Goals</h1>
-          <p className="text-silver-light">
-            Track your progress and commitments
-          </p>
-        </div>
+    <div className="min-h-screen">
+      <MobileHeader title="Your Goals" />
+
+      <div className="p-4 md:p-6">
+        <div className="container mx-auto max-w-4xl">
+          {/* Desktop Header */}
+          <div className="mb-8 hidden lg:block">
+            <Link
+              href="/dashboard"
+              className="mb-4 inline-flex items-center gap-2 text-sm text-silver-light hover:text-silver"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Dashboard
+            </Link>
+            <h1 className="mb-2 text-3xl font-bold">Your Goals</h1>
+            <p className="text-silver-light">
+              Track your progress and commitments
+            </p>
+          </div>
 
         {/* Active Goals */}
         <div className="mb-8">
@@ -151,6 +155,7 @@ export default async function GoalsPage() {
             </Link>
           </div>
         )}
+        </div>
       </div>
     </div>
   )
