@@ -64,7 +64,7 @@ export async function POST(req: Request) {
             prompt: {
               prompt: systemPrompt,
             },
-            first_message: `Hey ${firstName}! Ready to dive in?`,
+            firstMessage: `Hey ${firstName}! Ready to dive in?`,
           },
         },
       }),
