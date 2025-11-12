@@ -38,37 +38,35 @@ export function MessageInput({ onSend, disabled = false }: MessageInputProps) {
 
   return (
     <form onSubmit={handleSubmit} className="w-full">
-      <div className="flex items-end gap-3">
-        <div className="relative flex-1">
-          <textarea
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyDown={handleKeyDown}
-            disabled={disabled || sending}
-            placeholder="Message..."
-            rows={1}
-            className="w-full resize-none rounded-2xl border border-white/10 bg-titanium-800/50 px-4 py-3 pr-12 text-sm text-silver placeholder:text-gray-500 focus:border-white/20 focus:outline-none focus:ring-0"
-            style={{
-              minHeight: '44px',
-              maxHeight: '120px',
-            }}
-            onInput={(e) => {
-              const target = e.target as HTMLTextAreaElement
-              target.style.height = '44px'
-              target.style.height = Math.min(target.scrollHeight, 120) + 'px'
-            }}
-          />
-        </div>
+      <div className="flex items-center gap-2">
+        <textarea
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          onKeyDown={handleKeyDown}
+          disabled={disabled || sending}
+          placeholder="Message..."
+          rows={1}
+          className="flex-1 resize-none rounded-lg border border-white/10 bg-titanium-800 px-3 py-2.5 text-sm text-silver placeholder:text-gray-500 focus:border-white/20 focus:outline-none"
+          style={{
+            minHeight: '42px',
+            maxHeight: '100px',
+          }}
+          onInput={(e) => {
+            const target = e.target as HTMLTextAreaElement
+            target.style.height = '42px'
+            target.style.height = Math.min(target.scrollHeight, 100) + 'px'
+          }}
+        />
 
         <button
           type="submit"
           disabled={!message.trim() || sending || disabled}
-          className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-deep-blue-700 text-silver transition-all hover:bg-deep-blue-600 disabled:opacity-50 active:scale-95"
+          className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-deep-blue-700 text-silver transition-colors hover:bg-deep-blue-600 disabled:opacity-40"
         >
           {sending ? (
-            <Loader2 className="h-5 w-5 animate-spin" />
+            <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
-            <Send className="h-5 w-5" />
+            <Send className="h-4 w-4" />
           )}
         </button>
       </div>

@@ -10,6 +10,12 @@ export const metadata: Metadata = {
     template: '%s | Coach OS'
   },
   description: 'Premium on-demand business coaching for executives and founders. Strategic guidance powered by AI, with full context of your business. Available 24/7 with long-term memory and proven coaching frameworks.',
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+  },
   keywords: [
     'business coaching',
     'executive coaching',
