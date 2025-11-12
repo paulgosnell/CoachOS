@@ -37,8 +37,8 @@ export function DashboardClient({ profile, goalsCount, conversationsCount }: Das
 
         {/* Dashboard Cards - Cleaner spacing */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {/* Split Chat/Voice Card */}
-          <div className="card p-0 overflow-hidden">
+          {/* Chat/Voice Card - Side by Side */}
+          <div className="card p-0 overflow-hidden flex">
             <Link
               href="/chat/new"
               className="group flex flex-1 flex-col p-4 transition-all hover:bg-white/5"
@@ -53,7 +53,7 @@ export function DashboardClient({ profile, goalsCount, conversationsCount }: Das
                 Text conversation
               </p>
             </Link>
-            <div className="border-t border-white/5" />
+            <div className="border-l border-white/5" />
             <Link
               href="/voice-coach"
               className="group flex flex-1 flex-col p-4 transition-all hover:bg-white/5"
@@ -71,8 +71,23 @@ export function DashboardClient({ profile, goalsCount, conversationsCount }: Das
           </div>
 
           <Link
-            href="/tasks"
+            href="/goals"
             className="card group cursor-pointer transition-all hover:border-silver/30"
+          >
+            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-deep-blue-800/50">
+              <Target className="h-5 w-5 text-silver" />
+            </div>
+            <h3 className="mb-1 text-base font-semibold text-silver">
+              Your Goals
+            </h3>
+            <p className="text-sm text-silver-light">
+              Track progress
+            </p>
+          </Link>
+
+          <Link
+            href="/tasks"
+            className="card group cursor-pointer transition-all hover:border-silver/30 bg-titanium-900/30"
           >
             <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-deep-blue-800/50">
               <ListTodo className="h-5 w-5 text-silver" />
@@ -88,7 +103,7 @@ export function DashboardClient({ profile, goalsCount, conversationsCount }: Das
 
           <Link
             href="/brain-dump"
-            className="card group cursor-pointer transition-all hover:border-silver/30"
+            className="card group cursor-pointer transition-all hover:border-silver/30 bg-titanium-900/30"
           >
             <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-deep-blue-800/50">
               <Mic className="h-5 w-5 text-silver" />
@@ -104,7 +119,7 @@ export function DashboardClient({ profile, goalsCount, conversationsCount }: Das
 
           <Link
             href="/sessions"
-            className="card group cursor-pointer transition-all hover:border-silver/30"
+            className="card group cursor-pointer transition-all hover:border-silver/30 bg-titanium-900/30"
           >
             <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-deep-blue-800/50">
               <Calendar className="h-5 w-5 text-silver" />
@@ -116,21 +131,6 @@ export function DashboardClient({ profile, goalsCount, conversationsCount }: Das
               Structured coaching
             </p>
             <p className="mt-2 text-xs text-gray-500">Coming soon</p>
-          </Link>
-
-          <Link
-            href="/goals"
-            className="card group cursor-pointer transition-all hover:border-silver/30"
-          >
-            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-deep-blue-800/50">
-              <Target className="h-5 w-5 text-silver" />
-            </div>
-            <h3 className="mb-1 text-base font-semibold text-silver">
-              Your Goals
-            </h3>
-            <p className="text-sm text-silver-light">
-              Track progress
-            </p>
           </Link>
         </div>
       </div>
