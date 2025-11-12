@@ -137,116 +137,77 @@ export function VoiceConversation({ config, router }: VoiceConversationProps) {
 
   return (
     <div className="flex h-full flex-col">
-      {/* Header */}
-      <div className="border-b border-white/5 bg-titanium-900/80 p-4">
-        <div className="mx-auto max-w-4xl">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-xl font-semibold text-silver">Voice Coach</h1>
-              <p className="text-sm text-silver-light">
-                {conversation.status === 'connected'
-                  ? 'Connected - speak naturally'
-                  : 'Start a conversation with your AI coach'}
-              </p>
-            </div>
-            <button
-              onClick={() => router.push('/chat')}
-              className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm text-silver-light transition-colors hover:bg-white/5 hover:text-silver"
-            >
-              <MessageSquare className="h-4 w-4" />
-              Switch to Text Chat
-            </button>
-          </div>
-        </div>
+      {/* Minimal Mobile Header */}
+      <div className="flex items-center justify-between border-b border-white/5 bg-titanium-900/80 p-4">
+        <button
+          onClick={() => router.push('/dashboard')}
+          className="text-silver-light transition-colors hover:text-silver"
+        >
+          <MessageSquare className="h-5 w-5" />
+        </button>
+        <p className="text-sm font-medium text-silver">
+          {conversation.status === 'connected' ? 'Connected' : 'Voice'}
+        </p>
+        <div className="w-5" />
       </div>
 
-      {/* Main Content */}
-      <div className="flex flex-1 flex-col items-center justify-center p-8">
+      {/* Main Content - Clean & Centered */}
+      <div className="flex flex-1 flex-col items-center justify-center p-6">
         {error && (
-          <div className="mb-6 rounded-lg border border-red-500/20 bg-red-500/10 p-4 text-center text-red-400">
+          <div className="mb-6 w-full max-w-sm rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-center text-sm text-red-400">
             {error}
           </div>
         )}
 
         {/* Connection Status */}
-        <div className="mb-8 text-center">
-          {conversation.status === 'connected' ? (
-            <div className="space-y-4">
-              {/* Animated Speaking Indicator */}
-              <div className="mx-auto flex h-32 w-32 items-center justify-center">
-                <div
-                  className={`h-24 w-24 rounded-full transition-all duration-300 ${
-                    conversation.isSpeaking
-                      ? 'animate-pulse bg-deep-blue-600 shadow-lg shadow-deep-blue-600/50'
-                      : 'bg-deep-blue-800'
-                  }`}
-                >
-                  <div className="flex h-full items-center justify-center">
-                    <Mic className="h-12 w-12 text-silver" />
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <p className="text-lg font-medium text-silver">
-                  {conversation.isSpeaking ? 'Coach is speaking...' : 'Listening...'}
-                </p>
-                <p className="text-sm text-silver-light">Speak naturally, I'll respond</p>
-              </div>
+        {conversation.status === 'connected' ? (
+          <div className="flex flex-col items-center space-y-8">
+            {/* Animated Speaking Indicator */}
+            <div
+              className={`flex h-40 w-40 items-center justify-center rounded-full transition-all duration-300 ${
+                conversation.isSpeaking
+                  ? 'animate-pulse bg-deep-blue-600 shadow-2xl shadow-deep-blue-600/40'
+                  : 'bg-deep-blue-800/50'
+              }`}
+            >
+              <Mic className="h-16 w-16 text-silver" />
             </div>
-          ) : (
-            <div className="space-y-4">
-              <div className="mx-auto flex h-32 w-32 items-center justify-center rounded-full bg-titanium-800">
-                <Phone className="h-12 w-12 text-silver-light" />
-              </div>
-              <div>
-                <p className="text-lg font-medium text-silver">Ready to start?</p>
-                <p className="text-sm text-silver-light">
-                  Click below to begin your voice coaching session
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
 
-        {/* Controls */}
-        <div className="flex gap-4">
-          {conversation.status === 'connected' ? (
+            <div className="text-center">
+              <p className="mb-2 text-xl font-medium text-silver">
+                {conversation.isSpeaking ? 'Listening...' : 'Your turn'}
+              </p>
+            </div>
+
             <button
               onClick={endConversation}
-              className="flex items-center gap-2 rounded-lg bg-red-600 px-6 py-3 font-medium text-white transition-colors hover:bg-red-700"
+              className="flex h-14 w-14 items-center justify-center rounded-full bg-red-600 text-white shadow-lg transition-all hover:bg-red-700 active:scale-95"
             >
-              <PhoneOff className="h-5 w-5" />
-              End Call
+              <PhoneOff className="h-6 w-6" />
             </button>
-          ) : (
+          </div>
+        ) : (
+          <div className="flex flex-col items-center space-y-12">
+            {/* Ready State */}
+            <div className="flex h-40 w-40 items-center justify-center rounded-full bg-titanium-800/50">
+              <Phone className="h-16 w-16 text-silver-light" />
+            </div>
+
             <button
               onClick={startConversation}
-              className="flex items-center gap-2 rounded-lg bg-deep-blue-700 px-8 py-4 text-lg font-medium text-silver transition-colors hover:bg-deep-blue-600"
+              className="flex h-16 w-16 items-center justify-center rounded-full bg-deep-blue-700 text-silver shadow-lg transition-all hover:bg-deep-blue-600 active:scale-95"
             >
-              <Phone className="h-6 w-6" />
-              Start Voice Session
+              <Phone className="h-8 w-8" />
             </button>
-          )}
-        </div>
 
-        {/* Transcript removed - transcripts are saved but not displayed during voice sessions */}
-      </div>
-
-      {/* Tips */}
-      {conversation.status !== 'connected' && (
-        <div className="border-t border-white/5 bg-titanium-900/80 p-6">
-          <div className="mx-auto max-w-4xl">
-            <h3 className="mb-3 text-sm font-medium text-silver">Tips for best experience:</h3>
-            <ul className="space-y-2 text-sm text-silver-light">
-              <li>• Speak naturally - this is a real conversation, not commands</li>
-              <li>• Use headphones to avoid echo</li>
-              <li>• Find a quiet environment</li>
-              <li>• The coach has full context on your business and goals</li>
-            </ul>
+            {/* Minimal Tips - Only show 2 key ones */}
+            <div className="w-full max-w-xs space-y-3 text-center text-sm text-silver-light">
+              <p>Use headphones for best quality</p>
+              <p>Find a quiet space</p>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }
