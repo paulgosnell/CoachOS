@@ -46,10 +46,11 @@ export function MessageInput({ onSend, disabled = false }: MessageInputProps) {
           disabled={disabled || sending}
           placeholder="Message..."
           rows={1}
-          className="flex-1 resize-none rounded-lg border border-white/10 bg-titanium-800 px-3 py-2.5 text-sm text-silver placeholder:text-gray-500 focus:border-white/20 focus:outline-none"
+          className="flex-1 resize-none rounded-lg border border-white/10 bg-titanium-800 px-3 py-2.5 text-base text-silver placeholder:text-gray-500 focus:border-white/20 focus:outline-none"
           style={{
             minHeight: '42px',
             maxHeight: '100px',
+            fontSize: '16px',
           }}
           onInput={(e) => {
             const target = e.target as HTMLTextAreaElement
