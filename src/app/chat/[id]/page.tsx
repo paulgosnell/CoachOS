@@ -113,7 +113,16 @@ export default function ChatPage() {
             content: payload.new.content,
             createdAt: new Date(payload.new.created_at),
           }
-          setMessages((prev) => [...prev, newMessage])
+
+          setMessages((prev) => {
+            // Remove any temporary messages with the same content and role
+            const filtered = prev.filter(
+              (msg) => !(msg.id.startsWith('temp-') && msg.content === newMessage.content && msg.role === newMessage.role)
+            )
+
+            // Add the new real message
+            return [...filtered, newMessage]
+          })
         }
       )
       .subscribe()
@@ -181,8 +190,8 @@ export default function ChatPage() {
       setIsStreaming(false)
       setStreamingMessage('')
 
-      // Remove temporary user message - the real one will come via Supabase subscription
-      setMessages((prev) => prev.filter((msg) => !msg.id.startsWith('temp-')))
+      // Don't manually remove temp message - the subscription will replace it
+      // when the real message arrives from the database
     } catch (err: any) {
       console.error('Failed to send message:', err)
       setIsStreaming(false)
