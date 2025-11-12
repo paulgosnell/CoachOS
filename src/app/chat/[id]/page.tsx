@@ -181,8 +181,8 @@ export default function ChatPage() {
       setIsStreaming(false)
       setStreamingMessage('')
 
-      // Reload messages to get the saved version from database
-      await loadMessages()
+      // Remove temporary user message - the real one will come via Supabase subscription
+      setMessages((prev) => prev.filter((msg) => !msg.id.startsWith('temp-')))
     } catch (err: any) {
       console.error('Failed to send message:', err)
       setIsStreaming(false)
