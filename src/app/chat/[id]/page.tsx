@@ -125,6 +125,15 @@ export default function ChatPage() {
 
   const handleSendMessage = async (content: string) => {
     try {
+      // Add user message to UI immediately (optimistic update)
+      const optimisticUserMessage: Message = {
+        id: `temp-${Date.now()}`, // Temporary ID
+        role: 'user',
+        content,
+        createdAt: new Date(),
+      }
+      setMessages((prev) => [...prev, optimisticUserMessage])
+
       setIsStreaming(true)
       setStreamingMessage('')
 
@@ -178,6 +187,8 @@ export default function ChatPage() {
       console.error('Failed to send message:', err)
       setIsStreaming(false)
       setStreamingMessage('')
+      // Remove optimistic message on error
+      setMessages((prev) => prev.filter((msg) => !msg.id.startsWith('temp-')))
       throw err
     }
   }
