@@ -1,11 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
-import { ElevenLabsClient } from 'elevenlabs'
 import { assembleUserContext } from '@/lib/ai/context'
 import { generateSystemPrompt } from '@/lib/ai/prompts'
-
-const elevenlabs = new ElevenLabsClient({
-  apiKey: process.env.ELEVENLABS_API_KEY,
-})
 
 export async function POST(req: Request) {
   try {
@@ -19,6 +14,14 @@ export async function POST(req: Request) {
       return new Response('Unauthorized', { status: 401 })
     }
 
+    // Check if ElevenLabs API key is configured
+    if (!process.env.ELEVENLABS_API_KEY) {
+      return new Response(
+        JSON.stringify({ error: 'ElevenLabs API key not configured' }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      )
+    }
+
     // Assemble full user context (profile, goals, business, RAG memories)
     const context = await assembleUserContext(
       user.id,
@@ -28,28 +31,31 @@ export async function POST(req: Request) {
 
     // Generate the Coach OS system prompt with full context
     const systemPrompt = generateSystemPrompt(context)
+    const firstName = context.profile.fullName.split(' ')[0]
 
-    // Create a conversation with ElevenLabs
-    // This returns a signed URL that the frontend can use to connect
-    const conversation = await elevenlabs.conversationalAi.createConversation({
-      agent: {
-        prompt: {
-          prompt: systemPrompt,
-        },
-        first_message: `Hey ${context.profile.fullName.split(' ')[0]}! Ready to dive in?`,
-        language: 'en',
-        // Use ElevenLabs' premium voice (you can customize this)
-        tts: {
-          voice_id: '21m00Tcm4TlvDq8ikWAM', // Rachel - professional female voice
-        },
+    // Create a conversation with ElevenLabs using their REST API
+    // https://elevenlabs.io/docs/api-reference/get-signed-url
+    const response = await fetch('https://api.elevenlabs.io/v1/convai/conversation/get_signed_url', {
+      method: 'GET',
+      headers: {
+        'xi-api-key': process.env.ELEVENLABS_API_KEY,
       },
     })
 
-    // Return the signed URL for the frontend to connect
+    if (!response.ok) {
+      const errorData = await response.text()
+      console.error('ElevenLabs API error:', errorData)
+      throw new Error(`Failed to get signed URL: ${response.status}`)
+    }
+
+    const data = await response.json()
+
+    // Return the signed URL and context for the frontend
     return new Response(
       JSON.stringify({
-        signedUrl: conversation.signed_url,
-        conversationId: conversation.conversation_id,
+        signedUrl: data.signed_url,
+        systemPrompt,
+        firstName,
       }),
       {
         headers: { 'Content-Type': 'application/json' },
@@ -57,6 +63,9 @@ export async function POST(req: Request) {
     )
   } catch (error: any) {
     console.error('ElevenLabs conversation creation error:', error)
-    return new Response(error.message || 'Internal server error', { status: 500 })
+    return new Response(
+      JSON.stringify({ error: error.message || 'Internal server error' }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    )
   }
 }
