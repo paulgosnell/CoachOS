@@ -231,21 +231,20 @@ export default function ChatPage() {
   return (
     <ErrorBoundary>
       <div className="flex h-full flex-col">
-        {/* Mobile Header with Navigation */}
+        {/* Minimal Mobile Header */}
         <div className="flex items-center justify-between border-b border-white/5 bg-titanium-900/80 p-4 lg:hidden">
           <button
             onClick={() => router.push('/dashboard')}
-            className="flex items-center gap-2 text-silver-light transition-colors hover:text-silver"
+            className="text-silver-light transition-colors hover:text-silver"
           >
             <ArrowLeft className="h-5 w-5" />
-            <span className="text-sm">Back</span>
           </button>
+          <p className="text-sm font-medium text-silver">Chat</p>
           <button
             onClick={() => router.push('/voice-coach')}
-            className="flex items-center gap-2 rounded-lg bg-deep-blue-700 px-3 py-2 text-sm font-medium text-silver transition-colors hover:bg-deep-blue-600"
+            className="text-silver-light transition-colors hover:text-silver"
           >
-            <Phone className="h-4 w-4" />
-            Voice
+            <Phone className="h-5 w-5" />
           </button>
         </div>
 
@@ -294,47 +293,33 @@ export default function ChatPage() {
         </div>
       </div>
 
-      {/* Input Mode Toggle & Input */}
-      <div className="border-t border-white/5 bg-titanium-900/80">
-        {/* Mode Toggle */}
-        <div className="flex justify-center border-b border-white/5 py-2">
-          <div className="inline-flex rounded-lg bg-titanium-950 p-1">
-            <button
-              onClick={() => setVoiceMode(false)}
-              className={`flex items-center gap-2 rounded-md px-4 py-2 text-sm transition-colors ${
-                !voiceMode
-                  ? 'bg-deep-blue-800 text-silver'
-                  : 'text-gray-400 hover:text-silver'
-              }`}
-            >
-              <Keyboard className="h-4 w-4" />
-              Text
-            </button>
-            <button
-              onClick={() => setVoiceMode(true)}
-              className={`flex items-center gap-2 rounded-md px-4 py-2 text-sm transition-colors ${
-                voiceMode
-                  ? 'bg-deep-blue-800 text-silver'
-                  : 'text-gray-400 hover:text-silver'
-              }`}
-            >
-              <Mic className="h-4 w-4" />
-              Voice
-            </button>
-          </div>
-        </div>
-
-        {/* Input Area */}
-        <div className="p-4">
-          {voiceMode ? (
+      {/* Clean Input Area */}
+      <div className="border-t border-white/5 bg-titanium-900/80 p-4">
+        {voiceMode ? (
+          <div className="flex flex-col items-center gap-4">
             <VoiceRecorder
               onTranscription={handleVoiceTranscription}
               disabled={isStreaming}
             />
-          ) : (
+            <button
+              onClick={() => setVoiceMode(false)}
+              className="text-xs text-silver-light transition-colors hover:text-silver"
+            >
+              Switch to text
+            </button>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-3">
             <MessageInput onSend={handleSendMessage} disabled={isStreaming} />
-          )}
-        </div>
+            <button
+              onClick={() => setVoiceMode(true)}
+              className="flex items-center justify-center gap-2 text-xs text-silver-light transition-colors hover:text-silver"
+            >
+              <Mic className="h-3 w-3" />
+              Use voice instead
+            </button>
+          </div>
+        )}
       </div>
     </div>
     </ErrorBoundary>
