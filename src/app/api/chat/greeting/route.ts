@@ -1,10 +1,13 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { openai } from '@ai-sdk/openai'
-import { generateText } from 'ai'
-import { getRelevantContext } from '@/lib/ai/rag'
+import { assembleUserContext } from '@/lib/ai/context'
+import OpenAI from 'openai'
 
 export const maxDuration = 60
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+})
 
 export async function POST(request: Request) {
   try {
@@ -22,7 +25,7 @@ export async function POST(request: Request) {
     // Get user profile
     const { data: profile } = await supabase
       .from('profiles')
-      .select('full_name, business_context')
+      .select('full_name')
       .eq('id', user.id)
       .single()
 
@@ -35,38 +38,44 @@ export async function POST(request: Request) {
       .order('priority', { ascending: true })
       .limit(3)
 
-    // Get relevant context from RAG
-    const contextQuery = `Recent session context for ${profile?.full_name || 'user'}`
-    const ragContext = await getRelevantContext(user.id, contextQuery)
+    // Get recent conversation context
+    const { data: recentMessages } = await supabase
+      .from('messages')
+      .select('content, role, created_at')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(5)
 
     // Generate personalized greeting
     const firstName = profile?.full_name?.split(' ')[0] || 'there'
+    const goalsText = goals?.map(g => g.title).join(', ') || 'None set yet'
+    const recentContext = recentMessages?.slice(0, 2).map(m => m.content).join(' ') || ''
 
     const prompt = `Generate a brief, natural greeting (2-3 sentences max) for a coaching session.
 
 User context:
 - Name: ${firstName}
-- Business: ${profile?.business_context || 'Not specified'}
-- Active goals: ${goals?.map(g => g.title).join(', ') || 'None set yet'}
-- Recent context: ${ragContext.substring(0, 500)}
+- Active goals: ${goalsText}
+- Recent topics: ${recentContext.substring(0, 300)}
 
 Guidelines:
 - Use their first name naturally
-- Reference something specific from their context (a goal, challenge, or recent topic)
+- Reference something specific from their context if available
 - Keep it conversational and warm, not corporate
 - End with an open question about what they want to focus on
 - 2-3 sentences max
 - No emojis`
 
-    const result = await generateText({
-      model: openai('gpt-4o'),
-      prompt,
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4o',
+      messages: [{ role: 'user', content: prompt }],
       temperature: 0.8,
+      max_tokens: 150,
     })
 
-    return NextResponse.json({
-      greeting: result.text.trim(),
-    })
+    const greeting = completion.choices[0]?.message?.content?.trim() || "Hey! What would you like to work on today?"
+
+    return NextResponse.json({ greeting })
   } catch (error: any) {
     console.error('Greeting generation error:', error)
     // Fallback to generic greeting
