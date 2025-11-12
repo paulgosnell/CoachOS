@@ -37,31 +37,33 @@ export function MessageInput({ onSend, disabled = false }: MessageInputProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="border-t border-white/5 bg-titanium-900/80 p-4">
-      <div className="mx-auto flex max-w-4xl items-end gap-3">
-        <textarea
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          onKeyDown={handleKeyDown}
-          disabled={disabled || sending}
-          placeholder="Type your message... (Shift + Enter for new line)"
-          rows={1}
-          className="input flex-1 resize-none py-3"
-          style={{
-            minHeight: '48px',
-            maxHeight: '200px',
-          }}
-          onInput={(e) => {
-            const target = e.target as HTMLTextAreaElement
-            target.style.height = '48px'
-            target.style.height = Math.min(target.scrollHeight, 200) + 'px'
-          }}
-        />
+    <form onSubmit={handleSubmit} className="w-full">
+      <div className="flex items-end gap-3">
+        <div className="relative flex-1">
+          <textarea
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            onKeyDown={handleKeyDown}
+            disabled={disabled || sending}
+            placeholder="Message..."
+            rows={1}
+            className="w-full resize-none rounded-2xl border border-white/10 bg-titanium-800/50 px-4 py-3 pr-12 text-sm text-silver placeholder:text-gray-500 focus:border-white/20 focus:outline-none focus:ring-0"
+            style={{
+              minHeight: '44px',
+              maxHeight: '120px',
+            }}
+            onInput={(e) => {
+              const target = e.target as HTMLTextAreaElement
+              target.style.height = '44px'
+              target.style.height = Math.min(target.scrollHeight, 120) + 'px'
+            }}
+          />
+        </div>
 
         <button
           type="submit"
           disabled={!message.trim() || sending || disabled}
-          className="btn btn-primary h-12 w-12 flex-shrink-0 p-0"
+          className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-deep-blue-700 text-silver transition-all hover:bg-deep-blue-600 disabled:opacity-50 active:scale-95"
         >
           {sending ? (
             <Loader2 className="h-5 w-5 animate-spin" />
@@ -70,10 +72,6 @@ export function MessageInput({ onSend, disabled = false }: MessageInputProps) {
           )}
         </button>
       </div>
-
-      <p className="mx-auto mt-2 max-w-4xl text-center text-xs text-gray-500">
-        Press Enter to send • Shift + Enter for new line
-      </p>
     </form>
   )
 }
