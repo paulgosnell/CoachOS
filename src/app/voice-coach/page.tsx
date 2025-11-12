@@ -49,7 +49,7 @@ export default function VoiceCoachPage() {
 
   if (loading) {
     return (
-      <div className="flex h-full items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-silver" />
       </div>
     )
@@ -57,7 +57,7 @@ export default function VoiceCoachPage() {
 
   if (error) {
     return (
-      <div className="flex h-full items-center justify-center p-8">
+      <div className="flex min-h-screen items-center justify-center p-8">
         <div className="text-center">
           <p className="mb-4 text-red-400">{error}</p>
           <button onClick={() => router.push('/chat')} className="btn btn-primary">

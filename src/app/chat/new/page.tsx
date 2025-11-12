@@ -12,7 +12,26 @@ export default async function NewChatPage() {
     redirect('/auth/login')
   }
 
-  // Create a new conversation
+  // Check for most recent conversation (within last 24 hours)
+  const oneDayAgo = new Date()
+  oneDayAgo.setHours(oneDayAgo.getHours() - 24)
+
+  const { data: recentConversation } = await supabase
+    .from('conversations')
+    .select('id, created_at')
+    .eq('user_id', user.id)
+    .eq('session_type', 'quick-checkin')
+    .gte('created_at', oneDayAgo.toISOString())
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single()
+
+  // If there's a recent conversation, redirect to it
+  if (recentConversation) {
+    redirect(`/chat/${recentConversation.id}`)
+  }
+
+  // Otherwise, create a new conversation
   const { data: conversation, error } = await supabase
     .from('conversations')
     .insert({

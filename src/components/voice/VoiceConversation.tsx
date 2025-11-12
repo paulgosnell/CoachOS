@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { useConversation } from '@elevenlabs/react'
-import { Mic, Phone, PhoneOff, Loader2, MessageSquare } from 'lucide-react'
+import { Mic, Phone, PhoneOff, Loader2, ArrowLeft } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Toast } from '@/components/Toast'
 
@@ -154,7 +154,7 @@ export function VoiceConversation({ config, router }: VoiceConversationProps) {
           onClick={() => router.push('/dashboard')}
           className="text-silver-light transition-colors hover:text-silver"
         >
-          <MessageSquare className="h-5 w-5" />
+          <ArrowLeft className="h-5 w-5" />
         </button>
         <p className="text-sm font-medium text-silver">
           {conversation.status === 'connected' ? 'Connected' : 'Voice'}

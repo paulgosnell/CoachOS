@@ -29,12 +29,31 @@ export default function ChatPage() {
   const [isStreaming, setIsStreaming] = useState(false)
   const [streamingMessage, setStreamingMessage] = useState('')
   const [voiceMode, setVoiceMode] = useState(false)
+  const [greeting, setGreeting] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     loadMessages()
     subscribeToMessages()
+    loadGreeting()
   }, [conversationId])
+
+  const loadGreeting = async () => {
+    try {
+      const response = await fetch('/api/chat/greeting', {
+        method: 'POST',
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setGreeting(data.greeting)
+      }
+    } catch (err) {
+      console.error('Failed to load greeting:', err)
+      // Fallback greeting
+      setGreeting("Hey! What would you like to work on today?")
+    }
+  }
 
   useEffect(() => {
     scrollToBottom()
@@ -248,12 +267,9 @@ export default function ChatPage() {
         <div className="mx-auto max-w-4xl space-y-6">
           {messages.length === 0 ? (
             <div className="flex h-full items-center justify-center py-12 text-center">
-              <div>
-                <p className="mb-2 text-silver-light">
-                  👋 Hey there! What would you like to work on today?
-                </p>
-                <p className="text-sm text-gray-500">
-                  I have full context on your business and goals
+              <div className="max-w-lg px-4">
+                <p className="text-silver-light">
+                  {greeting || "Loading..."}
                 </p>
               </div>
             </div>
