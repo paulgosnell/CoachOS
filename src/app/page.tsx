@@ -58,7 +58,7 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-gradient-radial from-deep-blue-900/30 via-black to-black" />
 
         <div className="container relative z-10 mx-auto px-6 py-20">
-          <div className="grid items-center gap-8 lg:grid-cols-2 lg:gap-12">
+          <div className="grid items-center gap-8 lg:grid-cols-2 lg:gap-6">
             {/* Left: Text Content */}
             <div className="flex flex-col">
               {/* Badge */}
