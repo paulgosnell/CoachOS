@@ -3,9 +3,9 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { MobileHeader } from '@/components/MobileHeader'
-import { SessionsList } from '@/components/sessions/SessionsList'
+import { SessionBooking } from '@/components/sessions/SessionBooking'
 
-export default async function SessionsPage() {
+export default async function NewSessionPage() {
   const supabase = await createClient()
 
   const {
@@ -18,26 +18,22 @@ export default async function SessionsPage() {
 
   return (
     <div className="min-h-screen">
-      <MobileHeader title="Coaching Sessions" />
+      <MobileHeader title="Book Session" />
 
       <div className="p-4 md:p-6">
-        <div className="container mx-auto max-w-7xl">
+        <div className="container mx-auto max-w-3xl">
           {/* Desktop Header */}
           <div className="mb-8 hidden lg:block">
             <Link
-              href="/dashboard"
+              href="/sessions"
               className="mb-4 inline-flex items-center gap-2 text-sm text-silver-light hover:text-silver"
             >
               <ArrowLeft className="h-4 w-4" />
-              Back to Dashboard
+              Back to Sessions
             </Link>
-            <h1 className="mb-2 text-3xl font-bold">Coaching Sessions</h1>
-            <p className="text-silver-light">
-              Schedule and manage your structured coaching sessions
-            </p>
           </div>
 
-          <SessionsList />
+          <SessionBooking />
         </div>
       </div>
     </div>

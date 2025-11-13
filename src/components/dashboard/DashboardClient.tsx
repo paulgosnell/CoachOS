@@ -79,6 +79,21 @@ export function DashboardClient({ profile, goalsCount, conversationsCount }: Das
           </div>
 
           <Link
+            href="/sessions"
+            className="card group cursor-pointer transition-all hover:border-silver/30"
+          >
+            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-deep-blue-800/50">
+              <Calendar className="h-5 w-5 text-silver" />
+            </div>
+            <h3 className="mb-1 text-base font-semibold text-silver">
+              Coaching Sessions
+            </h3>
+            <p className="text-sm text-silver-light">
+              Structured sessions with proven frameworks
+            </p>
+          </Link>
+
+          <Link
             href="/goals"
             className="card group cursor-pointer transition-all hover:border-silver/30"
           >
@@ -121,22 +136,6 @@ export function DashboardClient({ profile, goalsCount, conversationsCount }: Das
             </h3>
             <p className="text-sm text-silver-light">
               Quick capture thoughts
-            </p>
-            <p className="mt-2 text-xs text-gray-500">Coming soon</p>
-          </Link>
-
-          <Link
-            href="/sessions"
-            className="card group cursor-pointer transition-all hover:border-silver/30 bg-titanium-900/30"
-          >
-            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-deep-blue-800/50">
-              <Calendar className="h-5 w-5 text-silver" />
-            </div>
-            <h3 className="mb-1 text-base font-semibold text-silver">
-              Book Session
-            </h3>
-            <p className="text-sm text-silver-light">
-              Structured coaching
             </p>
             <p className="mt-2 text-xs text-gray-500">Coming soon</p>
           </Link>
