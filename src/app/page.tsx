@@ -58,52 +58,112 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-gradient-radial from-deep-blue-900/30 via-black to-black" />
 
         <div className="container relative z-10 mx-auto px-6 py-20">
-          <div className="flex flex-col items-center text-center">
-            {/* Badge */}
-            <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-glass-border bg-glass-bg px-4 py-2">
-              <Sparkles className="h-4 w-4 text-silver" />
-              <span className="text-sm font-semibold uppercase tracking-wider text-silver">
-                Elite Executive Coaching with AI
-              </span>
+          <div className="grid items-center gap-12 lg:grid-cols-2">
+            {/* Left: Text Content */}
+            <div className="flex flex-col">
+              {/* Badge */}
+              <div className="mb-8 inline-flex w-fit items-center gap-2 rounded-full border border-glass-border bg-glass-bg px-4 py-2">
+                <Sparkles className="h-4 w-4 text-silver" />
+                <span className="text-sm font-semibold uppercase tracking-wider text-silver">
+                  Elite Executive Coaching with AI
+                </span>
+              </div>
+
+              {/* Headline */}
+              <h1 className="mb-6 text-5xl font-bold leading-tight md:text-6xl lg:text-7xl">
+                Your Executive Coach,
+                <br />
+                <span className="text-gradient">Always Available</span>
+              </h1>
+
+              {/* Subtitle */}
+              <p className="mb-12 max-w-2xl text-lg text-silver-light md:text-xl">
+                Strategic guidance that knows your business, remembers your goals, and helps you
+                think clearly. Professional coaching that fits your schedule.
+              </p>
+
+              {/* CTA Buttons */}
+              <div className="mb-8 flex flex-col gap-4 sm:flex-row">
+                <Link href="/auth/signup" className="btn btn-primary">
+                  Get Started
+                  <ArrowRight className="h-5 w-5" />
+                </Link>
+                <Link href="#how-it-works" className="btn btn-secondary">
+                  See How It Works
+                </Link>
+              </div>
+
+              {/* Trust indicators */}
+              <div className="flex flex-wrap items-center gap-6 text-sm text-gray-500">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-silver" />
+                  <span>GPT-4o Powered</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-silver" />
+                  <span>Long-Term Memory</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-silver" />
+                  <span>Voice + Text</span>
+                </div>
+              </div>
             </div>
 
-            {/* Headline */}
-            <h1 className="mb-6 max-w-4xl text-5xl font-bold leading-tight md:text-7xl">
-              Your Executive Coach,
-              <br />
-              <span className="text-gradient">Always Available</span>
-            </h1>
+            {/* Right: Mobile Mockup with Voice UI */}
+            <div className="flex justify-center lg:justify-end">
+              <div className="relative">
+                {/* Phone Frame */}
+                <div className="relative h-[600px] w-[300px] rounded-[3rem] border-[14px] border-titanium-900 bg-black shadow-2xl">
+                  {/* Notch */}
+                  <div className="absolute left-1/2 top-0 h-7 w-40 -translate-x-1/2 rounded-b-3xl bg-titanium-900" />
 
-            {/* Subtitle */}
-            <p className="mb-12 max-w-2xl text-lg text-silver-light md:text-xl">
-              Strategic guidance that knows your business, remembers your goals, and helps you
-              think clearly. Professional coaching that fits your schedule.
-            </p>
+                  {/* Screen Content */}
+                  <div className="flex h-full flex-col bg-titanium-950 p-4">
+                    {/* Header */}
+                    <div className="mb-6 flex items-center justify-between border-b border-white/5 pb-4">
+                      <div className="h-5 w-5" />
+                      <p className="text-sm font-medium text-silver">Voice</p>
+                      <div className="h-5 w-5" />
+                    </div>
 
-            {/* CTA Buttons */}
-            <div className="flex flex-col gap-4 sm:flex-row">
-              <Link href="/auth/signup" className="btn btn-primary">
-                Get Started
-                <ArrowRight className="h-5 w-5" />
-              </Link>
-              <Link href="#how-it-works" className="btn btn-secondary">
-                See How It Works
-              </Link>
-            </div>
+                    {/* Voice Interface - Centered */}
+                    <div className="flex flex-1 flex-col items-center justify-center">
+                      {/* Animated Mic Icon with Ripples */}
+                      <div className="relative mb-8">
+                        {/* Outer Ripple - Largest */}
+                        <div className="absolute inset-0 -m-16 animate-ping rounded-full bg-deep-blue-600/20" style={{ animationDuration: '2s' }} />
 
-            {/* Trust indicators */}
-            <div className="mt-12 flex flex-wrap items-center justify-center gap-8 text-sm text-gray-500">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-silver" />
-                <span>GPT-4o Powered</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-silver" />
-                <span>Long-Term Memory</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-silver" />
-                <span>Enterprise-Grade Security</span>
+                        {/* Middle Ripple */}
+                        <div className="absolute inset-0 -m-12 animate-ping rounded-full bg-deep-blue-600/30" style={{ animationDuration: '1.5s' }} />
+
+                        {/* Inner Ripple */}
+                        <div className="absolute inset-0 -m-8 animate-ping rounded-full bg-deep-blue-600/40" style={{ animationDuration: '1s' }} />
+
+                        {/* Main Circle */}
+                        <div className="relative flex h-32 w-32 items-center justify-center rounded-full bg-gradient-to-br from-deep-blue-600 to-deep-blue-800 shadow-2xl shadow-deep-blue-600/40">
+                          <Mic className="h-16 w-16 text-silver" />
+                        </div>
+                      </div>
+
+                      {/* Status Text */}
+                      <p className="mb-8 text-xl font-medium text-silver">Listening...</p>
+
+                      {/* Stop Button */}
+                      <button className="flex h-12 w-12 items-center justify-center rounded-lg bg-red-600 shadow-lg">
+                        <div className="h-5 w-5 rounded-sm bg-white" />
+                      </button>
+                    </div>
+
+                    {/* Bottom Tip */}
+                    <div className="text-center">
+                      <p className="text-xs text-silver-light">Talk naturally - I have full context</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Glow Effect Behind Phone */}
+                <div className="absolute inset-0 -z-10 rounded-[3rem] bg-deep-blue-600/20 blur-3xl" />
               </div>
             </div>
           </div>
