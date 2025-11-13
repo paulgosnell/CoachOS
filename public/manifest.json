@@ -11,51 +11,9 @@
   "categories": ["business", "productivity", "lifestyle"],
   "icons": [
     {
-      "src": "/icons/icon-72x72.png",
-      "sizes": "72x72",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/icons/icon-96x96.png",
-      "sizes": "96x96",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/icons/icon-128x128.png",
-      "sizes": "128x128",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/icons/icon-144x144.png",
-      "sizes": "144x144",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/icons/icon-152x152.png",
-      "sizes": "152x152",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/icons/icon-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icons/icon-384x384.png",
-      "sizes": "384x384",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/icons/icon-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
       "purpose": "any maskable"
     }
   ],
@@ -64,28 +22,27 @@
       "name": "New Conversation",
       "short_name": "New Chat",
       "description": "Start a new coaching conversation",
-      "url": "/chat",
+      "url": "/chat/new",
       "icons": [
         {
-          "src": "/icons/icon-192x192.png",
-          "sizes": "192x192",
-          "type": "image/png"
+          "src": "/icon.svg",
+          "sizes": "any",
+          "type": "image/svg+xml"
         }
       ]
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "/screenshots/mobile-chat.png",
-      "sizes": "750x1334",
-      "type": "image/png",
-      "form_factor": "narrow"
     },
     {
-      "src": "/screenshots/desktop-dashboard.png",
-      "sizes": "1920x1080",
-      "type": "image/png",
-      "form_factor": "wide"
+      "name": "Coaching Sessions",
+      "short_name": "Sessions",
+      "description": "Book or view coaching sessions",
+      "url": "/sessions",
+      "icons": [
+        {
+          "src": "/icon.svg",
+          "sizes": "any",
+          "type": "image/svg+xml"
+        }
+      ]
     }
   ]
 }
