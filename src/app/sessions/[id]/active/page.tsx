@@ -50,19 +50,11 @@ export default async function ActiveSessionPage({
         user_id: user.id,
         session_type: 'structured',
         title,
-        duration: session.duration_minutes,
-        metadata: {
-          session_id: session.id,
-          framework: session.framework_used,
-          current_stage: framework.stages[0].id,
-          stage_index: 0,
-        },
       })
       .select()
       .single()
 
-    if (convError) {
-      console.error('Error creating conversation:', convError)
+    if (convError || !conversation) {
       redirect('/sessions')
     }
 

@@ -4,13 +4,13 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   ArrowLeft,
-  Send,
   Loader2,
   CheckCircle2,
   Circle,
   StopCircle,
 } from 'lucide-react'
 import { MessageBubble } from '@/components/chat/MessageBubble'
+import { MessageInput } from '@/components/chat/MessageInput'
 import { TypingIndicator } from '@/components/chat/TypingIndicator'
 import { getFramework } from '@/lib/ai/frameworks'
 
@@ -40,7 +40,6 @@ export function ActiveSessionClient({
   const router = useRouter()
   const [session, setSession] = useState<Session | null>(null)
   const [messages, setMessages] = useState<Message[]>([])
-  const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [streaming, setStreaming] = useState(false)
   const [currentStageIndex, setCurrentStageIndex] = useState(0)
@@ -83,18 +82,16 @@ export function ActiveSessionClient({
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 
-  const handleSend = async () => {
-    if (!input.trim() || streaming) return
+  const handleSend = async (content: string) => {
+    if (streaming) return
 
-    const userMessage = input.trim()
-    setInput('')
     setStreaming(true)
 
     // Add user message optimistically
     const tempUserMessage: Message = {
       id: `temp-${Date.now()}`,
       role: 'user',
-      content: userMessage,
+      content,
       created_at: new Date().toISOString(),
     }
     setMessages((prev) => [...prev, tempUserMessage])
@@ -106,9 +103,8 @@ export function ActiveSessionClient({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          message: userMessage,
-          conversation_id: conversationId,
-          session_type: 'structured',
+          message: content,
+          conversationId,
         }),
       })
 
@@ -129,37 +125,26 @@ export function ActiveSessionClient({
           const lines = chunk.split('\n')
 
           for (const line of lines) {
-            if (line.startsWith('data: ')) {
-              const data = line.slice(6)
-              if (data === '[DONE]') {
-                break
-              }
+            if (line.startsWith('0:')) {
+              const text = line.slice(2).replace(/^"/, '').replace(/"$/, '')
+              assistantMessage += text
+              setMessages((prev) => {
+                const newMessages = [...prev]
+                const lastMessage = newMessages[newMessages.length - 1]
 
-              try {
-                const parsed = JSON.parse(data)
-                if (parsed.content) {
-                  assistantMessage += parsed.content
-                  setMessages((prev) => {
-                    const newMessages = [...prev]
-                    const lastMessage = newMessages[newMessages.length - 1]
-
-                    if (lastMessage && lastMessage.role === 'assistant') {
-                      lastMessage.content = assistantMessage
-                    } else {
-                      newMessages.push({
-                        id: `temp-assistant-${Date.now()}`,
-                        role: 'assistant',
-                        content: assistantMessage,
-                        created_at: new Date().toISOString(),
-                      })
-                    }
-
-                    return newMessages
+                if (lastMessage && lastMessage.role === 'assistant' && lastMessage.id.startsWith('temp-assistant')) {
+                  lastMessage.content = assistantMessage
+                } else if (newMessages[newMessages.length - 1]?.role !== 'assistant') {
+                  newMessages.push({
+                    id: `temp-assistant-${Date.now()}`,
+                    role: 'assistant',
+                    content: assistantMessage,
+                    created_at: new Date().toISOString(),
                   })
                 }
-              } catch (e) {
-                // Ignore parse errors
-              }
+
+                return newMessages
+              })
             }
           }
         }
@@ -169,15 +154,10 @@ export function ActiveSessionClient({
       await fetchMessages()
     } catch (error) {
       console.error('Error sending message:', error)
+      // Remove temp messages on error
+      setMessages((prev) => prev.filter((msg) => !msg.id.startsWith('temp-')))
     } finally {
       setStreaming(false)
-    }
-  }
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      handleSend()
     }
   }
 
@@ -223,96 +203,88 @@ export function ActiveSessionClient({
     framework.stages[Math.min(currentStageIndex, framework.stages.length - 1)]
 
   return (
-    <div className="flex h-screen flex-col">
-      {/* Header */}
-      <div className="border-b border-white/10 bg-titanium-800/50 px-4 py-3">
-        <div className="container mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => router.push('/sessions')}
-              className="text-silver-light hover:text-silver"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </button>
-            <div>
-              <h1 className="text-lg font-semibold">{framework.name} Session</h1>
-              {session.goal && (
-                <p className="text-sm text-silver-light">{session.goal}</p>
+    <div className="flex h-full flex-col">
+      {/* Minimal Mobile Header */}
+      <div className="flex items-center justify-between border-b border-white/5 bg-titanium-900/80 p-4">
+        <button
+          onClick={() => router.push('/sessions')}
+          className="text-silver-light transition-colors hover:text-silver"
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </button>
+        <div className="flex-1 px-3">
+          <p className="truncate text-center text-sm font-medium text-silver">
+            {framework.name} Session
+          </p>
+          {session.goal && (
+            <p className="truncate text-center text-xs text-silver-dark">
+              {session.goal}
+            </p>
+          )}
+        </div>
+        <button
+          onClick={() => setShowCompleteModal(true)}
+          className="flex h-9 w-9 items-center justify-center rounded-full text-silver-light transition-colors hover:bg-white/5 hover:text-silver"
+          title="Complete Session"
+        >
+          <StopCircle className="h-5 w-5" />
+        </button>
+      </div>
+
+      {/* Compact Framework Progress */}
+      <div className="border-b border-white/5 bg-titanium-900/50 px-4 py-2">
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
+          {framework.stages.map((stage, index) => (
+            <div key={stage.id} className="flex flex-shrink-0 items-center gap-2">
+              <div className="flex items-center gap-1.5">
+                {index < currentStageIndex ? (
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                ) : index === currentStageIndex ? (
+                  <div className="h-4 w-4 rounded-full border-2 border-deep-blue-600" />
+                ) : (
+                  <div className="h-4 w-4 rounded-full border-2 border-silver-darker/30" />
+                )}
+                <span
+                  className={`whitespace-nowrap text-xs font-medium ${
+                    index === currentStageIndex
+                      ? 'text-deep-blue-500'
+                      : index < currentStageIndex
+                        ? 'text-silver-light'
+                        : 'text-silver-darker'
+                  }`}
+                >
+                  {stage.name}
+                </span>
+              </div>
+              {index < framework.stages.length - 1 && (
+                <div
+                  className={`h-px w-4 ${
+                    index < currentStageIndex ? 'bg-green-500' : 'bg-silver-darker/30'
+                  }`}
+                />
               )}
             </div>
-          </div>
-          <button
-            onClick={() => setShowCompleteModal(true)}
-            className="btn btn-secondary btn-sm"
-          >
-            <StopCircle className="h-4 w-4" />
-            Complete Session
-          </button>
+          ))}
         </div>
       </div>
 
-      {/* Framework Progress */}
-      <div className="border-b border-white/10 bg-titanium-900/30 px-4 py-3">
-        <div className="container mx-auto">
-          <div className="flex items-center justify-between gap-2 overflow-x-auto">
-            {framework.stages.map((stage, index) => (
-              <div
-                key={stage.id}
-                className={`flex items-center gap-2 ${
-                  index < framework.stages.length - 1 ? 'flex-1' : ''
-                }`}
-              >
-                <div className="flex flex-shrink-0 items-center gap-2">
-                  {index < currentStageIndex ? (
-                    <CheckCircle2 className="h-5 w-5 text-green-500" />
-                  ) : index === currentStageIndex ? (
-                    <Circle className="h-5 w-5 text-deep-blue-600" />
-                  ) : (
-                    <Circle className="h-5 w-5 text-silver-darker" />
-                  )}
-                  <span
-                    className={`text-sm font-medium ${
-                      index === currentStageIndex
-                        ? 'text-deep-blue-500'
-                        : index < currentStageIndex
-                          ? 'text-silver-light'
-                          : 'text-silver-lighter'
-                    }`}
-                  >
-                    {stage.name}
-                  </span>
-                </div>
-                {index < framework.stages.length - 1 && (
-                  <div
-                    className={`h-0.5 flex-1 ${
-                      index < currentStageIndex
-                        ? 'bg-green-500'
-                        : 'bg-silver-darker'
-                    }`}
-                  />
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4">
-        <div className="container mx-auto max-w-4xl space-y-4">
-          {/* Current Stage Info */}
-          <div className="card bg-deep-blue-900/20">
-            <h3 className="mb-2 font-semibold text-deep-blue-400">
-              {currentStage.name}: {currentStage.description}
-            </h3>
-            <p className="text-sm text-silver-light">
-              Your coach will guide you through this stage
-            </p>
-          </div>
-
+      {/* Messages Area */}
+      <div className="flex-1 overflow-y-auto p-4 md:p-6">
+        <div className="mx-auto max-w-4xl space-y-6">
           {loading ? (
-            <div className="flex justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin text-deep-blue-600" />
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-deep-blue-600" />
+            </div>
+          ) : messages.length === 0 ? (
+            <div className="flex h-full items-center justify-center py-12 text-center">
+              <div className="max-w-lg px-4">
+                <p className="mb-1 text-sm font-semibold text-deep-blue-400">
+                  {currentStage.name}: {currentStage.description}
+                </p>
+                <p className="text-sm text-silver-light">
+                  Your coach will guide you through this stage
+                </p>
+              </div>
             </div>
           ) : (
             <>
@@ -331,28 +303,9 @@ export function ActiveSessionClient({
         </div>
       </div>
 
-      {/* Input */}
-      <div className="border-t border-white/10 bg-titanium-800/50 p-4">
-        <div className="container mx-auto max-w-4xl">
-          <div className="flex gap-2">
-            <textarea
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Type your response..."
-              rows={1}
-              className="input flex-1 resize-none"
-              disabled={streaming}
-            />
-            <button
-              onClick={handleSend}
-              disabled={!input.trim() || streaming}
-              className="btn btn-primary"
-            >
-              <Send className="h-5 w-5" />
-            </button>
-          </div>
-        </div>
+      {/* Clean Input Area */}
+      <div className="border-t border-white/5 bg-titanium-900/80 p-4">
+        <MessageInput onSend={handleSend} disabled={streaming} />
       </div>
 
       {/* Complete Modal */}
