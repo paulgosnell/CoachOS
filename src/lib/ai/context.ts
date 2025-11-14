@@ -164,8 +164,8 @@ export async function assembleUserContextWithRAG(
 
     if (summaries.dailySummaries.length > 0 || summaries.weeklySummaries.length > 0) {
       context.recentSummaries = {
-        daily: summaries.dailySummaries.map((s) => s.summary_text),
-        weekly: summaries.weeklySummaries.map((s) => s.summary_text),
+        daily: summaries.dailySummaries.map((s) => s.summary),
+        weekly: summaries.weeklySummaries.map((s) => s.summary),
       }
     }
   } catch (error) {

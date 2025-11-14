@@ -17,5 +17,15 @@
       "memory": 1024,
       "maxDuration": 60
     }
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/cron/daily-summary",
+      "schedule": "0 2 * * *"
+    },
+    {
+      "path": "/api/cron/weekly-summary",
+      "schedule": "0 3 * * 0"
+    }
+  ]
 }

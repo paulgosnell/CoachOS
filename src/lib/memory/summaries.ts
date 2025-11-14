@@ -83,15 +83,15 @@ Be specific and actionable. Focus on what matters for progress tracking.`,
 
   const result = JSON.parse(response.choices[0].message.content || '{}')
 
-  // Store in database
+  // Store in database (matching schema: date, summary, key_topics, sentiment, action_items, conversation_count)
   await supabase.from('daily_summaries').insert({
     user_id: userId,
-    summary_date: date.toISOString().split('T')[0],
-    summary_text: result.summary,
-    key_themes: result.keyThemes,
-    decisions_made: result.decisions,
-    wins: result.wins,
-    challenges: result.challenges,
+    date: date.toISOString().split('T')[0],
+    summary: result.summary,
+    key_topics: result.keyThemes || [],
+    sentiment: null, // Can be enhanced later
+    action_items: [...(result.decisions || []), ...(result.wins || []), ...(result.challenges || [])].map(item => ({ text: item })),
+    conversation_count: messages.length,
   })
 
   return result
@@ -142,12 +142,10 @@ export async function generateWeeklySummary(
   const dailySummariesText = dailySummaries
     .map(
       (d) => `
-Day: ${d.summary_date}
-Summary: ${d.summary_text}
-Themes: ${d.key_themes?.join(', ') || 'None'}
-Decisions: ${d.decisions_made?.join(', ') || 'None'}
-Wins: ${d.wins?.join(', ') || 'None'}
-Challenges: ${d.challenges?.join(', ') || 'None'}
+Day: ${d.date}
+Summary: ${d.summary}
+Themes: ${d.key_topics?.join(', ') || 'None'}
+Action Items: ${Array.isArray(d.action_items) ? d.action_items.map((a: any) => a.text || a).join(', ') : 'None'}
 `
     )
     .join('\n---\n')
@@ -183,14 +181,17 @@ Be strategic and forward-looking. Focus on actionable insights.`,
 
   const result = JSON.parse(response.choices[0].message.content || '{}')
 
-  // Store in database
+  // Store in database (matching schema: week_start, week_end, summary, progress_notes, goals_progress, key_decisions, challenges_faced, wins)
   await supabase.from('weekly_summaries').insert({
     user_id: userId,
-    week_start_date: weekStartDate.toISOString().split('T')[0],
-    summary_text: result.summary,
-    progress_on_goals: result.progressOnGoals,
-    patterns_identified: result.patterns,
-    recommendations: result.recommendations,
+    week_start: weekStartDate.toISOString().split('T')[0],
+    week_end: weekEndDate.toISOString().split('T')[0],
+    summary: result.summary,
+    progress_notes: result.recommendations?.join('\n') || null,
+    goals_progress: (result.progressOnGoals || []).map((p: string) => ({ note: p })),
+    key_decisions: [],
+    challenges_faced: [],
+    wins: [],
   })
 
   return result
@@ -213,15 +214,15 @@ export async function getRecentSummaries(userId: string, days: number = 7): Prom
       .from('daily_summaries')
       .select('*')
       .eq('user_id', userId)
-      .gte('summary_date', cutoffDate.toISOString().split('T')[0])
-      .order('summary_date', { ascending: false }),
+      .gte('date', cutoffDate.toISOString().split('T')[0])
+      .order('date', { ascending: false }),
 
     supabase
       .from('weekly_summaries')
       .select('*')
       .eq('user_id', userId)
-      .gte('week_start_date', cutoffDate.toISOString().split('T')[0])
-      .order('week_start_date', { ascending: false }),
+      .gte('week_start', cutoffDate.toISOString().split('T')[0])
+      .order('week_start', { ascending: false }),
   ])
 
   return {
