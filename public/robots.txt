@@ -6,6 +6,12 @@ Disallow: /auth/callback
 Disallow: /dashboard
 Disallow: /chat/
 Disallow: /onboarding/
+Disallow: /sessions/
+Disallow: /goals
+Disallow: /tasks
+Disallow: /settings
+Disallow: /brain-dump
+Disallow: /voice-coach
 
 # Sitemap
-Sitemap: https://coach-os-agent.vercel.app/sitemap.xml
+Sitemap: https://ceocoachos.com/sitemap.xml

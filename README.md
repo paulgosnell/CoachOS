@@ -1,251 +1,203 @@
-# Coach OS Landing Page
+# Coach OS - Your Business Coach In Your Pocket
 
-Premium, conversion-optimized landing page for Coach OS - Your Business Coach In Your Pocket.
+Premium AI-powered executive coaching platform for ambitious business leaders.
+
+## Overview
+
+Coach OS is a production-ready Next.js application providing on-demand business coaching powered by GPT-4o, Gemini 2.5 Flash, and advanced memory systems. We combine proven coaching frameworks with AI to deliver personalized, context-aware guidance that understands your business.
 
 ## Features
 
-- **Premium Design**: Business-class aesthetic with titanium, deep blue, and gold accent colors
-- **Animated Background**: Subtle gradient animation for visual interest
-- **Interactive Phone Mockup**: 3D floating animation with parallax mouse tracking
-- **Responsive**: Fully mobile-optimized (mobile-first design)
-- **Voice Visualization**: Animated voice wave indicators
-- **Waitlist Form**: Captures early adopter signups with qualification questions
-- **Smooth Animations**: Professional micro-interactions throughout
-- **Fast Loading**: Single HTML file, minimal dependencies (only Google Fonts)
+### Core Capabilities
+- **🎙️ Voice Coaching** - Real-time voice conversations with Gemini 2.5 Flash & ElevenLabs
+- **💬 Text Coaching** - GPT-4o powered strategic guidance
+- **🧠 Long-Term Memory** - RAG-based memory system that recalls context across sessions
+- **📊 Progress Tracking** - Beautiful data visualizations of your coaching journey
+- **✅ Auto Action Extraction** - Automatically captures commitments from conversations
+- **🎯 Structured Sessions** - Framework-based coaching (GROW, SWOT, OKRs, etc.)
+- **📱 PWA Support** - Installable on mobile/desktop with offline capabilities
 
-## Quick Deploy
+### Tech Stack
+- **Frontend**: Next.js 14 (App Router), React, TypeScript, TailwindCSS
+- **Backend**: Supabase (PostgreSQL, Auth, Storage, Realtime)
+- **AI Models**:
+  - GPT-4o for text coaching
+  - Gemini 2.5 Flash for voice coaching
+  - Whisper for speech-to-text
+  - ElevenLabs for voice synthesis
+  - OpenAI embeddings for RAG memory
+- **Charts**: Recharts for data visualization
+- **Fonts**: Playfair Display (serif) for headings, System fonts for body
+- **Icons**: Lucide React
+- **Deployment**: Vercel (recommended)
 
-### Option 1: Vercel (Recommended)
+## Getting Started
+
+### Prerequisites
+- Node.js 18+ and npm
+- Supabase account
+- OpenAI API key
+- Google Gemini API key
+- ElevenLabs API key
+
+### Installation
+
+1. **Clone the repository**
 ```bash
-# Install Vercel CLI
-npm i -g vercel
-
-# Navigate to the landing page directory
-cd coach-os-landing
-
-# Deploy
-vercel
-
-# Follow prompts to link to your Vercel account
+git clone <repo-url>
+cd CoachOS
 ```
 
-### Option 2: Netlify
+2. **Install dependencies**
 ```bash
-# Install Netlify CLI
-npm install netlify-cli -g
-
-# Deploy
-netlify deploy
-
-# Follow prompts, set deploy path to current directory
+npm install
 ```
 
-### Option 3: Static Hosting
-Simply upload `index.html` to any static hosting provider:
-- AWS S3 + CloudFront
-- GitHub Pages
-- Cloudflare Pages
-- Firebase Hosting
-
-## Customization
-
-### Update Form Submission
-In `index.html`, find the form submission handler (line ~665) and replace the TODO with your actual endpoint:
-
-```javascript
-const response = await fetch('YOUR_API_ENDPOINT', {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(formData)
-});
+3. **Set up environment variables**
+```bash
+cp .env.example .env.local
 ```
 
-### Form Integration Options
+Add your keys to `.env.local`:
+```env
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 
-1. **Supabase** (Recommended for MVP)
-```javascript
-const { data, error } = await supabase
-    .from('waitlist')
-    .insert([formData]);
+# OpenAI
+OPENAI_API_KEY=your_openai_key
+
+# Google Gemini
+GOOGLE_GEMINI_API_KEY=your_gemini_key
+
+# ElevenLabs
+ELEVENLABS_API_KEY=your_elevenlabs_key
+
+# App URL
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
-2. **Google Sheets** (Simple option)
-Use a service like SheetDB or Sheet.best to POST form data to a Google Sheet.
-
-3. **Email Service** (SendGrid, Mailgun, etc.)
-Send form data directly to your email via their APIs.
-
-4. **Form Services** (Formspree, Basin, etc.)
-Point form action to their endpoint.
-
-### Update Colors
-All colors are defined in CSS variables at the top of the file:
-```css
-:root {
-    --titanium: #2D3436;
-    --deep-blue: #0C2340;
-    --silver: #C0C0C8;
-    --silver-light: #E8E8ED;
-    --silver-dark: #8E8E93;
-    --black: #000000;
-    --dark-gray: #1A1A1A;
-    --off-white: #F5F5F5;
-}
+4. **Set up the database**
+```bash
+# See DATABASE-SETUP.md for detailed instructions
+# Run migrations in supabase/migrations/
 ```
 
-### Update Copy
-All text content is in the HTML. Key sections to customize:
-- Hero headline (line ~408)
-- Hero subtitle (line ~409-411)
-- Feature cards (line ~475-516)
-- Use cases (line ~533-580)
-- CTA section (line ~591-593)
-
-## Analytics Integration
-
-Add Google Analytics or Plausible by inserting the tracking code before the closing `</head>` tag:
-
-### Google Analytics
-```html
-<script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'GA_MEASUREMENT_ID');
-</script>
+5. **Run the development server**
+```bash
+npm run dev
 ```
 
-### Plausible (Privacy-friendly)
-```html
-<script defer data-domain="yourdomain.com" src="https://plausible.io/js/script.js"></script>
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+### Build for Production
+
+```bash
+npm run build
+npm start
 ```
 
-## Performance
+## Project Structure
 
-- **First Contentful Paint**: < 1s
-- **Largest Contentful Paint**: < 2s
-- **Time to Interactive**: < 2.5s
-- **Cumulative Layout Shift**: < 0.1
-- **Lighthouse Score**: 95+
-
-## SEO Optimization
-
-The page includes:
-- Semantic HTML structure
-- Meta description
-- Proper heading hierarchy
-- Fast loading time
-- Mobile responsive
-- Clean URL structure
-
-Consider adding:
-- Open Graph tags for social sharing
-- Twitter Card tags
-- Structured data (JSON-LD) for rich snippets
-- Sitemap
-- robots.txt
-
-## Domain Setup
-
-1. **Purchase domain**: coachos.ai or similar
-2. **Configure DNS**: Point to your hosting provider
-3. **Enable SSL**: Use Let's Encrypt (free) or hosting provider's SSL
-4. **Add www redirect**: Redirect www to non-www or vice versa
-
-## Testing Before Launch
-
-- [ ] Test form submission
-- [ ] Check mobile responsiveness on real devices
-- [ ] Test in multiple browsers (Chrome, Firefox, Safari)
-- [ ] Verify all links work
-- [ ] Check loading speed (PageSpeed Insights)
-- [ ] Proofread all copy
-- [ ] Test on slow connection (throttle in DevTools)
-- [ ] Verify analytics tracking
-
-## Marketing Integration
-
-After deployment, consider:
-- LinkedIn post about the product
-- Twitter thread with the landing page link
-- Product Hunt launch prep
-- Email signature link
-- Personal network outreach
-
-## Database Schema for Waitlist
-
-If using Supabase, create a table:
-
-```sql
-create table waitlist (
-  id uuid default uuid_generate_v4() primary key,
-  first_name text not null,
-  last_name text not null,
-  email text not null unique,
-  role text not null,
-  company_stage text not null,
-  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
-  notified boolean default false,
-  notes text
-);
-
--- Add index for email lookups
-create index waitlist_email_idx on waitlist(email);
-
--- Add index for creation date
-create index waitlist_created_at_idx on waitlist(created_at desc);
+```
+├── src/
+│   ├── app/                    # Next.js 14 App Router
+│   │   ├── (auth)/            # Authentication pages
+│   │   ├── api/               # API routes
+│   │   ├── chat/              # Chat interface
+│   │   ├── dashboard/         # Main dashboard
+│   │   ├── sessions/          # Coaching sessions
+│   │   └── ...
+│   ├── components/            # React components
+│   │   ├── dashboard/         # Dashboard-specific components
+│   │   ├── chat/              # Chat UI components
+│   │   ├── voice/             # Voice interface components
+│   │   └── sessions/          # Session components
+│   ├── lib/                   # Utilities and helpers
+│   │   ├── supabase/          # Supabase client setup
+│   │   ├── openai/            # OpenAI integration
+│   │   └── ...
+│   └── types/                 # TypeScript type definitions
+├── public/                    # Static assets
+│   ├── icon.svg               # App icon
+│   ├── manifest.json          # PWA manifest
+│   ├── robots.txt             # SEO
+│   ├── llms.txt               # LLM discovery file
+│   └── ...
+├── supabase/                  # Supabase migrations & config
+│   ├── migrations/            # Database migrations
+│   └── functions/             # Edge functions
+└── tailwind.config.ts         # Tailwind configuration
 ```
 
-## Email Automation
+## Key Features Documentation
 
-Set up welcome email for new signups:
-1. Thank them for joining
-2. Set expectations (when they'll hear from you)
-3. Ask qualifying questions
-4. Provide value (coaching tip, resource, etc.)
+### Design System
+See [coach-os-design-system.md](./coach-os-design-system.md) for:
+- Color palette and typography
+- Component guidelines
+- Animation patterns
+- Accessibility standards
 
-## A/B Testing Ideas
+### Database Setup
+See [DATABASE-SETUP.md](./DATABASE-SETUP.md) for:
+- Schema overview
+- Migration instructions
+- RLS policies
+- Vector search setup
 
-Once live, test:
-- Hero headline variations
-- CTA button copy
-- Pricing mention (£50 vs "founding member pricing")
-- Social proof (add testimonials when available)
-- Feature order
-- Video vs static mockup
+### Voice Coaching
+See [VOICE-COACH-SETUP.md](./VOICE-COACH-SETUP.md) for:
+- Gemini 2.5 Flash integration
+- ElevenLabs voice synthesis
+- Real-time conversation flow
 
-## Conversion Optimization
+### Production Deployment
+See [PRODUCTION-READY.md](./PRODUCTION-READY.md) for:
+- Deployment checklist
+- Environment setup
+- Performance optimization
+- Security considerations
 
-Track:
-- Waitlist signup rate
-- Scroll depth
-- CTA click rate
-- Form field drop-off
-- Traffic sources
+## SEO & Discovery
 
-## Next Steps
+- **Domain**: ceocoachos.com
+- **Sitemap**: Auto-generated at `/sitemap.xml`
+- **Robots**: Configured in `/robots.txt`
+- **OG Images**: Dynamic generation via Next.js
+- **LLM Discovery**: `/llms.txt` and `/llms-full.txt` for AI assistants
 
-1. Deploy landing page
-2. Share with target audience
-3. Collect 50-100 signups
-4. Send survey to waitlist
-5. Interview 10-15 prospects
-6. Refine product based on feedback
-7. Start MVP development
-8. Beta launch to waitlist
+## Scripts
+
+```bash
+npm run dev          # Start development server
+npm run build        # Build for production
+npm start            # Run production server
+npm run lint         # Run ESLint
+```
+
+## Environment Variables
+
+See `.env.example` for all required environment variables.
+
+## Contributing
+
+This is a private project. For questions or collaboration opportunities, contact the maintainer.
+
+## License
+
+Proprietary - All Rights Reserved
 
 ## Support
 
-For questions or issues:
-- Email: paul@p0stman.com
-- Check Coach OS documentation in `/docs`
+For questions about the codebase:
+- Check documentation in this repo
+- Review inline code comments
+- See individual feature docs (VOICE-COACH-SETUP.md, etc.)
 
 ---
 
-**Built with:** HTML, CSS, JavaScript  
-**Design System:** Coach OS Design System  
-**Hosted on:** TBD  
-**Domain:** TBD
+**Built by**: Paul Gosnell
+**Domain**: [ceocoachos.com](https://ceocoachos.com)
+**Status**: Production-Ready Beta
+**Last Updated**: November 14, 2025

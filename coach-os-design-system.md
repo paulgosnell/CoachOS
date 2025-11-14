@@ -1,8 +1,8 @@
 # Coach OS - Design System & Brand Guidelines
 
-**Version:** 1.0  
-**Last Updated:** November 11, 2025  
-**Status:** MVP Design Language
+**Version:** 2.0
+**Last Updated:** November 14, 2025
+**Status:** Production-Ready Design Language
 
 ---
 
@@ -123,15 +123,21 @@
 ### Font Stack
 
 ```css
-/* Primary Font - SF Pro / Inter */
---font-primary: 'SF Pro Display', 'Inter', -apple-system, BlinkMacSystemFont, 
-                'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+/* Serif Font - For Headlines & Titles */
+--font-serif: 'Playfair Display', Georgia, serif;
+
+/* Primary Font - SF Pro / System Fonts */
+--font-primary: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto',
+                'Helvetica Neue', Arial, sans-serif;
 
 /* Monospace - for code/data */
 --font-mono: 'SF Mono', 'Menlo', 'Monaco', 'Courier New', monospace;
 ```
 
-**Rationale:** SF Pro is native to iOS/macOS (no download needed). Inter is the web fallback - excellent readability, optimized for screens, professional feel.
+**Rationale:**
+- **Playfair Display (Serif)** - Premium, elegant feel for all headings and titles. Conveys sophistication and executive-level quality.
+- **System Fonts** - Native to each platform (no download needed), excellent readability for body text, professional feel.
+- **SF Mono** - For code snippets and data display.
 
 ### Type Scale
 
@@ -172,10 +178,12 @@
 ### Typography Guidelines
 
 **Headlines:**
+- **Always use serif font (Playfair Display)** for H1, H2, H3 titles
 - Use sentence case, not title case
 - Keep headlines short (max 40 characters)
 - Never use all caps in headlines
-- Line length: 30-40 characters
+- Line height: 1.2-1.3 for headings
+- Font weights: 500-700 for headings
 
 **Body Text:**
 - Optimal line length: 50-75 characters
@@ -989,6 +997,17 @@ All spacing uses multiples of 8px for visual consistency and rhythm.
 
 ---
 
+## Shipped Features ✅
+
+**November 2025 Launch:**
+- ✅ **Serif Typography** - Playfair Display for all headings
+- ✅ **Data Visualization** - Coaching growth journey chart with Recharts
+- ✅ **Dynamic Icons** - Auto-generated favicon, apple-icon, OG images
+- ✅ **Password Reset Flow** - Complete with show/hide toggles
+- ✅ **SEO Optimization** - llms.txt, sitemap, robots.txt, complete metadata
+- ✅ **PWA Support** - Installable app with manifest and service worker
+- ✅ **Dashboard Redesign** - Growth chart at top with serif titles
+
 ## Future Design Explorations
 
 ### Phase 2
@@ -997,7 +1016,7 @@ All spacing uses multiples of 8px for visual consistency and rhythm.
 - **Custom themes** - User-selectable color schemes
 - **Voice visualizations** - Advanced waveform animations
 - **Achievement system** - Celebrate milestones (subtle)
-- **Data visualization** - Charts for goal progress
+- **Advanced analytics** - More detailed progress tracking
 
 ### Phase 3
 

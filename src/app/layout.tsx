@@ -1,7 +1,15 @@
 import type { Metadata } from 'next'
+import { Playfair_Display } from 'next/font/google'
 import './globals.css'
 
-const siteUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://coach-os-agent.vercel.app'
+const playfair = Playfair_Display({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800', '900'],
+  variable: '--font-playfair',
+  display: 'swap',
+})
+
+const siteUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://ceocoachos.com'
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -23,12 +31,16 @@ export const metadata: Metadata = {
     'CEO coaching',
     'strategic guidance',
     'AI coaching',
-    'GPT-4 coach',
+    'GPT-4o coach',
     'business advisor',
     'leadership coaching',
     'startup coach',
     'on-demand coaching',
-    'professional coaching'
+    'professional coaching',
+    'AI executive coach',
+    'business coach app',
+    'CEO coach',
+    'founder coach'
   ],
   authors: [{ name: 'Coach OS', url: siteUrl }],
   creator: 'Coach OS',
@@ -52,11 +64,11 @@ export const metadata: Metadata = {
     locale: 'en_US',
     url: siteUrl,
     siteName: 'Coach OS',
-    title: 'Coach OS - Your Business Coach In Your Pocket',
-    description: 'Premium on-demand business coaching for executives and founders. Strategic guidance powered by AI, available 24/7.',
+    title: 'Coach OS - Your Executive Coach, Always Available',
+    description: 'Premium on-demand business coaching for executives and founders. Strategic guidance powered by GPT-4o, Gemini 2.5, with RAG memory. Available 24/7.',
     images: [
       {
-        url: '/og-image.png',
+        url: '/opengraph-image',
         width: 1200,
         height: 630,
         alt: 'Coach OS - Your Business Coach In Your Pocket',
@@ -68,9 +80,9 @@ export const metadata: Metadata = {
   // Twitter Card
   twitter: {
     card: 'summary_large_image',
-    title: 'Coach OS - Your Business Coach In Your Pocket',
-    description: 'Premium on-demand business coaching for executives and founders. Strategic guidance powered by AI, available 24/7.',
-    images: ['/og-image.png'],
+    title: 'Coach OS - Your Executive Coach, Always Available',
+    description: 'Premium on-demand business coaching for executives and founders. Strategic guidance powered by GPT-4o, Gemini 2.5, with RAG memory. Available 24/7.',
+    images: ['/opengraph-image'],
     creator: '@coachos',
     site: '@coachos',
   },
@@ -80,12 +92,6 @@ export const metadata: Metadata = {
     capable: true,
     statusBarStyle: 'black-translucent',
     title: 'Coach OS',
-    startupImage: [
-      {
-        url: '/apple-touch-icon.png',
-        media: '(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)',
-      },
-    ],
   },
 
   // Additional metadata
@@ -184,7 +190,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="min-h-screen">{children}</body>
+      <body className={`${playfair.variable} min-h-screen`}>{children}</body>
     </html>
   )
 }

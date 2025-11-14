@@ -50,6 +50,7 @@ const config: Config = {
       },
       fontFamily: {
         sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+        serif: ['var(--font-playfair)', 'Georgia', 'serif'],
         mono: ['SF Mono', 'Menlo', 'Monaco', 'Courier New', 'monospace'],
       },
       fontSize: {

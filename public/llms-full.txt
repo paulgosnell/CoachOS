@@ -1,0 +1,235 @@
+# Coach OS - Extended LLM Context
+
+This is the extended version of llms.txt with additional technical details and implementation information.
+
+## Architecture
+
+### Frontend Stack
+- **Framework**: Next.js 14 (App Router)
+- **Language**: TypeScript
+- **Styling**: TailwindCSS with custom design system
+- **Components**: React Server Components + Client Components
+- **Fonts**: Playfair Display (serif) for headings, System fonts for body
+- **Icons**: Lucide React
+- **Charts**: Recharts for data visualization
+
+### Backend Stack
+- **Database**: Supabase (PostgreSQL 15)
+- **Authentication**: Supabase Auth with email/password
+- **Storage**: Supabase Storage for file uploads
+- **Vector Search**: pgvector extension for semantic memory
+- **Real-time**: Supabase Realtime for live updates
+
+### AI Integration
+- **Text Coaching**: OpenAI GPT-4o via streaming API
+- **Voice Coaching**: Google Gemini 2.5 Flash with WebRTC
+- **Speech-to-Text**: OpenAI Whisper API
+- **Text-to-Speech**: ElevenLabs conversational AI
+- **Embeddings**: OpenAI text-embedding-3-small (1536 dimensions)
+
+### Memory System
+- **Short-term**: Conversation history in PostgreSQL
+- **Long-term**: Vector embeddings for semantic retrieval
+- **Similarity Threshold**: 0.70 for memory recall
+- **Auto-summarization**: Daily and weekly summaries of coaching sessions
+
+### Data Models
+
+#### Core Tables
+- `profiles` - User profiles with business context
+- `conversations` - Chat/voice conversation sessions
+- `messages` - Individual messages with timestamps
+- `coaching_sessions` - Structured framework-based sessions
+- `goals` - User goals with OKRs
+- `action_items` - Extracted from conversations
+- `memories` - Vector embeddings of important context
+- `daily_summaries` - Automated daily insights
+- `weekly_summaries` - Automated weekly progress reports
+
+### Coaching Frameworks Implementation
+
+Each framework is implemented as a structured session type:
+
+1. **GROW Sessions**: 4-phase guided conversation
+2. **SWOT Sessions**: 4-quadrant analysis with visualization
+3. **OKR Sessions**: Goal setting with measurable key results
+4. **Eisenhower Sessions**: Priority matrix for task organization
+5. **Force Field Sessions**: Change analysis with driving/restraining forces
+6. **Retrospective Sessions**: Start/Stop/Continue format
+
+### Voice Architecture
+
+#### Real-time Voice Conversation
+1. User speaks → Whisper transcription
+2. Transcription → Gemini 2.5 Flash processing
+3. Response → ElevenLabs synthesis
+4. Audio streamed back to user
+5. All stored in conversation history
+
+#### Voice Features
+- Interrupt detection
+- Context awareness across turns
+- Emotion detection (future)
+- Multiple voice options
+- Background noise suppression
+
+### Action Item Extraction
+
+Automatically extracts action items using:
+1. GPT-4o with structured output
+2. Pattern matching for commitments
+3. Due date extraction (NLP)
+4. Priority inference
+5. Automatic task creation
+
+Format: "Verb + object + optional deadline"
+Example: "Email Sarah about Q4 strategy by Friday"
+
+### Memory & Context
+
+#### Semantic Search
+- Embed user query
+- Search vector store with cosine similarity
+- Retrieve top 5 relevant memories (>0.70 similarity)
+- Inject into conversation context
+- LLM synthesizes with current question
+
+#### Context Window Management
+- Max context: 128k tokens (GPT-4o)
+- Priority: Recent messages > Relevant memories > System prompt
+- Automatic pruning of low-relevance context
+- Summary injection for long conversations
+
+### Onboarding Flow
+
+1. **Personal Info**: Name, role, company
+2. **Business Context**: Industry, stage, team size, revenue
+3. **Goals**: 3-5 professional goals with timeframes
+4. Initial system prompt generated from onboarding data
+
+### Progress Tracking
+
+#### Metrics
+- Sessions completed
+- Action items done vs. pending
+- Goal progress (self-reported + inferred)
+- Engagement frequency
+- Average session rating
+
+#### Visualizations
+- Growth journey chart (Recharts line chart)
+- Goal progress bars
+- Action item completion rate
+- Weekly activity heatmap
+
+### Security & Privacy
+
+- Row-level security (RLS) on all tables
+- User can only access their own data
+- API keys stored in environment variables
+- No third-party analytics by default
+- GDPR-compliant data deletion
+
+### Performance
+
+- Server-side rendering for marketing pages
+- Client components for interactive features
+- Streaming for AI responses (better UX)
+- Edge functions for low-latency APIs
+- CDN for static assets
+- Image optimization via Next.js
+
+### PWA Features
+
+- Installable on mobile/desktop
+- Offline support (service worker)
+- App shortcuts (New Chat, Sessions)
+- Push notifications (future)
+- Background sync (future)
+
+### Analytics & Monitoring
+
+- Server logs for debugging
+- Error tracking (client + server)
+- Performance monitoring
+- User feedback system built-in
+
+### Future Roadmap
+
+- [ ] Mobile native apps (iOS/Android)
+- [ ] Team/organization accounts
+- [ ] Coach marketplace (human coaches)
+- [ ] Calendar integration
+- [ ] Email digests
+- [ ] Slack/Teams integration
+- [ ] API for third-party integrations
+- [ ] Advanced analytics dashboard
+- [ ] Custom coaching frameworks
+- [ ] Multi-language support
+
+### Development
+
+```bash
+# Clone and install
+git clone [repo]
+npm install
+
+# Environment setup
+cp .env.example .env.local
+# Add Supabase, OpenAI, Gemini, ElevenLabs keys
+
+# Run dev server
+npm run dev
+
+# Build for production
+npm run build
+
+# Deploy to Vercel
+vercel --prod
+```
+
+### Environment Variables Required
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `OPENAI_API_KEY`
+- `GOOGLE_GEMINI_API_KEY`
+- `ELEVENLABS_API_KEY`
+- `NEXT_PUBLIC_APP_URL`
+
+### API Endpoints
+
+- `/api/chat` - Text coaching conversations
+- `/api/voice/conversation` - Real-time voice
+- `/api/voice/transcribe` - Whisper transcription
+- `/api/voice/synthesize` - ElevenLabs TTS
+- `/api/sessions` - Coaching session management
+- `/api/goals` - Goal tracking
+- `/api/actions/extract` - Action item extraction
+- `/api/memory/generate-summary` - Daily/weekly summaries
+- `/api/memory/process-embedding` - Vector embeddings
+
+### Design System
+
+#### Colors
+- Background: #0A0A0A (titanium-950)
+- Primary: #C0C0C8 (silver)
+- Accent: #0C2340 (deep-blue)
+- Text: #E8E8ED (silver-light)
+- Borders: rgba(255,255,255,0.1)
+
+#### Typography
+- Headings: Playfair Display (serif)
+- Body: System fonts (-apple-system, Segoe UI, etc.)
+- Code: SF Mono, Menlo
+
+#### Components
+- Cards: Rounded, subtle borders, hover effects
+- Buttons: Primary (white), Secondary (dark)
+- Inputs: Dark background, light borders
+- Toasts: Floating notifications
+- Modals: Glass morphism effects
+
+---
+
+This extended context helps AI assistants understand the technical implementation and architecture of Coach OS.

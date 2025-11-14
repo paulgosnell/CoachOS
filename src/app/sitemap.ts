@@ -1,6 +1,6 @@
 import { MetadataRoute } from 'next'
 
-const siteUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://coach-os-agent.vercel.app'
+const siteUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://ceocoachos.com'
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const currentDate = new Date()

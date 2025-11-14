@@ -18,6 +18,7 @@ import {
   ListTodo,
   Mic,
 } from 'lucide-react'
+import { CoachingGrowthChart } from '@/components/dashboard/CoachingGrowthChart'
 
 function EmailConfirmationHandler() {
   const router = useRouter()
@@ -57,98 +58,133 @@ export default function HomePage() {
         {/* Background gradient */}
         <div className="absolute inset-0 bg-gradient-radial from-deep-blue-900/30 via-black to-black" />
 
-        <div className="relative z-10 mx-auto max-w-6xl px-6 py-20">
-          <div className="grid items-center gap-8 lg:grid-cols-2 lg:gap-6">
-            {/* Left: Text Content */}
-            <div className="flex flex-col">
-              {/* Badge */}
-              <div className="mb-8 inline-flex w-fit items-center gap-2 rounded-full border border-glass-border bg-glass-bg px-4 py-2">
-                <Sparkles className="h-4 w-4 text-silver" />
-                <span className="text-sm font-semibold uppercase tracking-wider text-silver">
-                  Elite Executive Coaching with AI
-                </span>
-              </div>
+        <div className="relative z-10 mx-auto w-full max-w-7xl px-6 py-20">
+          {/* Text Content - Centered */}
+          <div className="mb-12 mx-auto max-w-4xl text-center">
+            {/* Badge */}
+            <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-glass-border bg-glass-bg px-4 py-2">
+              <Sparkles className="h-4 w-4 text-silver" />
+              <span className="text-sm font-semibold uppercase tracking-wider text-silver">
+                Elite Executive Coaching with AI
+              </span>
+            </div>
 
-              {/* Headline */}
-              <h1 className="mb-6 text-5xl font-bold leading-tight md:text-6xl lg:text-7xl">
-                Your Executive Coach,
-                <br />
-                <span className="text-gradient">Always Available</span>
-              </h1>
+            {/* Headline */}
+            <h1 className="mb-6 font-serif text-5xl font-bold leading-tight md:text-6xl lg:text-7xl">
+              Your Executive Coach,
+              <br />
+              <span className="text-gradient">Always Available</span>
+            </h1>
 
-              {/* Subtitle */}
-              <p className="mb-12 max-w-2xl text-lg text-silver-light md:text-xl">
-                Strategic guidance that knows your business, remembers your goals, and helps you
-                think clearly. Professional coaching that fits your schedule.
+            {/* Subtitle */}
+            <p className="mb-8 mx-auto max-w-2xl text-lg text-silver-light md:text-xl">
+              Strategic guidance that knows your business, remembers your goals, and helps you
+              think clearly. Professional coaching that fits your schedule.
+            </p>
+
+            {/* CTA Buttons */}
+            <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:justify-center">
+              <Link href="/auth/signup" className="btn btn-primary">
+                Get Started
+                <ArrowRight className="h-5 w-5" />
+              </Link>
+              <Link href="#how-it-works" className="btn btn-secondary">
+                See How It Works
+              </Link>
+            </div>
+
+            {/* Tech Stack */}
+            <div className="mx-auto max-w-2xl">
+              <p className="mb-4 text-center text-xs font-semibold uppercase tracking-wider text-silver-dark">
+                Powered by
               </p>
-
-              {/* CTA Buttons */}
-              <div className="mb-8 flex flex-col gap-4 sm:flex-row">
-                <Link href="/auth/signup" className="btn btn-primary">
-                  Get Started
-                  <ArrowRight className="h-5 w-5" />
-                </Link>
-                <Link href="#how-it-works" className="btn btn-secondary">
-                  See How It Works
-                </Link>
-              </div>
-
-              {/* Trust indicators */}
-              <div className="flex flex-wrap items-center gap-6 text-sm text-gray-500">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-silver" />
-                  <span>GPT-4o Powered</span>
+              <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-sm">
+                <div className="flex items-center gap-2 text-gray-400">
+                  <CheckCircle2 className="h-4 w-4 text-silver-dark" />
+                  <span>GPT-4o Chat</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-silver" />
-                  <span>Long-Term Memory</span>
+                <div className="flex items-center gap-2 text-gray-400">
+                  <CheckCircle2 className="h-4 w-4 text-silver-dark" />
+                  <span>Gemini 2.5 Flash</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-silver" />
-                  <span>Voice + Text</span>
+                <div className="flex items-center gap-2 text-gray-400">
+                  <CheckCircle2 className="h-4 w-4 text-silver-dark" />
+                  <span>Whisper</span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-400">
+                  <CheckCircle2 className="h-4 w-4 text-silver-dark" />
+                  <span>ElevenLabs</span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-400">
+                  <CheckCircle2 className="h-4 w-4 text-silver-dark" />
+                  <span>RAG Memory</span>
                 </div>
               </div>
             </div>
+          </div>
 
-            {/* Right: Mobile Mockup with Voice UI */}
-            <div className="flex justify-center lg:justify-end">
+          {/* Dashboard + Mobile Mockup */}
+          <div className="relative mt-16">
+            {/* Desktop Dashboard Browser Mockup - Background */}
+            <div className="relative rounded-2xl border border-white/10 bg-titanium-900/50 p-3 backdrop-blur-sm shadow-2xl">
+              {/* Browser Chrome */}
+              <div className="mb-3 flex items-center gap-2 border-b border-white/5 pb-3">
+                <div className="flex gap-1.5">
+                  <div className="h-3 w-3 rounded-full bg-red-500/80" />
+                  <div className="h-3 w-3 rounded-full bg-yellow-500/80" />
+                  <div className="h-3 w-3 rounded-full bg-green-500/80" />
+                </div>
+                <div className="ml-4 flex-1 rounded-md bg-titanium-800/50 px-3 py-1.5 text-xs text-silver-dark">
+                  ceocoachos.com/dashboard
+                </div>
+              </div>
+
+              {/* Dashboard Content with slight blur for depth */}
+              <div className="relative overflow-hidden rounded-xl opacity-90">
+                <div className="scale-95 transform">
+                  <CoachingGrowthChart />
+                </div>
+                {/* Subtle overlay for depth */}
+                <div className="absolute inset-0 bg-gradient-to-t from-titanium-950/40 via-transparent to-transparent pointer-events-none" />
+              </div>
+            </div>
+
+            {/* Mobile Phone Mockup - Overlaid on Right Side */}
+            <div className="absolute -bottom-8 -right-4 md:right-8 lg:right-16 z-20 hidden sm:block">
               <div className="relative">
                 {/* Phone Frame */}
-                <div className="relative h-[600px] w-[300px] rounded-[3rem] border-[14px] border-titanium-900 bg-black shadow-2xl">
+                <div className="relative h-[500px] w-[250px] rounded-[2.5rem] border-[12px] border-titanium-900 bg-black shadow-2xl">
                   {/* Screen Content */}
-                  <div className="flex h-full flex-col rounded-[2rem] bg-titanium-950 p-6">
+                  <div className="flex h-full flex-col rounded-[1.8rem] bg-titanium-950 p-5">
                     {/* Header */}
-                    <div className="mb-6 flex items-center justify-between border-b border-white/5 pb-4">
-                      <div className="h-5 w-5" />
-                      <p className="text-sm font-medium text-silver">Voice</p>
-                      <div className="h-5 w-5" />
+                    <div className="mb-4 flex items-center justify-between border-b border-white/5 pb-3">
+                      <div className="h-4 w-4" />
+                      <p className="text-xs font-medium text-silver">Voice</p>
+                      <div className="h-4 w-4" />
                     </div>
 
                     {/* Voice Interface - Centered */}
                     <div className="flex flex-1 flex-col items-center justify-center">
                       {/* Animated Mic Icon with Ripples */}
-                      <div className="relative mb-8">
-                        {/* Outer Ripple - Largest */}
-                        <div className="absolute inset-0 -m-16 animate-ping rounded-full bg-deep-blue-600/20" style={{ animationDuration: '2s' }} />
-
+                      <div className="relative mb-6">
+                        {/* Outer Ripple */}
+                        <div className="absolute inset-0 -m-12 animate-ping rounded-full bg-deep-blue-600/20" style={{ animationDuration: '2s' }} />
                         {/* Middle Ripple */}
-                        <div className="absolute inset-0 -m-12 animate-ping rounded-full bg-deep-blue-600/30" style={{ animationDuration: '1.5s' }} />
-
+                        <div className="absolute inset-0 -m-9 animate-ping rounded-full bg-deep-blue-600/30" style={{ animationDuration: '1.5s' }} />
                         {/* Inner Ripple */}
-                        <div className="absolute inset-0 -m-8 animate-ping rounded-full bg-deep-blue-600/40" style={{ animationDuration: '1s' }} />
-
+                        <div className="absolute inset-0 -m-6 animate-ping rounded-full bg-deep-blue-600/40" style={{ animationDuration: '1s' }} />
                         {/* Main Circle */}
-                        <div className="relative flex h-32 w-32 items-center justify-center rounded-full bg-gradient-to-br from-deep-blue-600 to-deep-blue-800 shadow-2xl shadow-deep-blue-600/40">
-                          <Mic className="h-16 w-16 text-silver" />
+                        <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-deep-blue-600 to-deep-blue-800 shadow-2xl shadow-deep-blue-600/40">
+                          <Mic className="h-12 w-12 text-silver" />
                         </div>
                       </div>
 
                       {/* Status Text */}
-                      <p className="mb-8 text-xl font-medium text-silver">Listening...</p>
+                      <p className="mb-6 text-lg font-medium text-silver">Listening...</p>
 
                       {/* Stop Button */}
-                      <button className="flex h-12 w-12 items-center justify-center rounded-lg bg-red-600 shadow-lg">
-                        <div className="h-5 w-5 rounded-sm bg-white" />
+                      <button className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-600 shadow-lg">
+                        <div className="h-4 w-4 rounded-sm bg-white" />
                       </button>
                     </div>
 
@@ -160,9 +196,12 @@ export default function HomePage() {
                 </div>
 
                 {/* Glow Effect Behind Phone */}
-                <div className="absolute inset-0 -z-10 rounded-[3rem] bg-deep-blue-600/20 blur-3xl" />
+                <div className="absolute inset-0 -z-10 rounded-[2.5rem] bg-deep-blue-600/30 blur-3xl" />
               </div>
             </div>
+
+            {/* Depth shadow under dashboard */}
+            <div className="absolute -inset-x-4 -bottom-4 h-32 bg-gradient-to-t from-black via-transparent to-transparent blur-2xl" />
           </div>
         </div>
       </section>
@@ -171,7 +210,7 @@ export default function HomePage() {
       <section id="how-it-works" className="relative border-t border-white/5 py-24">
         <div className="container mx-auto px-6">
           <div className="mb-16 text-center">
-            <h2 className="mb-4 text-4xl font-bold md:text-5xl">
+            <h2 className="mb-4 font-serif text-4xl font-bold md:text-5xl">
               Not Just AI. <span className="text-gradient">Professional Coaching.</span>
             </h2>
             <p className="mx-auto max-w-2xl text-lg text-silver-light">
@@ -240,7 +279,7 @@ export default function HomePage() {
       <section className="relative border-t border-white/5 py-24">
         <div className="container mx-auto px-6">
           <div className="mb-16 text-center">
-            <h2 className="mb-4 text-4xl font-bold md:text-5xl">
+            <h2 className="mb-4 font-serif text-4xl font-bold md:text-5xl">
               Powered by <span className="text-gradient">Proven Frameworks</span>
             </h2>
             <p className="mx-auto max-w-2xl text-lg text-silver-light">
@@ -408,7 +447,7 @@ export default function HomePage() {
       <section className="relative border-t border-white/5 py-24">
         <div className="container mx-auto px-6">
           <div className="mb-16 text-center">
-            <h2 className="mb-4 text-4xl font-bold md:text-5xl">
+            <h2 className="mb-4 font-serif text-4xl font-bold md:text-5xl">
               Never Lose Track of <span className="text-gradient">What Matters</span>
             </h2>
             <p className="mx-auto max-w-2xl text-lg text-silver-light">
@@ -511,7 +550,7 @@ export default function HomePage() {
       <section className="relative border-t border-white/5 py-24">
         <div className="container mx-auto px-6">
           <div className="mb-16 text-center">
-            <h2 className="mb-4 text-4xl font-bold md:text-5xl">
+            <h2 className="mb-4 font-serif text-4xl font-bold md:text-5xl">
               Long-Term Memory <span className="text-gradient">Built In</span>
             </h2>
             <p className="mx-auto max-w-2xl text-lg text-silver-light">
@@ -612,7 +651,7 @@ export default function HomePage() {
         <div className="container mx-auto px-6">
           <div className="mx-auto max-w-4xl">
             <div className="mb-12 text-center">
-              <h2 className="mb-4 text-4xl font-bold md:text-5xl">
+              <h2 className="mb-4 font-serif text-4xl font-bold md:text-5xl">
                 The <span className="text-gradient">Coach OS</span> Approach
               </h2>
               <p className="text-lg text-silver-light">
@@ -677,7 +716,7 @@ export default function HomePage() {
       <section className="relative border-t border-white/5 py-24">
         <div className="container mx-auto px-6">
           <div className="mx-auto max-w-3xl text-center">
-            <h2 className="mb-6 text-4xl font-bold md:text-5xl">
+            <h2 className="mb-6 font-serif text-4xl font-bold md:text-5xl">
               Ready to <span className="text-gradient">Think More Clearly</span>?
             </h2>
             <p className="mb-8 text-lg text-silver-light">

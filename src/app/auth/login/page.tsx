@@ -53,13 +53,13 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         {/* Logo/Brand */}
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold">Coach OS</h1>
+          <h1 className="font-serif text-3xl font-bold">Coach OS</h1>
           <p className="mt-2 text-silver-light">Welcome back</p>
         </div>
 
         {/* Login Form */}
         <div className="card-elevated">
-          <h2 className="mb-6 text-2xl font-semibold">Sign in to your account</h2>
+          <h2 className="mb-6 font-serif text-2xl font-semibold">Sign in to your account</h2>
 
           {error && (
             <div className="mb-4 rounded-lg border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-400">

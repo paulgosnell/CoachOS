@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { MessageSquare, Calendar, Target, ArrowRight, MessageCircle, Mic, ListTodo, Phone, Settings } from 'lucide-react'
 import { FeedbackModal } from '@/components/FeedbackModal'
+import { CoachingGrowthChart } from './CoachingGrowthChart'
 
 interface DashboardClientProps {
   profile: {
@@ -22,7 +23,7 @@ export function DashboardClient({ profile, goalsCount, conversationsCount }: Das
         {/* Minimal Header */}
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-semibold text-silver">
+            <h1 className="font-serif text-3xl font-medium text-silver-light">
               {profile.full_name?.split(' ')[0] || 'Dashboard'}
             </h1>
           </div>
@@ -41,6 +42,21 @@ export function DashboardClient({ profile, goalsCount, conversationsCount }: Das
               <MessageCircle className="h-5 w-5" />
             </button>
           </div>
+        </div>
+
+        {/* Coaching Growth Chart */}
+        <div className="mb-8">
+          <CoachingGrowthChart />
+        </div>
+
+        {/* Section Header for Actions */}
+        <div className="mb-4">
+          <h2 className="font-serif text-2xl font-medium text-silver-light">
+            Your Coaching Tools
+          </h2>
+          <p className="text-sm text-silver-dark">
+            Choose how you'd like to engage with your coach today
+          </p>
         </div>
 
         {/* Dashboard Cards - Cleaner spacing */}

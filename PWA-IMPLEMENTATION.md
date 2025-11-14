@@ -88,46 +88,43 @@ Service worker is generated automatically during production build. Development m
 ```
 /public
 ├── manifest.json              # PWA manifest
-├── icon.svg                   # Coach OS logo (placeholder)
+├── icon.svg                   # Coach OS logo (used in manifest)
 ├── robots.txt                 # SEO configuration
+├── llms.txt                   # LLM discovery file (main)
+├── llms-full.txt              # LLM discovery file (extended)
 ├── sw.js                      # Service worker (auto-generated)
 ├── workbox-*.js               # Workbox runtime (auto-generated)
-├── /icons/                    # PWA icons directory
-│   └── .gitkeep              # Placeholder (icons needed)
-├── apple-touch-icon.png.txt   # iOS icon instructions
-└── favicon.ico.txt            # Favicon instructions
+/src/app
+├── icon.tsx                   # Dynamic favicon generation (32x32)
+├── apple-icon.tsx             # Dynamic Apple touch icon (180x180)
+└── opengraph-image.tsx        # Dynamic OG image (1200x630)
 ```
 
 ## Icon Requirements
 
-### Production Icons Needed
+### Dynamic Icon Generation ✅ (November 2025)
 
-Replace placeholder files with actual branded Coach OS icons:
+**Next.js automatically generates icons** via ImageResponse API:
 
-**Standard Sizes** (in `/public/icons/`)
-- icon-72x72.png
-- icon-96x96.png
-- icon-128x128.png
-- icon-144x144.png
-- icon-152x152.png
-- icon-192x192.png (maskable)
-- icon-384x384.png
-- icon-512x512.png (maskable)
+**Implemented** (in `/src/app/`)
+- ✅ `icon.tsx` - Favicon (32x32) with "C" logo in Playfair Display serif
+- ✅ `apple-icon.tsx` - Apple touch icon (180x180)
+- ✅ `opengraph-image.tsx` - Social media OG image (1200x630)
 
-**Special Icons** (in `/public/`)
-- apple-touch-icon.png (180x180 for iOS)
-- favicon.ico (multi-resolution: 16x16, 32x32, 48x48)
-
-**Design Guidelines**:
+**Design Guidelines** (Applied):
 - Background: `#0A0A0A` (titanium-950)
 - Primary: `#C0C0C8` (silver)
 - Accent: `#0C2340` (deep-blue)
-- Maskable icons: Include 10% safe zone around key elements
+- Typography: Playfair Display serif font
+- "C" logo for favicon/apple-icon
+- Full branded design for OG image
 
-**Generation Tools**:
-- https://realfavicongenerator.net/ (comprehensive)
-- https://www.pwabuilder.com/ (PWA-focused)
-- Figma + export plugins
+**Optional: Additional PWA Icon Sizes** (if needed for manifest)
+Standard sizes can be added to `/public/icons/` if manifest requires:
+- icon-192x192.png
+- icon-512x512.png
+
+**Note**: Current implementation uses `/public/icon.svg` in manifest, which works across all platforms.
 
 ## Configuration
 
@@ -272,6 +269,9 @@ caches.keys().then(keys => {
 
 ---
 
-**Status**: ✅ PWA Fully Implemented
+**Status**: ✅ PWA Fully Implemented - Production Ready
 **Build**: Tested and working
-**Next Steps**: Add production icons before launch
+**Domain**: ceocoachos.com
+**Icons**: ✅ Dynamic generation via Next.js ImageResponse (November 2025)
+**Last Updated**: November 14, 2025
+**Ready for**: Beta launch and user testing
