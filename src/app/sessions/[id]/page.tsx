@@ -12,6 +12,8 @@ import {
 import { MobileHeader } from '@/components/MobileHeader'
 import { getFramework } from '@/lib/ai/frameworks'
 import { format } from 'date-fns'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 
 export default async function SessionSummaryPage({
   params,
@@ -121,10 +123,10 @@ export default async function SessionSummaryPage({
                 <FileText className="h-5 w-5 text-deep-blue-600" />
                 <h2 className="text-xl font-bold">Session Summary</h2>
               </div>
-              <div className="prose prose-invert max-w-none">
-                <div className="whitespace-pre-wrap text-silver-light">
+              <div className="prose prose-invert max-w-none prose-headings:text-silver-light prose-p:text-silver-light prose-li:text-silver-light prose-strong:text-silver">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
                   {session.outcome_summary}
-                </div>
+                </ReactMarkdown>
               </div>
             </div>
           )}
