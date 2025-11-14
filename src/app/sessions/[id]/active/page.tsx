@@ -72,6 +72,8 @@ export default async function ActiveSessionPage({
   }
 
   return (
-    <ActiveSessionClient sessionId={params.id} conversationId={conversationId} />
+    <div className="flex h-screen flex-col overflow-hidden">
+      <ActiveSessionClient sessionId={params.id} conversationId={conversationId} />
+    </div>
   )
 }
