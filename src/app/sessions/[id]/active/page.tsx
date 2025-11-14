@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { ActiveSessionClient } from '@/components/sessions/ActiveSessionClient'
+import { getFramework } from '@/lib/ai/frameworks'
 
 export default async function ActiveSessionPage({
   params,
@@ -34,22 +35,44 @@ export default async function ActiveSessionPage({
     redirect(`/sessions/${params.id}`)
   }
 
-  // Start the session (creates conversation if needed)
-  const startResponse = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/sessions/${params.id}/start`,
-    {
-      method: 'POST',
-      headers: {
-        Cookie: `sb-access-token=${(await supabase.auth.getSession()).data.session?.access_token}; sb-refresh-token=${(await supabase.auth.getSession()).data.session?.refresh_token}`,
-      },
-    }
-  )
-
   let conversationId = session.conversation_id
 
-  if (startResponse.ok) {
-    const data = await startResponse.json()
-    conversationId = data.conversation_id
+  // Start the session (create conversation if needed)
+  if (!conversationId) {
+    const framework = getFramework(session.framework_used)
+    const title = session.goal
+      ? `${framework.name}: ${session.goal}`
+      : `${framework.name} Session`
+
+    const { data: conversation, error: convError } = await supabase
+      .from('conversations')
+      .insert({
+        user_id: user.id,
+        session_type: 'structured',
+        title,
+        duration: session.duration_minutes,
+        metadata: {
+          session_id: session.id,
+          framework: session.framework_used,
+          current_stage: framework.stages[0].id,
+          stage_index: 0,
+        },
+      })
+      .select()
+      .single()
+
+    if (convError) {
+      console.error('Error creating conversation:', convError)
+      redirect('/sessions')
+    }
+
+    // Link the conversation to the session
+    await supabase
+      .from('coaching_sessions')
+      .update({ conversation_id: conversation.id })
+      .eq('id', session.id)
+
+    conversationId = conversation.id
   }
 
   if (!conversationId) {
