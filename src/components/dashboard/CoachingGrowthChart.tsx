@@ -53,7 +53,11 @@ const metrics: Metric[] = [
   },
 ]
 
-export function CoachingGrowthChart() {
+interface CoachingGrowthChartProps {
+  fullPage?: boolean
+}
+
+export function CoachingGrowthChart({ fullPage = false }: CoachingGrowthChartProps) {
   const [selectedMetric, setSelectedMetric] = useState<MetricType>('growth')
   const data = generateMockData()
   const currentMetric = metrics.find(m => m.key === selectedMetric) || metrics[0]
@@ -64,35 +68,52 @@ export function CoachingGrowthChart() {
   const level = latestValue >= 70 ? 'High' : latestValue >= 50 ? 'Moderate' : 'Low'
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-titanium-800 to-titanium-900 p-6 shadow-xl">
+    <div className={`relative overflow-hidden rounded-2xl md:rounded-3xl border border-white/10 bg-gradient-to-br from-titanium-800 to-titanium-900 shadow-xl ${fullPage ? 'p-4 md:p-6' : 'p-6'}`}>
       {/* Background gradient accent */}
       <div className="absolute right-0 top-0 h-64 w-64 rounded-full bg-deep-blue-600/10 blur-3xl" />
 
       <div className="relative">
-        {/* Header with Status Badge */}
-        <div className="mb-6">
-          <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-deep-blue-800/50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-silver">
-            <Icon className="h-3 w-3" />
-            {level}, This Week
+        {/* Header with Status Badge - Only show full header on dashboard */}
+        {!fullPage && (
+          <div className="mb-6">
+            <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-deep-blue-800/50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-silver">
+              <Icon className="h-3 w-3" />
+              {level}, This Week
+            </div>
+
+            {/* Title in serif font */}
+            <h2 className="mb-2 font-serif text-4xl font-medium text-silver-light">
+              Making Progress
+            </h2>
+
+            <p className="text-sm text-silver-light/70">
+              {currentMetric.description}
+            </p>
           </div>
+        )}
 
-          {/* Title in serif font */}
-          <h2 className="mb-2 font-serif text-4xl font-medium text-silver-light">
-            Making Progress
-          </h2>
+        {/* Compact header for full page */}
+        {fullPage && (
+          <div className="mb-4 flex items-start justify-between">
+            <div>
+              <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-deep-blue-800/50 px-2.5 py-1 text-xs font-semibold uppercase tracking-wider text-silver">
+                <Icon className="h-3 w-3" />
+                {level}, This Week
+              </div>
+              <p className="mt-2 text-sm text-silver-light/70 md:text-base">
+                {currentMetric.description}
+              </p>
+            </div>
+          </div>
+        )}
 
-          <p className="text-sm text-silver-light/70">
-            {currentMetric.description}
-          </p>
-        </div>
-
-        {/* Metric Tabs */}
-        <div className="mb-6 flex gap-2">
+        {/* Metric Tabs - Responsive sizing */}
+        <div className="mb-4 md:mb-6 flex gap-1.5 md:gap-2 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide">
           {metrics.map(metric => (
             <button
               key={metric.key}
               onClick={() => setSelectedMetric(metric.key)}
-              className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${
+              className={`flex-shrink-0 rounded-full px-3 py-1.5 md:px-4 md:py-2 text-xs md:text-sm font-medium transition-all whitespace-nowrap ${
                 selectedMetric === metric.key
                   ? 'bg-white/10 text-silver-light'
                   : 'bg-transparent text-silver-dark hover:bg-white/5'
@@ -103,10 +124,18 @@ export function CoachingGrowthChart() {
           ))}
         </div>
 
-        {/* Chart */}
-        <div className="relative h-64">
+        {/* Chart - Responsive height */}
+        <div className={`relative ${fullPage ? 'h-56 md:h-72' : 'h-64'}`}>
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={data} margin={{ top: 5, right: 5, bottom: 5, left: -20 }}>
+            <LineChart
+              data={data}
+              margin={{
+                top: 5,
+                right: fullPage ? 2 : 5,
+                bottom: 5,
+                left: fullPage ? -25 : -20
+              }}
+            >
               {/* Grid lines */}
               <defs>
                 <linearGradient id={`gradient-${selectedMetric}`} x1="0" y1="0" x2="0" y2="1">
@@ -125,19 +154,20 @@ export function CoachingGrowthChart() {
               <XAxis
                 dataKey="week"
                 stroke="#8E8E93"
-                tick={{ fill: '#8E8E93', fontSize: 12 }}
+                tick={{ fill: '#8E8E93', fontSize: fullPage ? 10 : 12 }}
                 axisLine={{ stroke: 'rgba(255,255,255,0.1)' }}
+                interval={fullPage ? 1 : 0}
               />
 
               <YAxis
                 stroke="#8E8E93"
-                tick={{ fill: '#8E8E93', fontSize: 12 }}
+                tick={{ fill: '#8E8E93', fontSize: fullPage ? 10 : 12 }}
                 axisLine={{ stroke: 'rgba(255,255,255,0.1)' }}
                 domain={[0, 100]}
                 ticks={[0, 25, 50, 75, 100]}
                 tickFormatter={(value) => {
                   if (value === 100) return 'High'
-                  if (value === 50) return 'Moderate'
+                  if (value === 50) return fullPage ? 'Mod' : 'Moderate'
                   if (value === 0) return 'Low'
                   return ''
                 }}
@@ -174,19 +204,19 @@ export function CoachingGrowthChart() {
           </div>
         </div>
 
-        {/* Stats Footer */}
-        <div className="mt-6 flex items-center justify-between border-t border-white/5 pt-4">
-          <div>
-            <p className="text-xs text-silver-dark">Sessions Completed</p>
-            <p className="text-lg font-semibold text-silver-light">12</p>
+        {/* Stats Footer - Responsive grid */}
+        <div className={`${fullPage ? 'mt-4 md:mt-6' : 'mt-6'} grid grid-cols-3 gap-3 md:gap-4 border-t border-white/5 pt-3 md:pt-4`}>
+          <div className="text-center md:text-left">
+            <p className="text-xs text-silver-dark">Sessions</p>
+            <p className="text-base md:text-lg font-semibold text-silver-light">12</p>
           </div>
-          <div>
-            <p className="text-xs text-silver-dark">Avg. Session Rating</p>
-            <p className="text-lg font-semibold text-silver-light">4.8/5</p>
+          <div className="text-center md:text-left">
+            <p className="text-xs text-silver-dark">Avg. Rating</p>
+            <p className="text-base md:text-lg font-semibold text-silver-light">4.8/5</p>
           </div>
-          <div>
-            <p className="text-xs text-silver-dark">Action Items Done</p>
-            <p className="text-lg font-semibold text-silver-light">34/38</p>
+          <div className="text-center md:text-left">
+            <p className="text-xs text-silver-dark">Tasks Done</p>
+            <p className="text-base md:text-lg font-semibold text-silver-light">34/38</p>
           </div>
         </div>
       </div>

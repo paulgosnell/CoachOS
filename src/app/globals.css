@@ -95,6 +95,16 @@
   .text-gradient {
     @apply bg-gradient-to-r from-white to-silver-light bg-clip-text text-transparent;
   }
+
+  /* Hide scrollbar for horizontal scroll */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 /* Keyframes */
