@@ -13,6 +13,7 @@ import { MessageBubble } from '@/components/chat/MessageBubble'
 import { MessageInput } from '@/components/chat/MessageInput'
 import { TypingIndicator } from '@/components/chat/TypingIndicator'
 import { getFramework } from '@/lib/ai/frameworks'
+import { createClient } from '@/lib/supabase/client'
 
 interface ActiveSessionClientProps {
   sessionId: string
@@ -51,11 +52,51 @@ export function ActiveSessionClient({
   useEffect(() => {
     fetchSession()
     fetchMessages()
+    subscribeToMessages()
   }, [])
 
   useEffect(() => {
     scrollToBottom()
   }, [messages])
+
+  const subscribeToMessages = () => {
+    const supabase = createClient()
+
+    const channel = supabase
+      .channel(`messages:${conversationId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+          filter: `conversation_id=eq.${conversationId}`,
+        },
+        (payload) => {
+          const newMessage: Message = {
+            id: payload.new.id,
+            role: payload.new.role,
+            content: payload.new.content,
+            created_at: payload.new.created_at,
+          }
+
+          setMessages((prev) => {
+            // Remove any temporary messages with the same content and role
+            const filtered = prev.filter(
+              (msg) => !(msg.id.startsWith('temp-') && msg.content === newMessage.content && msg.role === newMessage.role)
+            )
+
+            // Add the new real message
+            return [...filtered, newMessage]
+          })
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }
 
   const fetchSession = async () => {
     const response = await fetch(`/api/sessions/${sessionId}`)
@@ -68,9 +109,24 @@ export function ActiveSessionClient({
   const fetchMessages = async () => {
     setLoading(true)
     try {
-      const response = await fetch(`/api/chat?conversation_id=${conversationId}`)
-      const data = await response.json()
-      setMessages(data.messages || [])
+      const supabase = createClient()
+
+      const { data: messagesData, error } = await supabase
+        .from('messages')
+        .select('id, role, content, created_at')
+        .eq('conversation_id', conversationId)
+        .order('created_at', { ascending: true })
+
+      if (error) throw error
+
+      const formattedMessages: Message[] = messagesData.map((msg) => ({
+        id: msg.id,
+        role: msg.role as 'user' | 'assistant',
+        content: msg.content,
+        created_at: msg.created_at,
+      }))
+
+      setMessages(formattedMessages)
     } catch (error) {
       console.error('Error fetching messages:', error)
     } finally {
@@ -150,8 +206,7 @@ export function ActiveSessionClient({
         }
       }
 
-      // Refresh messages to get real IDs
-      await fetchMessages()
+      // Real-time subscription will handle adding the real messages
     } catch (error) {
       console.error('Error sending message:', error)
       // Remove temp messages on error
