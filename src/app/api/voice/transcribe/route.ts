@@ -25,6 +25,13 @@ export async function POST(req: Request) {
       return new Response('No audio file provided', { status: 400 })
     }
 
+    console.log('Received audio file:', audioFile.name, 'Size:', audioFile.size, 'bytes')
+
+    // Check if audio file is empty
+    if (audioFile.size === 0) {
+      return new Response('Empty audio file', { status: 400 })
+    }
+
     // Transcribe with Whisper
     const transcription = await openai.audio.transcriptions.create({
       file: audioFile,
@@ -32,6 +39,8 @@ export async function POST(req: Request) {
       language: 'en', // Can be made dynamic
       response_format: 'json',
     })
+
+    console.log('Transcription result:', transcription.text)
 
     return new Response(
       JSON.stringify({

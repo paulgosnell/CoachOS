@@ -48,6 +48,14 @@ export function VoiceRecorder({ onTranscription, disabled = false }: VoiceRecord
         const audioBlob = new Blob(chunksRef.current, { type: 'audio/webm' })
         stream.getTracks().forEach((track) => track.stop())
 
+        console.log('Audio blob size:', audioBlob.size, 'bytes')
+
+        // Check if audio was actually recorded
+        if (audioBlob.size === 0) {
+          setError('No audio recorded. Please try again.')
+          return
+        }
+
         // Transcribe audio
         await transcribeAudio(audioBlob)
       }
