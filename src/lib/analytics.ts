@@ -19,7 +19,7 @@ export const trackDashboardCardClick = (cardName: string) => {
 }
 
 export const trackNavigationClick = (destination: string, source?: string) => {
-  track('navigation_click', { destination, source })
+  track('navigation_click', source ? { destination, source } : { destination })
 }
 
 // Chat Events
@@ -28,7 +28,7 @@ export const trackNewConversation = () => {
 }
 
 export const trackMessageSent = (type: 'text' | 'voice' = 'text', conversationId?: string) => {
-  track('message_sent', { type, conversationId })
+  track('message_sent', conversationId ? { type, conversationId } : { type })
 }
 
 export const trackConversationOpened = (conversationId: string) => {
@@ -41,7 +41,10 @@ export const trackVoiceNoteUsed = () => {
 
 // Goals Events
 export const trackGoalCreated = (category?: string, priority?: string) => {
-  track('goal_created', { category, priority })
+  const props: Record<string, string> = {}
+  if (category) props.category = category
+  if (priority) props.priority = priority
+  track('goal_created', Object.keys(props).length > 0 ? props : undefined)
 }
 
 export const trackGoalUpdated = (goalId: string) => {
@@ -49,7 +52,7 @@ export const trackGoalUpdated = (goalId: string) => {
 }
 
 export const trackGoalCompleted = (goalId: string, category?: string) => {
-  track('goal_completed', { goalId, category })
+  track('goal_completed', category ? { goalId, category } : { goalId })
 }
 
 export const trackGoalDeleted = (goalId: string) => {
@@ -70,7 +73,10 @@ export const trackSessionStarted = (sessionId: string, framework: string) => {
 }
 
 export const trackSessionCompleted = (sessionId: string, rating?: number, duration?: number) => {
-  track('session_completed', { sessionId, rating, duration })
+  const props: Record<string, string | number> = { sessionId }
+  if (rating !== undefined) props.rating = rating
+  if (duration !== undefined) props.duration = duration
+  track('session_completed', props)
 }
 
 export const trackSessionTabChanged = (tab: 'upcoming' | 'completed') => {
@@ -83,7 +89,7 @@ export const trackVoiceRecordingStarted = () => {
 }
 
 export const trackVoiceRecordingStopped = (duration?: number) => {
-  track('voice_recording_stopped', { duration })
+  track('voice_recording_stopped', duration !== undefined ? { duration } : undefined)
 }
 
 export const trackAudioPlaybackStarted = () => {
@@ -92,11 +98,11 @@ export const trackAudioPlaybackStarted = () => {
 
 // Feedback Events
 export const trackFeedbackOpened = (source?: string) => {
-  track('feedback_opened', { source })
+  track('feedback_opened', source ? { source } : undefined)
 }
 
 export const trackFeedbackSubmitted = (type: string, category?: string) => {
-  track('feedback_submitted', { type, category })
+  track('feedback_submitted', category ? { type, category } : { type })
 }
 
 // Settings Events
@@ -105,7 +111,7 @@ export const trackSettingsOpened = () => {
 }
 
 export const trackSettingsSaved = (fieldsChanged?: string[]) => {
-  track('settings_saved', { fieldsChanged: fieldsChanged?.join(',') })
+  track('settings_saved', fieldsChanged && fieldsChanged.length > 0 ? { fieldsChanged: fieldsChanged.join(',') } : undefined)
 }
 
 // Onboarding Events
@@ -137,5 +143,5 @@ export const trackCTAClick = (ctaName: string, location: string) => {
 
 // Feature Usage
 export const trackFeatureUsed = (featureName: string, metadata?: Record<string, string | number | boolean>) => {
-  track('feature_used', { feature: featureName, ...metadata })
+  track('feature_used', metadata ? { feature: featureName, ...metadata } : { feature: featureName })
 }
