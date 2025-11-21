@@ -234,8 +234,16 @@ export default function ChatPage() {
       setIsStreaming(false)
       setStreamingMessage('')
 
-      // Don't manually remove temp message - the subscription will replace it
-      // when the real message arrives from the database
+      // Add assistant message as temporary until subscription confirms it
+      const tempAssistantMessage: Message = {
+        id: `temp-assistant-${Date.now()}`,
+        role: 'assistant',
+        content: fullMessage,
+        createdAt: new Date(),
+      }
+      setMessages((prev) => [...prev, tempAssistantMessage])
+
+      // The subscription will replace this temp message with the real one from DB
     } catch (err: any) {
       console.error('Failed to send message:', err)
       setIsStreaming(false)
