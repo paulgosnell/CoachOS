@@ -60,14 +60,21 @@ export function VoiceRecorder({ onTranscription, disabled = false }: VoiceRecord
         await transcribeAudio(audioBlob)
       }
 
-      mediaRecorder.start()
+      // Request data every 100ms to ensure we capture audio
+      mediaRecorder.start(100)
       setIsRecording(true)
       setRecordingTime(0)
 
       // Start timer
       timerRef.current = setInterval(() => {
-        setRecordingTime((prev) => prev + 1)
+        setRecordingTime((prev) => {
+          const newTime = prev + 1
+          console.log('Timer tick:', newTime)
+          return newTime
+        })
       }, 1000)
+
+      console.log('Recording started, timer set')
     } catch (err: any) {
       console.error('Failed to start recording:', err)
       setError('Failed to access microphone. Please check permissions.')
