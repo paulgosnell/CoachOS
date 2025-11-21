@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { ArrowRight, Loader2 } from 'lucide-react'
+import { trackSignUp, trackFormError } from '@/lib/analytics'
 
 export default function SignUpPage() {
   const router = useRouter()
@@ -37,6 +38,9 @@ export default function SignUpPage() {
       if (error) throw error
 
       if (data?.user) {
+        // Track successful sign up
+        trackSignUp('email')
+
         setMessage('Check your email to confirm your account!')
         // Clear form
         setEmail('')
@@ -44,7 +48,9 @@ export default function SignUpPage() {
         setFullName('')
       }
     } catch (err: any) {
-      setError(err.message || 'An error occurred during sign up')
+      const errorMessage = err.message || 'An error occurred during sign up'
+      setError(errorMessage)
+      trackFormError('signup', errorMessage)
     } finally {
       setLoading(false)
     }

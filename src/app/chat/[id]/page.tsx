@@ -227,6 +227,7 @@ export default function ChatPage() {
             fullMessage += text
             setStreamingMessage(fullMessage)
           }
+          // Ignore other streaming metadata (e.g., agent types, session info)
         }
       }
 

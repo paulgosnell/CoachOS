@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Calendar, Clock, Target, Sparkles } from 'lucide-react'
 import { getAllFrameworks, type CoachingFramework } from '@/lib/ai/frameworks'
+import { trackSessionBooked, trackSessionBookingStarted, trackFormError } from '@/lib/analytics'
 
 export function SessionBooking() {
   const router = useRouter()
@@ -51,12 +52,17 @@ export function SessionBooking() {
 
       const { session } = await response.json()
 
+      // Track successful booking
+      trackSessionBooked(formData.framework, parseInt(formData.duration), formData.date)
+
       // Redirect to sessions page
       router.push(`/sessions?booked=${session.id}`)
       router.refresh()
     } catch (err) {
       console.error('Error booking session:', err)
-      setError(err instanceof Error ? err.message : 'Failed to book session')
+      const errorMessage = err instanceof Error ? err.message : 'Failed to book session'
+      setError(errorMessage)
+      trackFormError('session_booking', errorMessage)
     } finally {
       setLoading(false)
     }

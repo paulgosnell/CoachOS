@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Send, Loader2 } from 'lucide-react'
+import { trackMessageSent } from '@/lib/analytics'
 
 interface MessageInputProps {
   onSend: (message: string) => Promise<void>
@@ -20,6 +21,7 @@ export function MessageInput({ onSend, disabled = false }: MessageInputProps) {
     setSending(true)
     try {
       await onSend(message.trim())
+      trackMessageSent('text')
       setMessage('')
     } catch (error) {
       console.error('Failed to send message:', error)

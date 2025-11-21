@@ -14,6 +14,7 @@ import { MessageInput } from '@/components/chat/MessageInput'
 import { TypingIndicator } from '@/components/chat/TypingIndicator'
 import { getFramework } from '@/lib/ai/frameworks'
 import { createClient } from '@/lib/supabase/client'
+import { trackSessionStarted, trackSessionCompleted } from '@/lib/analytics'
 
 interface ActiveSessionClientProps {
   sessionId: string
@@ -53,6 +54,11 @@ export function ActiveSessionClient({
     fetchSession()
     fetchMessages()
     subscribeToMessages()
+
+    // Track session started when component mounts
+    if (session) {
+      trackSessionStarted(sessionId, session.framework_used)
+    }
   }, [])
 
   useEffect(() => {
@@ -235,6 +241,9 @@ export function ActiveSessionClient({
       if (!response.ok) {
         throw new Error('Failed to complete session')
       }
+
+      // Track session completion
+      trackSessionCompleted(sessionId, rating, session?.duration_minutes)
 
       router.push(`/sessions/${sessionId}`)
     } catch (error) {

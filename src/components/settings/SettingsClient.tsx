@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Loader2, Save, Building2, User } from 'lucide-react'
+import { trackSettingsSaved, trackFormError } from '@/lib/analytics'
 
 interface SettingsClientProps {
   profile: {
@@ -75,12 +76,24 @@ export function SettingsClient({ profile, businessProfile }: SettingsClientProps
         throw new Error('Failed to save settings')
       }
 
+      // Track which fields were changed
+      const changedFields: string[] = []
+      if (fullName !== profile.full_name) changedFields.push('full_name')
+      if (industry !== (businessProfile?.industry || '')) changedFields.push('industry')
+      if (companyStage !== (businessProfile?.company_stage || '')) changedFields.push('company_stage')
+      if (companyName !== (businessProfile?.company_name || '')) changedFields.push('company_name')
+      if (role !== (businessProfile?.role || '')) changedFields.push('role')
+
+      trackSettingsSaved(changedFields.length > 0 ? changedFields : undefined)
+
       setMessage({ type: 'success', text: 'Settings saved successfully' })
       setTimeout(() => setMessage(null), 3000)
       router.refresh()
     } catch (error) {
       console.error('Failed to save settings:', error)
-      setMessage({ type: 'error', text: 'Failed to save settings' })
+      const errorMessage = 'Failed to save settings'
+      setMessage({ type: 'error', text: errorMessage })
+      trackFormError('settings', errorMessage)
     } finally {
       setSaving(false)
     }

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { X, Send, Loader2, CheckCircle2 } from 'lucide-react'
+import { trackFeedbackSubmitted, trackFormError } from '@/lib/analytics'
 
 interface FeedbackModalProps {
   isOpen: boolean
@@ -33,6 +34,9 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
         throw new Error('Failed to submit feedback')
       }
 
+      // Track successful feedback submission
+      trackFeedbackSubmitted(type, category)
+
       setSuccess(true)
       setTimeout(() => {
         onClose()
@@ -44,7 +48,9 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
         setSuccess(false)
       }, 2000)
     } catch (err: any) {
-      setError(err.message || 'Failed to submit feedback')
+      const errorMessage = err.message || 'Failed to submit feedback'
+      setError(errorMessage)
+      trackFormError('feedback', errorMessage)
     } finally {
       setLoading(false)
     }

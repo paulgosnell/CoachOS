@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { ArrowRight, Loader2 } from 'lucide-react'
+import { trackSignIn, trackFormError } from '@/lib/analytics'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -28,6 +29,9 @@ export default function LoginPage() {
       if (error) throw error
 
       if (data?.user) {
+        // Track successful sign in
+        trackSignIn('email')
+
         // Check if onboarding is completed
         const { data: profile } = await supabase
           .from('profiles')
@@ -42,7 +46,9 @@ export default function LoginPage() {
         }
       }
     } catch (err: any) {
-      setError(err.message || 'An error occurred during login')
+      const errorMessage = err.message || 'An error occurred during login'
+      setError(errorMessage)
+      trackFormError('login', errorMessage)
     } finally {
       setLoading(false)
     }

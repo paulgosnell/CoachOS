@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { Target, Calendar, ArrowLeft, CheckCircle2, Circle, Plus, Edit2, Trash2, Check, X } from 'lucide-react'
 import { MobileHeader } from '@/components/MobileHeader'
 import { GoalModal } from './GoalModal'
+import { trackGoalCreated, trackGoalUpdated, trackGoalCompleted, trackGoalDeleted } from '@/lib/analytics'
 
 interface Goal {
   id: string
@@ -59,9 +60,11 @@ export function GoalsClient({ initialGoals }: GoalsClientProps) {
       if (editingGoal) {
         // Update existing goal
         setGoals(goals.map((g) => (g.id === editingGoal.id ? savedGoal : g)))
+        trackGoalUpdated(editingGoal.id)
       } else {
         // Add new goal
         setGoals([...goals, savedGoal])
+        trackGoalCreated(goalData.category, goalData.priority?.toString())
       }
 
       setShowModal(false)
@@ -89,6 +92,11 @@ export function GoalsClient({ initialGoals }: GoalsClientProps) {
 
       const updatedGoal = await response.json()
       setGoals(goals.map((g) => (g.id === goalId ? updatedGoal : g)))
+
+      // Find the goal to track its category
+      const completedGoal = goals.find((g) => g.id === goalId)
+      trackGoalCompleted(goalId, completedGoal?.category)
+
       router.refresh()
     } catch (error) {
       console.error('Failed to complete goal:', error)
@@ -109,6 +117,7 @@ export function GoalsClient({ initialGoals }: GoalsClientProps) {
       if (!response.ok) throw new Error('Failed to delete goal')
 
       setGoals(goals.filter((g) => g.id !== goalId))
+      trackGoalDeleted(goalId)
       router.refresh()
     } catch (error) {
       console.error('Failed to delete goal:', error)

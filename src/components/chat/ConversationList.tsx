@@ -3,6 +3,7 @@
 import { Plus, MessageSquare } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { trackNewConversation, trackConversationOpened } from '@/lib/analytics'
 
 interface Conversation {
   id: string
@@ -35,7 +36,10 @@ export function ConversationList({ conversations, onNewConversation }: Conversat
       {/* Header */}
       <div className="border-b border-white/5 p-4">
         <button
-          onClick={onNewConversation}
+          onClick={() => {
+            trackNewConversation()
+            onNewConversation()
+          }}
           className="btn btn-primary w-full justify-center text-sm"
         >
           <Plus className="h-4 w-4" />
@@ -60,6 +64,7 @@ export function ConversationList({ conversations, onNewConversation }: Conversat
                 <Link
                   key={conversation.id}
                   href={`/chat/${conversation.id}`}
+                  onClick={() => trackConversationOpened(conversation.id)}
                   className={`block rounded-lg p-3 transition-colors ${
                     isActive
                       ? 'bg-deep-blue-800/50 border border-white/10'

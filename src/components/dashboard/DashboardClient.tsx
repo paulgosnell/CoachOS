@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { MessageSquare, Calendar, Target, ArrowRight, MessageCircle, Mic, ListTodo, Phone, Settings, Brain } from 'lucide-react'
 import { FeedbackModal } from '@/components/FeedbackModal'
 import { MiniProgressChart } from './MiniProgressChart'
+import { trackDashboardCardClick, trackSettingsOpened, trackFeedbackOpened } from '@/lib/analytics'
 
 interface DashboardClientProps {
   profile: {
@@ -32,11 +33,15 @@ export function DashboardClient({ profile, goalsCount, conversationsCount }: Das
             <Link
               href="/settings"
               className="text-silver-light transition-colors hover:text-silver"
+              onClick={() => trackSettingsOpened()}
             >
               <Settings className="h-5 w-5" />
             </Link>
             <button
-              onClick={() => setFeedbackOpen(true)}
+              onClick={() => {
+                trackFeedbackOpened('dashboard')
+                setFeedbackOpen(true)
+              }}
               className="text-silver-light transition-colors hover:text-silver"
             >
               <MessageCircle className="h-5 w-5" />
@@ -61,6 +66,7 @@ export function DashboardClient({ profile, goalsCount, conversationsCount }: Das
             <Link
               href="/chat/new"
               className="card group cursor-pointer transition-all hover:border-silver/30"
+              onClick={() => trackDashboardCardClick('chat')}
             >
               <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-deep-blue-800/50">
                 <MessageSquare className="h-5 w-5 text-silver" />
@@ -76,6 +82,7 @@ export function DashboardClient({ profile, goalsCount, conversationsCount }: Das
             <Link
               href="/voice-coach"
               className="card group cursor-pointer transition-all hover:border-silver/30"
+              onClick={() => trackDashboardCardClick('voice')}
             >
               <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-deep-blue-800/50">
                 <Phone className="h-5 w-5 text-silver" />
@@ -94,6 +101,7 @@ export function DashboardClient({ profile, goalsCount, conversationsCount }: Das
             <Link
               href="/sessions"
               className="card group cursor-pointer transition-all hover:border-silver/30"
+              onClick={() => trackDashboardCardClick('sessions')}
             >
               <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-deep-blue-800/50">
                 <Calendar className="h-5 w-5 text-silver" />
@@ -109,6 +117,7 @@ export function DashboardClient({ profile, goalsCount, conversationsCount }: Das
             <Link
               href="/goals"
               className="card group cursor-pointer transition-all hover:border-silver/30"
+              onClick={() => trackDashboardCardClick('goals')}
             >
               <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-deep-blue-800/50">
                 <Target className="h-5 w-5 text-silver" />
@@ -126,6 +135,7 @@ export function DashboardClient({ profile, goalsCount, conversationsCount }: Das
           <Link
             href="/progress"
             className="card group cursor-pointer transition-all hover:border-silver/30"
+            onClick={() => trackDashboardCardClick('progress')}
           >
             <MiniProgressChart />
           </Link>
