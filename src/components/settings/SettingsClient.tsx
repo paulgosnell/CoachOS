@@ -2,13 +2,19 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Loader2, Save, Building2, User } from 'lucide-react'
+import { Loader2, Save, Building2, User, Mic } from 'lucide-react'
 import { trackSettingsSaved, trackFormError } from '@/lib/analytics'
 
 interface SettingsClientProps {
   profile: {
     full_name: string
     email: string
+    coach_preference?: {
+      voice?: string
+      voice_speed?: number
+      vad_threshold?: number
+      vad_silence_duration?: number
+    }
   }
   businessProfile: {
     industry?: string
@@ -33,6 +39,12 @@ export function SettingsClient({ profile, businessProfile }: SettingsClientProps
   // Personal info
   const [fullName, setFullName] = useState(profile.full_name)
 
+  // Voice preferences
+  const [voice, setVoice] = useState(profile.coach_preference?.voice || 'verse')
+  const [voiceSpeed, setVoiceSpeed] = useState(profile.coach_preference?.voice_speed || 1.0)
+  const [vadThreshold, setVadThreshold] = useState(profile.coach_preference?.vad_threshold || 0.5)
+  const [vadSilenceDuration, setVadSilenceDuration] = useState(profile.coach_preference?.vad_silence_duration || 500)
+
   // Business profile
   const [industry, setIndustry] = useState(businessProfile?.industry || '')
   const [companyStage, setCompanyStage] = useState(businessProfile?.company_stage || '')
@@ -56,6 +68,12 @@ export function SettingsClient({ profile, businessProfile }: SettingsClientProps
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           fullName,
+          coachPreference: {
+            voice,
+            voice_speed: voiceSpeed,
+            vad_threshold: vadThreshold,
+            vad_silence_duration: vadSilenceDuration,
+          },
           businessProfile: {
             industry,
             company_stage: companyStage,
@@ -146,6 +164,110 @@ export function SettingsClient({ profile, businessProfile }: SettingsClientProps
             />
             <p className="mt-1 text-xs text-gray-500">
               Contact support to change your email
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Voice Preferences */}
+      <div className="card">
+        <div className="mb-4 flex items-center gap-2">
+          <Mic className="h-5 w-5 text-silver" />
+          <h2 className="text-xl font-semibold text-silver">Voice Agent Settings</h2>
+        </div>
+
+        <div className="space-y-6">
+          <div>
+            <label className="mb-2 block text-sm font-medium text-silver-light">
+              Voice
+            </label>
+            <select
+              value={voice}
+              onChange={(e) => setVoice(e.target.value)}
+              className="w-full rounded-lg border border-white/10 bg-titanium-800 px-3 py-2 text-silver focus:border-white/20 focus:outline-none"
+            >
+              <option value="alloy">Alloy - Neutral, balanced (gender-neutral)</option>
+              <option value="ash">Ash - Clear, articulate (masculine)</option>
+              <option value="ballad">Ballad - Smooth, warm (masculine)</option>
+              <option value="coral">Coral - Friendly, upbeat (feminine)</option>
+              <option value="echo">Echo - Deep, resonant (masculine)</option>
+              <option value="sage">Sage - Calm, wise (masculine)</option>
+              <option value="shimmer">Shimmer - Bright, energetic (feminine)</option>
+              <option value="verse">Verse - Natural, conversational (Default, masculine)</option>
+              <option value="cedar">Cedar - Rich, steady (masculine)</option>
+              <option value="marin">Marin - Professional, crisp (feminine)</option>
+            </select>
+            <p className="mt-1 text-xs text-silver-light">
+              Choose the voice personality for your AI coach
+            </p>
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-medium text-silver-light">
+              Speech Speed: {voiceSpeed.toFixed(1)}x
+            </label>
+            <input
+              type="range"
+              min="0.8"
+              max="1.2"
+              step="0.1"
+              value={voiceSpeed}
+              onChange={(e) => setVoiceSpeed(parseFloat(e.target.value))}
+              className="w-full"
+            />
+            <div className="mt-1 flex justify-between text-xs text-silver-light">
+              <span>Slower (0.8x)</span>
+              <span>Normal (1.0x)</span>
+              <span>Faster (1.2x)</span>
+            </div>
+            <p className="mt-1 text-xs text-silver-light">
+              Adjust how fast the AI speaks
+            </p>
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-medium text-silver-light">
+              Microphone Sensitivity: {(vadThreshold * 100).toFixed(0)}%
+            </label>
+            <input
+              type="range"
+              min="0.3"
+              max="0.7"
+              step="0.05"
+              value={vadThreshold}
+              onChange={(e) => setVadThreshold(parseFloat(e.target.value))}
+              className="w-full"
+            />
+            <div className="mt-1 flex justify-between text-xs text-silver-light">
+              <span>More Sensitive</span>
+              <span>Balanced</span>
+              <span>Less Sensitive</span>
+            </div>
+            <p className="mt-1 text-xs text-silver-light">
+              Higher = requires louder speech to activate
+            </p>
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-medium text-silver-light">
+              Pause Detection: {vadSilenceDuration}ms
+            </label>
+            <input
+              type="range"
+              min="300"
+              max="1000"
+              step="100"
+              value={vadSilenceDuration}
+              onChange={(e) => setVadSilenceDuration(parseInt(e.target.value))}
+              className="w-full"
+            />
+            <div className="mt-1 flex justify-between text-xs text-silver-light">
+              <span>Quick (300ms)</span>
+              <span>Balanced (500ms)</span>
+              <span>Patient (1000ms)</span>
+            </div>
+            <p className="mt-1 text-xs text-silver-light">
+              How long to wait after you stop speaking before the AI responds
             </p>
           </div>
         </div>

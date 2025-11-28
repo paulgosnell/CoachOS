@@ -92,17 +92,19 @@ export async function POST(req: Request) {
       },
     ]
 
-    // Call OpenAI with streaming
+    // Call OpenAI with streaming and stream_options to get usage
     const response = await openai.chat.completions.create({
       model: 'gpt-4o',
       messages,
       temperature: 0.7,
       max_tokens: 1000,
       stream: true,
+      stream_options: { include_usage: true }, // Get token usage with streaming
     })
 
     // Create a streaming response
     let fullResponse = ''
+    let usageData: any = null
     const encoder = new TextEncoder()
 
     const stream = new ReadableStream({
@@ -113,6 +115,11 @@ export async function POST(req: Request) {
             fullResponse += content
             // Send chunk in streaming format
             controller.enqueue(encoder.encode(`0:"${content}"\n`))
+          }
+
+          // Capture usage data from final chunk
+          if (chunk.usage) {
+            usageData = chunk.usage
           }
         }
 
@@ -144,6 +151,37 @@ export async function POST(req: Request) {
               fullResponse,
               'assistant'
             ).catch((err) => console.error('Failed to process assistant message embedding:', err))
+          }
+
+          // Track token usage
+          if (usageData) {
+            try {
+              // Calculate cost using database function
+              const { data: costData } = await supabase.rpc('calculate_token_cost', {
+                p_model: 'gpt-4o',
+                p_input_tokens: usageData.prompt_tokens || 0,
+                p_output_tokens: usageData.completion_tokens || 0,
+                p_input_audio_tokens: 0,
+                p_output_audio_tokens: 0,
+              })
+
+              // Save token usage
+              await supabase.from('token_usage').insert({
+                user_id: user.id,
+                conversation_id: conversationId,
+                message_id: assistantMessage?.id,
+                session_type: 'chat',
+                model: 'gpt-4o',
+                input_tokens: usageData.prompt_tokens || 0,
+                output_tokens: usageData.completion_tokens || 0,
+                total_tokens: usageData.total_tokens || 0,
+                input_cost: costData?.input_cost || 0,
+                output_cost: costData?.output_cost || 0,
+                total_cost: costData?.total_cost || 0,
+              })
+            } catch (err) {
+              console.error('Failed to track token usage:', err)
+            }
           }
 
           // Check if response contains action items (📋 emoji indicates action items)

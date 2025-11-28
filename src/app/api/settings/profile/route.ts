@@ -14,13 +14,17 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { fullName, businessProfile } = await request.json()
+    const { fullName, coachPreference, businessProfile } = await request.json()
 
     // Update profile
-    if (fullName) {
+    const updates: any = {}
+    if (fullName) updates.full_name = fullName
+    if (coachPreference) updates.coach_preference = coachPreference
+
+    if (Object.keys(updates).length > 0) {
       const { error: profileError } = await supabase
         .from('profiles')
-        .update({ full_name: fullName })
+        .update(updates)
         .eq('id', user.id)
 
       if (profileError) throw profileError

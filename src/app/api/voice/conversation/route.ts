@@ -2,8 +2,6 @@ import { createClient } from '@/lib/supabase/server'
 import { assembleUserContext } from '@/lib/ai/context'
 import { generateSystemPrompt } from '@/lib/ai/prompts'
 
-const ELEVENLABS_AGENT_ID = 'agent_1601k9wcf2dpfwmbdzxqew0f2pjx'
-
 export async function POST(req: Request) {
   try {
     // Verify authentication
@@ -16,10 +14,10 @@ export async function POST(req: Request) {
       return new Response('Unauthorized', { status: 401 })
     }
 
-    // Check if ElevenLabs API key is configured
-    if (!process.env.ELEVENLABS_API_KEY) {
+    // Check if OpenAI API key is configured
+    if (!process.env.OPENAI_API_KEY) {
       return new Response(
-        JSON.stringify({ error: 'ElevenLabs API key not configured' }),
+        JSON.stringify({ error: 'OpenAI API key not configured' }),
         { status: 500, headers: { 'Content-Type': 'application/json' } }
       )
     }
@@ -35,37 +33,25 @@ export async function POST(req: Request) {
     const systemPrompt = generateSystemPrompt(context)
     const firstName = context.profile.fullName.split(' ')[0]
 
-    // Get a signed URL for the agent conversation with prompt override
-    const response = await fetch(
-      `https://api.elevenlabs.io/v1/convai/conversation/get_signed_url?agent_id=${ELEVENLABS_AGENT_ID}`,
-      {
-        method: 'GET',
-        headers: {
-          'xi-api-key': process.env.ELEVENLABS_API_KEY,
-        },
-      }
-    )
+    // Get voice preferences from profile
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('coach_preference')
+      .eq('id', user.id)
+      .single()
 
-    if (!response.ok) {
-      const errorData = await response.text()
-      console.error('ElevenLabs API error:', errorData)
-      throw new Error(`Failed to get signed URL: ${response.status}`)
-    }
+    const voicePreference = profile?.coach_preference || {}
 
-    const data = await response.json()
-
-    // Return the signed URL and overrides for the frontend
+    // Return the configuration for OpenAI Realtime API
     return new Response(
       JSON.stringify({
-        signedUrl: data.signed_url,
-        agentId: ELEVENLABS_AGENT_ID,
-        overrides: {
-          agent: {
-            prompt: {
-              prompt: systemPrompt,
-            },
-            firstMessage: `Hey ${firstName}! Ready to dive in?`,
-          },
+        systemPrompt,
+        firstName,
+        voiceSettings: {
+          voice: voicePreference.voice || 'verse',
+          speed: voicePreference.voice_speed || 1.0,
+          vadThreshold: voicePreference.vad_threshold || 0.5,
+          vadSilenceDuration: voicePreference.vad_silence_duration || 500,
         },
       }),
       {
@@ -73,7 +59,7 @@ export async function POST(req: Request) {
       }
     )
   } catch (error: any) {
-    console.error('ElevenLabs conversation creation error:', error)
+    console.error('Voice conversation configuration error:', error)
     return new Response(
       JSON.stringify({ error: error.message || 'Internal server error' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }

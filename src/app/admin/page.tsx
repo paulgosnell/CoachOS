@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { requireAdmin } from '@/lib/admin'
 import Link from 'next/link'
-import { Users, MessageSquare, MessageCircle, TrendingUp, Activity } from 'lucide-react'
+import { Users, MessageSquare, MessageCircle, TrendingUp, Activity, DollarSign } from 'lucide-react'
 
 export default async function AdminDashboard() {
   try {
@@ -134,7 +134,7 @@ export default async function AdminDashboard() {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           <Link
             href="/admin/users"
             className="card group cursor-pointer transition-all hover:border-silver/30 hover:shadow-lg"
@@ -158,6 +158,19 @@ export default async function AdminDashboard() {
             <h3 className="mb-2 text-lg font-semibold">View Sessions</h3>
             <p className="text-sm text-silver-light">
               Analyze coaching sessions, frameworks used, and success metrics
+            </p>
+          </Link>
+
+          <Link
+            href="/admin/usage"
+            className="card group cursor-pointer transition-all hover:border-silver/30 hover:shadow-lg"
+          >
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-emerald-600 to-emerald-800">
+              <DollarSign className="h-6 w-6 text-white" />
+            </div>
+            <h3 className="mb-2 text-lg font-semibold">Usage & Costs</h3>
+            <p className="text-sm text-silver-light">
+              Monitor API usage, token consumption, and operational costs
             </p>
           </Link>
 
