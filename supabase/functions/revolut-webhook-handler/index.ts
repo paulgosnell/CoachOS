@@ -93,6 +93,31 @@ Deno.serve(async (req) => {
 
     console.log('Subscription activated for user:', user_id)
 
+    // Send subscription activation email
+    try {
+      const { data: profile } = await supabaseAdmin
+        .from('profiles')
+        .select('email, full_name')
+        .eq('id', user_id)
+        .single()
+
+      if (profile?.email) {
+        // Call email API endpoint
+        await fetch(`${Deno.env.get('NEXT_PUBLIC_APP_URL')}/api/emails/subscription-activated`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: profile.email,
+            userName: profile.full_name || 'there',
+            expiresAt: expiresAt.toISOString(),
+          }),
+        })
+      }
+    } catch (emailError) {
+      console.error('Failed to send subscription email:', emailError)
+      // Don't fail the webhook if email fails
+    }
+
     return new Response(JSON.stringify({ received: true }), {
       headers: { 'Content-Type': 'application/json' },
     })
