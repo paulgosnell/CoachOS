@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { MessageSquare, Calendar, Target, ArrowRight, MessageCircle, Mic, ListTodo, Phone, Settings, Brain } from 'lucide-react'
+import { MessageSquare, Calendar, Target, ArrowRight, MessageCircle, Mic, ListTodo, Phone, Settings, Brain, Sparkles, Lock } from 'lucide-react'
 import { FeedbackModal } from '@/components/FeedbackModal'
 import { MiniProgressChart } from './MiniProgressChart'
 import { trackDashboardCardClick, trackSettingsOpened, trackFeedbackOpened } from '@/lib/analytics'
@@ -13,9 +13,10 @@ interface DashboardClientProps {
   }
   goalsCount: number | null
   conversationsCount: number | null
+  isPro: boolean
 }
 
-export function DashboardClient({ profile, goalsCount, conversationsCount }: DashboardClientProps) {
+export function DashboardClient({ profile, goalsCount, conversationsCount, isPro }: DashboardClientProps) {
   const [feedbackOpen, setFeedbackOpen] = useState(false)
 
   return (
@@ -30,6 +31,15 @@ export function DashboardClient({ profile, goalsCount, conversationsCount }: Das
           </div>
 
           <div className="flex items-center gap-3">
+            {!isPro && (
+              <Link
+                href="/subscribe"
+                className="flex items-center gap-1 rounded-full bg-gradient-to-r from-deep-blue-600 to-purple-600 px-3 py-1 text-xs font-semibold transition-all hover:from-deep-blue-500 hover:to-purple-500"
+              >
+                <Sparkles className="h-3 w-3" />
+                Upgrade
+              </Link>
+            )}
             <Link
               href="/settings"
               className="text-silver-light transition-colors hover:text-silver"
@@ -80,12 +90,22 @@ export function DashboardClient({ profile, goalsCount, conversationsCount }: Das
             </Link>
 
             <Link
-              href="/voice-coach"
-              className="card group cursor-pointer transition-all hover:border-silver/30"
+              href={isPro ? "/voice-coach" : "/subscribe"}
+              className="card group relative cursor-pointer transition-all hover:border-silver/30"
               onClick={() => trackDashboardCardClick('voice')}
             >
+              {!isPro && (
+                <div className="absolute right-2 top-2 flex items-center gap-1 rounded-full bg-gradient-to-r from-deep-blue-600 to-purple-600 px-2 py-0.5 text-xs font-semibold">
+                  <Sparkles className="h-2.5 w-2.5" />
+                  PRO
+                </div>
+              )}
               <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-deep-blue-800/50">
-                <Phone className="h-5 w-5 text-silver" />
+                {!isPro ? (
+                  <Lock className="h-5 w-5 text-silver-light" />
+                ) : (
+                  <Phone className="h-5 w-5 text-silver" />
+                )}
               </div>
               <h3 className="mb-1 text-base font-semibold text-silver">
                 Voice
@@ -99,12 +119,22 @@ export function DashboardClient({ profile, goalsCount, conversationsCount }: Das
           {/* Row 2: Coaching Sessions and Goals */}
           <div className="grid grid-cols-2 gap-4">
             <Link
-              href="/sessions"
-              className="card group cursor-pointer transition-all hover:border-silver/30"
+              href={isPro ? "/sessions" : "/subscribe"}
+              className="card group relative cursor-pointer transition-all hover:border-silver/30"
               onClick={() => trackDashboardCardClick('sessions')}
             >
+              {!isPro && (
+                <div className="absolute right-2 top-2 flex items-center gap-1 rounded-full bg-gradient-to-r from-deep-blue-600 to-purple-600 px-2 py-0.5 text-xs font-semibold">
+                  <Sparkles className="h-2.5 w-2.5" />
+                  PRO
+                </div>
+              )}
               <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-deep-blue-800/50">
-                <Calendar className="h-5 w-5 text-silver" />
+                {!isPro ? (
+                  <Lock className="h-5 w-5 text-silver-light" />
+                ) : (
+                  <Calendar className="h-5 w-5 text-silver" />
+                )}
               </div>
               <h3 className="mb-1 text-base font-semibold text-silver">
                 Coaching Sessions
@@ -115,12 +145,22 @@ export function DashboardClient({ profile, goalsCount, conversationsCount }: Das
             </Link>
 
             <Link
-              href="/goals"
-              className="card group cursor-pointer transition-all hover:border-silver/30"
+              href={isPro ? "/goals" : "/subscribe"}
+              className="card group relative cursor-pointer transition-all hover:border-silver/30"
               onClick={() => trackDashboardCardClick('goals')}
             >
+              {!isPro && (
+                <div className="absolute right-2 top-2 flex items-center gap-1 rounded-full bg-gradient-to-r from-deep-blue-600 to-purple-600 px-2 py-0.5 text-xs font-semibold">
+                  <Sparkles className="h-2.5 w-2.5" />
+                  PRO
+                </div>
+              )}
               <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-deep-blue-800/50">
-                <Target className="h-5 w-5 text-silver" />
+                {!isPro ? (
+                  <Lock className="h-5 w-5 text-silver-light" />
+                ) : (
+                  <Target className="h-5 w-5 text-silver" />
+                )}
               </div>
               <h3 className="mb-1 text-base font-semibold text-silver">
                 Goals
@@ -133,11 +173,17 @@ export function DashboardClient({ profile, goalsCount, conversationsCount }: Das
 
           {/* Row 3: Progress - Full width with mini data viz */}
           <Link
-            href="/progress"
-            className="card group cursor-pointer transition-all hover:border-silver/30"
+            href={isPro ? "/progress" : "/subscribe"}
+            className="card group relative cursor-pointer transition-all hover:border-silver/30"
             onClick={() => trackDashboardCardClick('progress')}
           >
-            <MiniProgressChart />
+            {!isPro && (
+              <div className="absolute right-2 top-2 flex items-center gap-1 rounded-full bg-gradient-to-r from-deep-blue-600 to-purple-600 px-2 py-0.5 text-xs font-semibold">
+                <Sparkles className="h-2.5 w-2.5" />
+                PRO
+              </div>
+            )}
+            <MiniProgressChart isPro={isPro} />
           </Link>
 
           {/* Row 4: Tasks and Brain Dump */}

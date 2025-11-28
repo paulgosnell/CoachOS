@@ -35,11 +35,14 @@ export default async function DashboardPage() {
     .select('*', { count: 'exact', head: true })
     .eq('user_id', user.id)
 
+  const isPro = profile?.subscription_status === 'pro'
+
   return (
     <DashboardClient
       profile={{ full_name: profile.full_name }}
       goalsCount={goalsCount}
       conversationsCount={conversationsCount}
+      isPro={isPro}
     />
   )
 }

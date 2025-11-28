@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { requireAdmin } from '@/lib/admin'
 import Link from 'next/link'
-import { Users, MessageSquare, MessageCircle, TrendingUp, Activity, DollarSign } from 'lucide-react'
+import { Users, MessageSquare, MessageCircle, TrendingUp, Activity, DollarSign, CreditCard } from 'lucide-react'
 
 export default async function AdminDashboard() {
   try {
@@ -171,6 +171,19 @@ export default async function AdminDashboard() {
             <h3 className="mb-2 text-lg font-semibold">Usage & Costs</h3>
             <p className="text-sm text-silver-light">
               Monitor API usage, token consumption, and operational costs
+            </p>
+          </Link>
+
+          <Link
+            href="/admin/payments"
+            className="card group cursor-pointer transition-all hover:border-silver/30 hover:shadow-lg"
+          >
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-purple-600 to-purple-800">
+              <CreditCard className="h-6 w-6 text-white" />
+            </div>
+            <h3 className="mb-2 text-lg font-semibold">Payments</h3>
+            <p className="text-sm text-silver-light">
+              Configure Revolut webhooks and manage payment settings
             </p>
           </Link>
 

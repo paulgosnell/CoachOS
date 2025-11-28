@@ -1,7 +1,7 @@
 'use client'
 
 import { LineChart, Line, ResponsiveContainer } from 'recharts'
-import { TrendingUp } from 'lucide-react'
+import { TrendingUp, Lock } from 'lucide-react'
 
 // Generate simple mock data for the mini chart
 const generateMiniData = () => {
@@ -10,7 +10,11 @@ const generateMiniData = () => {
   }))
 }
 
-export function MiniProgressChart() {
+interface MiniProgressChartProps {
+  isPro: boolean
+}
+
+export function MiniProgressChart({ isPro }: MiniProgressChartProps) {
   const data = generateMiniData()
 
   return (
@@ -19,7 +23,11 @@ export function MiniProgressChart() {
       <div className="flex-1">
         <div className="mb-2 flex items-center gap-2">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-deep-blue-800/50">
-            <TrendingUp className="h-5 w-5 text-silver" />
+            {!isPro ? (
+              <Lock className="h-5 w-5 text-silver-light" />
+            ) : (
+              <TrendingUp className="h-5 w-5 text-silver" />
+            )}
           </div>
           <div>
             <h3 className="text-base font-semibold text-silver">
@@ -33,26 +41,28 @@ export function MiniProgressChart() {
       </div>
 
       {/* Mini Chart */}
-      <div className="h-16 w-32 opacity-70">
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data}>
-            <defs>
-              <linearGradient id="miniGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#5384C4" stopOpacity={0.8} />
-                <stop offset="100%" stopColor="#5384C4" stopOpacity={0.3} />
-              </linearGradient>
-            </defs>
-            <Line
-              type="monotone"
-              dataKey="value"
-              stroke="url(#miniGradient)"
-              strokeWidth={2}
-              dot={false}
-              animationDuration={800}
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
+      {isPro && (
+        <div className="h-16 w-32 opacity-70">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={data}>
+              <defs>
+                <linearGradient id="miniGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#5384C4" stopOpacity={0.8} />
+                  <stop offset="100%" stopColor="#5384C4" stopOpacity={0.3} />
+                </linearGradient>
+              </defs>
+              <Line
+                type="monotone"
+                dataKey="value"
+                stroke="url(#miniGradient)"
+                strokeWidth={2}
+                dot={false}
+                animationDuration={800}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
     </div>
   )
 }
