@@ -60,7 +60,7 @@ export async function sendWelcomeEmail(to: string, userName: string) {
 export async function sendSubscriptionActivatedEmail(to: string, userName: string, expiresAt: Date) {
   try {
     await resend.emails.send({
-      from: 'Coach OS <billing@coachos.app>',
+      from: 'Coach OS <onboarding@resend.dev>',
       to,
       subject: 'Your Coach OS Pro Subscription is Active',
       html: `

@@ -129,7 +129,7 @@ export default function SubscribeClient({
             <button
               onClick={handleSubscribe}
               disabled={isLoading}
-              className="btn-primary w-full"
+              className="btn btn-primary w-full"
             >
               {isLoading ? (
                 <>

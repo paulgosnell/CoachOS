@@ -104,7 +104,7 @@ export default function PaymentsClient() {
           <button
             onClick={handleRegisterWebhook}
             disabled={registering}
-            className="btn-primary"
+            className="btn btn-primary"
           >
             {registering ? (
               <>
