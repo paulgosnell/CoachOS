@@ -70,15 +70,39 @@ const metrics: Metric[] = [
 
 interface CoachingGrowthChartProps {
   fullPage?: boolean
+  demoMode?: boolean
 }
 
-export function CoachingGrowthChart({ fullPage = false }: CoachingGrowthChartProps) {
+const DEMO_DATA: ProgressData = {
+  weeklyData: [
+    { week: 'W1', weekStart: '2024-01-01', sessions: 2, voiceSessions: 1, structuredSessions: 1, checkinSessions: 0, messageCount: 15, growth: 45, clarity: 30, confidence: 40 },
+    { week: 'W2', weekStart: '2024-01-08', sessions: 3, voiceSessions: 2, structuredSessions: 1, checkinSessions: 0, messageCount: 25, growth: 55, clarity: 45, confidence: 50 },
+    { week: 'W3', weekStart: '2024-01-15', sessions: 2, voiceSessions: 1, structuredSessions: 1, checkinSessions: 0, messageCount: 20, growth: 65, clarity: 60, confidence: 55 },
+    { week: 'W4', weekStart: '2024-01-22', sessions: 4, voiceSessions: 3, structuredSessions: 1, checkinSessions: 0, messageCount: 35, growth: 75, clarity: 70, confidence: 65 },
+    { week: 'W5', weekStart: '2024-01-29', sessions: 3, voiceSessions: 2, structuredSessions: 1, checkinSessions: 0, messageCount: 30, growth: 82, clarity: 80, confidence: 75 },
+  ],
+  stats: {
+    totalSessions: 14,
+    totalGoals: 5,
+    completedGoals: 3,
+    totalActions: 12,
+    completedActions: 10
+  }
+}
+
+export function CoachingGrowthChart({ fullPage = false, demoMode = false }: CoachingGrowthChartProps) {
   const [selectedMetric, setSelectedMetric] = useState<MetricType>('growth')
   const [progressData, setProgressData] = useState<ProgressData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    if (demoMode) {
+      setProgressData(DEMO_DATA)
+      setLoading(false)
+      return
+    }
+
     async function fetchProgress() {
       try {
         const response = await fetch('/api/progress')
@@ -96,7 +120,7 @@ export function CoachingGrowthChart({ fullPage = false }: CoachingGrowthChartPro
     }
 
     fetchProgress()
-  }, [])
+  }, [demoMode])
 
   const currentMetric = metrics.find(m => m.key === selectedMetric) || metrics[0]
   const Icon = currentMetric.icon
@@ -180,11 +204,10 @@ export function CoachingGrowthChart({ fullPage = false }: CoachingGrowthChartPro
             <button
               key={metric.key}
               onClick={() => setSelectedMetric(metric.key)}
-              className={`flex-shrink-0 rounded-full px-3 py-1.5 md:px-4 md:py-2 text-xs md:text-sm font-medium transition-all whitespace-nowrap ${
-                selectedMetric === metric.key
+              className={`flex-shrink-0 rounded-full px-3 py-1.5 md:px-4 md:py-2 text-xs md:text-sm font-medium transition-all whitespace-nowrap ${selectedMetric === metric.key
                   ? 'bg-white/10 text-silver-light'
                   : 'bg-transparent text-silver-dark hover:bg-white/5'
-              }`}
+                }`}
             >
               {metric.label}
             </button>
@@ -210,10 +233,10 @@ export function CoachingGrowthChart({ fullPage = false }: CoachingGrowthChartPro
                   <stop offset="100%" stopColor={currentMetric.color} stopOpacity={0.2} />
                 </linearGradient>
                 <filter id="glow">
-                  <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                  <feGaussianBlur stdDeviation="3" result="coloredBlur" />
                   <feMerge>
-                    <feMergeNode in="coloredBlur"/>
-                    <feMergeNode in="SourceGraphic"/>
+                    <feMergeNode in="coloredBlur" />
+                    <feMergeNode in="SourceGraphic" />
                   </feMerge>
                 </filter>
               </defs>

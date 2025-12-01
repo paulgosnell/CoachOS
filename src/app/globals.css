@@ -3,6 +3,7 @@
 @tailwind utilities;
 
 @layer base {
+
   /* Root styles */
   html {
     @apply scroll-smooth;
@@ -25,6 +26,7 @@
 }
 
 @layer components {
+
   /* Button styles */
   .btn {
     @apply inline-flex items-center justify-center gap-2 rounded-lg px-6 py-3 font-semibold transition-all duration-200;
@@ -39,10 +41,12 @@
   .btn-secondary {
     @apply bg-titanium-800 text-gray-200 border border-glass-border hover:bg-titanium-700;
     @apply focus:ring-silver;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-titanium-800;
   }
 
   .btn-ghost {
     @apply bg-transparent text-gray-300 hover:bg-titanium-800;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   /* Card styles */
@@ -73,6 +77,7 @@
 }
 
 @layer utilities {
+
   /* Custom animations */
   .animate-fade-in {
     animation: fadeIn 200ms ease-out;
@@ -112,6 +117,7 @@
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -122,6 +128,7 @@
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -133,10 +140,16 @@
     transform: translateY(100%);
     opacity: 0;
   }
+
   to {
     transform: translateY(0);
     opacity: 1;
   }
+}
+
+/* Aurora Effect */
+.animate-aurora {
+  animation: aurora 20s linear infinite;
 }
 
 /* Reduce motion for accessibility */
@@ -144,5 +157,15 @@
   * {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+@keyframes aurora {
+  0% {
+    background-position: 50% 50%, 50% 50%;
+  }
+
+  100% {
+    background-position: 350% 50%, 350% 50%;
   }
 }
