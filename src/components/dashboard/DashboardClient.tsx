@@ -69,12 +69,12 @@ export function DashboardClient({ profile, goalsCount, conversationsCount, isPro
           </p>
         </div>
 
-        {/* Dashboard Cards - New Layout */}
-        <div className="flex flex-col gap-4">
+        {/* Dashboard Cards - Compact Layout */}
+        <div className="flex flex-col gap-3">
           {/* Row 1: Progress - Full width with mini data viz */}
           <Link
             href={isPro ? "/progress" : "/subscribe"}
-            className="card group relative cursor-pointer transition-all hover:border-silver/30"
+            className="card group relative cursor-pointer p-4 transition-all hover:border-silver/30"
             onClick={() => trackDashboardCardClick('progress')}
           >
             {!isPro && (
@@ -86,137 +86,134 @@ export function DashboardClient({ profile, goalsCount, conversationsCount, isPro
             <MiniProgressChart isPro={isPro} />
           </Link>
 
-          {/* Row 2: Chat and Voice - Separate buttons */}
-          <div className="grid grid-cols-2 gap-4">
+          {/* Row 2: Chat and Voice */}
+          <div className="grid grid-cols-2 gap-3">
             <Link
               href="/chat/new"
-              className="card group cursor-pointer transition-all hover:border-silver/30"
+              className="card group cursor-pointer p-4 transition-all hover:border-silver/30"
               onClick={() => trackDashboardCardClick('chat')}
             >
-              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-deep-blue-800/50">
-                <MessageSquare className="h-5 w-5 text-silver" />
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-deep-blue-800/50">
+                  <MessageSquare className="h-4 w-4 text-silver" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-silver">Chat</h3>
+                  <p className="text-xs text-silver-light">Text conversation</p>
+                </div>
               </div>
-              <h3 className="mb-1 text-base font-semibold text-silver">
-                Chat
-              </h3>
-              <p className="text-sm text-silver-light">
-                Text conversation
-              </p>
             </Link>
 
             <Link
               href={isPro ? "/voice-coach" : "/subscribe"}
-              className="card group relative cursor-pointer transition-all hover:border-silver/30"
+              className="card group relative cursor-pointer p-4 transition-all hover:border-silver/30"
               onClick={() => trackDashboardCardClick('voice')}
             >
               {!isPro && (
-                <div className="absolute right-2 top-2 flex items-center gap-1 rounded-full bg-gradient-to-r from-deep-blue-600 to-purple-600 px-2 py-0.5 text-xs font-semibold">
-                  <Sparkles className="h-2.5 w-2.5" />
+                <div className="absolute right-2 top-2 flex items-center gap-1 rounded-full bg-gradient-to-r from-deep-blue-600 to-purple-600 px-1.5 py-0.5 text-[10px] font-semibold">
+                  <Sparkles className="h-2 w-2" />
                   PRO
                 </div>
               )}
-              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-deep-blue-800/50">
-                {!isPro ? (
-                  <Lock className="h-5 w-5 text-silver-light" />
-                ) : (
-                  <Phone className="h-5 w-5 text-silver" />
-                )}
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-deep-blue-800/50">
+                  {!isPro ? (
+                    <Lock className="h-4 w-4 text-silver-light" />
+                  ) : (
+                    <Phone className="h-4 w-4 text-silver" />
+                  )}
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-silver">Voice</h3>
+                  <p className="text-xs text-silver-light">Live conversation</p>
+                </div>
               </div>
-              <h3 className="mb-1 text-base font-semibold text-silver">
-                Voice
-              </h3>
-              <p className="text-sm text-silver-light">
-                Live conversation
-              </p>
             </Link>
           </div>
 
           {/* Row 3: Coaching Sessions and Goals */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-3">
             <Link
               href={isPro ? "/sessions" : "/subscribe"}
-              className="card group relative cursor-pointer transition-all hover:border-silver/30"
+              className="card group relative cursor-pointer p-4 transition-all hover:border-silver/30"
               onClick={() => trackDashboardCardClick('sessions')}
             >
               {!isPro && (
-                <div className="absolute right-2 top-2 flex items-center gap-1 rounded-full bg-gradient-to-r from-deep-blue-600 to-purple-600 px-2 py-0.5 text-xs font-semibold">
-                  <Sparkles className="h-2.5 w-2.5" />
+                <div className="absolute right-2 top-2 flex items-center gap-1 rounded-full bg-gradient-to-r from-deep-blue-600 to-purple-600 px-1.5 py-0.5 text-[10px] font-semibold">
+                  <Sparkles className="h-2 w-2" />
                   PRO
                 </div>
               )}
-              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-deep-blue-800/50">
-                {!isPro ? (
-                  <Lock className="h-5 w-5 text-silver-light" />
-                ) : (
-                  <Calendar className="h-5 w-5 text-silver" />
-                )}
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-deep-blue-800/50">
+                  {!isPro ? (
+                    <Lock className="h-4 w-4 text-silver-light" />
+                  ) : (
+                    <Calendar className="h-4 w-4 text-silver" />
+                  )}
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-silver">Sessions</h3>
+                  <p className="text-xs text-silver-light">Structured coaching</p>
+                </div>
               </div>
-              <h3 className="mb-1 text-base font-semibold text-silver">
-                Coaching Sessions
-              </h3>
-              <p className="text-sm text-silver-light">
-                Structured frameworks
-              </p>
             </Link>
 
             <Link
               href={isPro ? "/goals" : "/subscribe"}
-              className="card group relative cursor-pointer transition-all hover:border-silver/30"
+              className="card group relative cursor-pointer p-4 transition-all hover:border-silver/30"
               onClick={() => trackDashboardCardClick('goals')}
             >
               {!isPro && (
-                <div className="absolute right-2 top-2 flex items-center gap-1 rounded-full bg-gradient-to-r from-deep-blue-600 to-purple-600 px-2 py-0.5 text-xs font-semibold">
-                  <Sparkles className="h-2.5 w-2.5" />
+                <div className="absolute right-2 top-2 flex items-center gap-1 rounded-full bg-gradient-to-r from-deep-blue-600 to-purple-600 px-1.5 py-0.5 text-[10px] font-semibold">
+                  <Sparkles className="h-2 w-2" />
                   PRO
                 </div>
               )}
-              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-deep-blue-800/50">
-                {!isPro ? (
-                  <Lock className="h-5 w-5 text-silver-light" />
-                ) : (
-                  <Target className="h-5 w-5 text-silver" />
-                )}
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-deep-blue-800/50">
+                  {!isPro ? (
+                    <Lock className="h-4 w-4 text-silver-light" />
+                  ) : (
+                    <Target className="h-4 w-4 text-silver" />
+                  )}
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-silver">Goals</h3>
+                  <p className="text-xs text-silver-light">Track objectives</p>
+                </div>
               </div>
-              <h3 className="mb-1 text-base font-semibold text-silver">
-                Goals
-              </h3>
-              <p className="text-sm text-silver-light">
-                Track objectives
-              </p>
             </Link>
           </div>
 
           {/* Row 4: Tasks and Brain Dump */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-3">
             <Link
               href="/tasks"
-              className="card group cursor-pointer transition-all hover:border-silver/30"
+              className="card group cursor-pointer p-4 transition-all hover:border-silver/30"
               onClick={() => trackDashboardCardClick('tasks')}
             >
-              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-deep-blue-800/50">
-                <ListTodo className="h-5 w-5 text-silver" />
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-deep-blue-800/50">
+                  <ListTodo className="h-4 w-4 text-silver" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-silver">Tasks</h3>
+                  <p className="text-xs text-silver-light">Action items</p>
+                </div>
               </div>
-              <h3 className="mb-1 text-base font-semibold text-silver">
-                Tasks
-              </h3>
-              <p className="text-sm text-silver-light">
-                Action items
-              </p>
             </Link>
 
-            <div
-              className="card group cursor-not-allowed transition-all bg-titanium-900/30 opacity-60"
-            >
-              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-deep-blue-800/50">
-                <Brain className="h-5 w-5 text-silver" />
+            <div className="card group cursor-not-allowed p-4 bg-titanium-900/30 opacity-60">
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-deep-blue-800/50">
+                  <Brain className="h-4 w-4 text-silver" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-silver">Brain Dump</h3>
+                  <p className="text-xs text-silver-light">Coming soon</p>
+                </div>
               </div>
-              <h3 className="mb-1 text-base font-semibold text-silver">
-                Brain Dump
-              </h3>
-              <p className="text-sm text-silver-light">
-                Quick capture
-              </p>
-              <p className="mt-2 text-xs text-gray-500">Coming soon</p>
             </div>
           </div>
         </div>
