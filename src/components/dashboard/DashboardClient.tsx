@@ -201,7 +201,6 @@ export function DashboardClient({ profile, goalsCount, conversationsCount, isPro
               <p className="text-sm text-silver-light">
                 Action items
               </p>
-              <p className="mt-2 text-xs text-gray-500">Coming soon</p>
             </Link>
 
             <Link
