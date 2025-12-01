@@ -1,10 +1,9 @@
--- Coach OS Database Schema
--- This script sets up all tables, indexes, and functions for the Coach OS MVP
+-- Coach OS Database Schema (Fixed for Production)
+-- This script sets up all tables, indexes, and functions for Coach OS
+-- IMPORTANT: Run this in the Supabase SQL Editor
 
--- Enable UUID extension
+-- Enable required extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
--- Enable pgvector extension for embeddings
 CREATE EXTENSION IF NOT EXISTS vector;
 
 -- ============================================================================
@@ -72,7 +71,8 @@ CREATE TABLE IF NOT EXISTS conversations (
   started_at TIMESTAMPTZ DEFAULT NOW(),
   ended_at TIMESTAMPTZ,
   duration_seconds INTEGER,
-  created_at TIMESTAMPTZ DEFAULT NOW()
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE INDEX IF NOT EXISTS idx_conversations_user_started ON conversations(user_id, started_at DESC);
@@ -167,7 +167,8 @@ CREATE TABLE IF NOT EXISTS conversation_embeddings (
   conversation_id UUID REFERENCES conversations(id) ON DELETE CASCADE,
   message_id UUID REFERENCES messages(id) ON DELETE CASCADE,
   embedding VECTOR(1536),
-  content_snippet TEXT NOT NULL,
+  content TEXT NOT NULL,
+  role TEXT,
   metadata JSONB DEFAULT '{}'::JSONB,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -309,6 +310,10 @@ DROP TRIGGER IF EXISTS update_goals_updated_at ON goals;
 CREATE TRIGGER update_goals_updated_at BEFORE UPDATE ON goals
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_conversations_updated_at ON conversations;
+CREATE TRIGGER update_conversations_updated_at BEFORE UPDATE ON conversations
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
 DROP TRIGGER IF EXISTS update_coaching_sessions_updated_at ON coaching_sessions;
 CREATE TRIGGER update_coaching_sessions_updated_at BEFORE UPDATE ON coaching_sessions
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
@@ -326,7 +331,7 @@ CREATE OR REPLACE FUNCTION match_conversations(
 )
 RETURNS TABLE (
   id UUID,
-  content_snippet TEXT,
+  content TEXT,
   similarity FLOAT,
   created_at TIMESTAMPTZ
 )
@@ -334,7 +339,7 @@ LANGUAGE SQL STABLE
 AS $$
   SELECT
     conversation_embeddings.id,
-    conversation_embeddings.content_snippet,
+    conversation_embeddings.content,
     1 - (conversation_embeddings.embedding <=> query_embedding) AS similarity,
     conversation_embeddings.created_at
   FROM conversation_embeddings
@@ -343,6 +348,26 @@ AS $$
   ORDER BY conversation_embeddings.embedding <=> query_embedding
   LIMIT match_count;
 $$;
+
+-- Function to auto-populate user_id in messages from conversation
+CREATE OR REPLACE FUNCTION set_message_user_id()
+RETURNS TRIGGER AS $$
+BEGIN
+  -- If user_id is not provided, get it from the conversation
+  IF NEW.user_id IS NULL THEN
+    SELECT user_id INTO NEW.user_id
+    FROM conversations
+    WHERE id = NEW.conversation_id;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger to auto-set user_id on messages
+DROP TRIGGER IF EXISTS set_message_user_id_trigger ON messages;
+CREATE TRIGGER set_message_user_id_trigger
+  BEFORE INSERT ON messages
+  FOR EACH ROW EXECUTE FUNCTION set_message_user_id();
 
 -- Function to create profile on signup
 CREATE OR REPLACE FUNCTION public.handle_new_user()
