@@ -33,6 +33,7 @@ export function VoiceConversation({ config, router }: VoiceConversationProps) {
   const dataChannelRef = useRef<RTCDataChannel | null>(null)
   const audioStreamRef = useRef<MediaStream | null>(null)
   const remoteAudioRef = useRef<HTMLAudioElement>(null)
+  const transcriptRef = useRef<Array<{ role: string; message: string }>>([])
   const supabase = createClient()
 
   // Cleanup on unmount
@@ -129,7 +130,9 @@ export function VoiceConversation({ config, router }: VoiceConversationProps) {
 
         case 'conversation.item.input_audio_transcription.completed':
           console.log('User transcription:', msg.transcript)
-          setTranscript(prev => [...prev, { role: 'user', message: msg.transcript }])
+          const userEntry = { role: 'user', message: msg.transcript }
+          setTranscript(prev => [...prev, userEntry])
+          transcriptRef.current = [...transcriptRef.current, userEntry]
           saveMessage('user', msg.transcript)
           break
 
@@ -139,7 +142,9 @@ export function VoiceConversation({ config, router }: VoiceConversationProps) {
 
         case 'response.audio_transcript.done':
           console.log('Assistant response:', msg.transcript)
-          setTranscript(prev => [...prev, { role: 'assistant', message: msg.transcript }])
+          const assistantEntry = { role: 'assistant', message: msg.transcript }
+          setTranscript(prev => [...prev, assistantEntry])
+          transcriptRef.current = [...transcriptRef.current, assistantEntry]
           saveMessage('assistant', msg.transcript)
           break
 
@@ -308,15 +313,18 @@ export function VoiceConversation({ config, router }: VoiceConversationProps) {
             .update({ ended_at: new Date().toISOString() })
             .eq('id', conversationIdRef.current)
 
-          // Extract action items from voice conversation
-          if (transcript.length > 0) {
+          // Extract action items from voice conversation using ref (always has current value)
+          const currentTranscript = transcriptRef.current
+          console.log('Extracting action items from transcript:', currentTranscript.length, 'messages')
+
+          if (currentTranscript.length > 0) {
             try {
               const response = await fetch('/api/actions/extract', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                   conversationId: conversationIdRef.current,
-                  messages: transcript.map((t) => ({
+                  messages: currentTranscript.map((t) => ({
                     role: t.role,
                     content: t.message,
                   })),
@@ -325,14 +333,19 @@ export function VoiceConversation({ config, router }: VoiceConversationProps) {
 
               if (response.ok) {
                 const data = await response.json()
+                console.log('Action extraction result:', data)
                 if (data.actionCount > 0) {
                   setToastMessage(`📋 ${data.actionCount} task${data.actionCount > 1 ? 's' : ''} captured`)
                   setShowToast(true)
                 }
+              } else {
+                console.error('Action extraction failed:', response.status, await response.text())
               }
             } catch (err) {
               console.error('Failed to extract action items:', err)
             }
+          } else {
+            console.log('No transcript messages to extract actions from')
           }
         } catch (err) {
           console.error('Failed to update conversation:', err)
@@ -340,6 +353,7 @@ export function VoiceConversation({ config, router }: VoiceConversationProps) {
       }
 
       setTranscript([])
+      transcriptRef.current = []
     } catch (err) {
       console.error('Failed to end conversation:', err)
     }

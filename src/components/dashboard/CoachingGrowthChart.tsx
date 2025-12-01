@@ -1,21 +1,36 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip } from 'recharts'
-import { TrendingUp, Brain, Target } from 'lucide-react'
-
-// Mock data - in production, this would come from actual user data
-const generateMockData = () => {
-  const weeks = ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6', 'Week 7', 'Week 8']
-  return weeks.map((week, index) => ({
-    week,
-    growth: 20 + Math.random() * 10 + index * 8,
-    clarity: 15 + Math.random() * 12 + index * 7,
-    confidence: 25 + Math.random() * 8 + index * 6,
-  }))
-}
+import { TrendingUp, Brain, Target, Loader2 } from 'lucide-react'
 
 type MetricType = 'growth' | 'clarity' | 'confidence'
+
+interface WeeklyData {
+  week: string
+  weekStart: string
+  sessions: number
+  voiceSessions: number
+  structuredSessions: number
+  checkinSessions: number
+  messageCount: number
+  growth: number
+  clarity: number
+  confidence: number
+}
+
+interface ProgressStats {
+  totalSessions: number
+  totalGoals: number
+  completedGoals: number
+  totalActions: number
+  completedActions: number
+}
+
+interface ProgressData {
+  weeklyData: WeeklyData[]
+  stats: ProgressStats | null
+}
 
 interface Metric {
   key: MetricType
@@ -59,13 +74,65 @@ interface CoachingGrowthChartProps {
 
 export function CoachingGrowthChart({ fullPage = false }: CoachingGrowthChartProps) {
   const [selectedMetric, setSelectedMetric] = useState<MetricType>('growth')
-  const data = generateMockData()
+  const [progressData, setProgressData] = useState<ProgressData | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    async function fetchProgress() {
+      try {
+        const response = await fetch('/api/progress')
+        if (!response.ok) {
+          throw new Error('Failed to fetch progress data')
+        }
+        const data = await response.json()
+        setProgressData(data)
+      } catch (err) {
+        console.error('Error fetching progress:', err)
+        setError('Unable to load progress data')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchProgress()
+  }, [])
+
   const currentMetric = metrics.find(m => m.key === selectedMetric) || metrics[0]
   const Icon = currentMetric.icon
 
+  // Use real data or empty array
+  const data = progressData?.weeklyData || []
+  const stats = progressData?.stats
+
   // Calculate current level based on latest data
-  const latestValue = data[data.length - 1][selectedMetric]
-  const level = latestValue >= 70 ? 'High' : latestValue >= 50 ? 'Moderate' : 'Low'
+  const latestValue = data.length > 0 ? data[data.length - 1][selectedMetric] : 0
+  const level = latestValue >= 70 ? 'High' : latestValue >= 50 ? 'Moderate' : 'Building'
+
+  if (loading) {
+    return (
+      <div className={`relative overflow-hidden rounded-2xl md:rounded-3xl border border-white/10 bg-gradient-to-br from-titanium-800 to-titanium-900 shadow-xl ${fullPage ? 'p-4 md:p-6' : 'p-6'}`}>
+        <div className="flex items-center justify-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin text-silver-dark" />
+        </div>
+      </div>
+    )
+  }
+
+  if (error || data.length === 0) {
+    return (
+      <div className={`relative overflow-hidden rounded-2xl md:rounded-3xl border border-white/10 bg-gradient-to-br from-titanium-800 to-titanium-900 shadow-xl ${fullPage ? 'p-4 md:p-6' : 'p-6'}`}>
+        <div className="absolute right-0 top-0 h-64 w-64 rounded-full bg-deep-blue-600/10 blur-3xl" />
+        <div className="relative flex flex-col items-center justify-center h-64 text-center">
+          <TrendingUp className="h-12 w-12 text-silver-dark/50 mb-4" />
+          <h3 className="text-lg font-medium text-silver-light mb-2">Start Your Journey</h3>
+          <p className="text-sm text-silver-dark max-w-xs">
+            Complete your first coaching sessions to see your progress here.
+          </p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className={`relative overflow-hidden rounded-2xl md:rounded-3xl border border-white/10 bg-gradient-to-br from-titanium-800 to-titanium-900 shadow-xl ${fullPage ? 'p-4 md:p-6' : 'p-6'}`}>
@@ -182,7 +249,8 @@ export function CoachingGrowthChart({ fullPage = false }: CoachingGrowthChartPro
                 }}
                 labelStyle={{ color: '#E8E8ED', fontSize: '12px', fontWeight: 600 }}
                 itemStyle={{ color: currentMetric.color, fontSize: '12px' }}
-                formatter={(value: number) => value.toFixed(1)}
+                formatter={(value: number) => [value.toFixed(0), currentMetric.label]}
+                labelFormatter={(label) => label}
               />
 
               <Line
@@ -208,15 +276,21 @@ export function CoachingGrowthChart({ fullPage = false }: CoachingGrowthChartPro
         <div className={`${fullPage ? 'mt-4 md:mt-6' : 'mt-6'} grid grid-cols-3 gap-3 md:gap-4 border-t border-white/5 pt-3 md:pt-4`}>
           <div className="text-center md:text-left">
             <p className="text-xs text-silver-dark">Sessions</p>
-            <p className="text-base md:text-lg font-semibold text-silver-light">12</p>
+            <p className="text-base md:text-lg font-semibold text-silver-light">
+              {stats?.totalSessions || 0}
+            </p>
           </div>
           <div className="text-center md:text-left">
-            <p className="text-xs text-silver-dark">Avg. Rating</p>
-            <p className="text-base md:text-lg font-semibold text-silver-light">4.8/5</p>
+            <p className="text-xs text-silver-dark">Goals Set</p>
+            <p className="text-base md:text-lg font-semibold text-silver-light">
+              {stats?.totalGoals || 0}
+            </p>
           </div>
           <div className="text-center md:text-left">
-            <p className="text-xs text-silver-dark">Tasks Done</p>
-            <p className="text-base md:text-lg font-semibold text-silver-light">34/38</p>
+            <p className="text-xs text-silver-dark">Goals Done</p>
+            <p className="text-base md:text-lg font-semibold text-silver-light">
+              {stats?.completedGoals || 0}/{stats?.totalGoals || 0}
+            </p>
           </div>
         </div>
       </div>
