@@ -34,11 +34,16 @@ export async function PUT(request: Request) {
     if (businessProfile) {
       const { error: businessError } = await supabase
         .from('business_profiles')
-        .upsert({
-          user_id: user.id,
-          ...businessProfile,
-        })
-        .eq('user_id', user.id)
+        .upsert(
+          {
+            user_id: user.id,
+            ...businessProfile,
+            updated_at: new Date().toISOString(),
+          },
+          {
+            onConflict: 'user_id',
+          }
+        )
 
       if (businessError) throw businessError
     }
