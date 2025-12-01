@@ -1,8 +1,9 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
-import { ListTodo, ArrowLeft, CheckSquare, Square } from 'lucide-react'
+import { ArrowLeft, ListTodo } from 'lucide-react'
 import { MobileHeader } from '@/components/MobileHeader'
+import { TaskList } from '@/components/tasks/TaskList'
 
 export default async function TasksPage() {
   const supabase = await createClient()
@@ -15,9 +16,23 @@ export default async function TasksPage() {
     redirect('/auth/login')
   }
 
+  // Fetch action items for the user
+  const { data: tasks, error } = await supabase
+    .from('action_items')
+    .select('*')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    console.error('Error fetching tasks:', error)
+  }
+
+  const pendingTasks = tasks?.filter(t => t.status === 'pending') || []
+  const completedTasks = tasks?.filter(t => t.status === 'completed') || []
+
   return (
     <div className="min-h-screen">
-      <MobileHeader title="Task Manager" />
+      <MobileHeader title="Tasks" />
 
       <div className="p-4 md:p-6">
         <div className="container mx-auto max-w-4xl">
@@ -30,64 +45,52 @@ export default async function TasksPage() {
               <ArrowLeft className="h-4 w-4" />
               Back to Dashboard
             </Link>
-            <h1 className="mb-2 text-3xl font-bold">Task Manager</h1>
+            <h1 className="mb-2 text-3xl font-bold">Tasks</h1>
             <p className="text-silver-light">
-              Track action items from your coaching sessions
+              Action items captured from your coaching sessions
             </p>
           </div>
 
-        {/* Coming Soon Card */}
-        <div className="card text-center">
-          <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-deep-blue-800 to-silver-darker">
-            <ListTodo className="h-10 w-10 text-silver" />
-          </div>
+          {tasks && tasks.length > 0 ? (
+            <div className="space-y-8">
+              {/* Pending Tasks */}
+              {pendingTasks.length > 0 && (
+                <div>
+                  <h2 className="mb-4 text-lg font-semibold text-silver-light">
+                    To Do ({pendingTasks.length})
+                  </h2>
+                  <TaskList tasks={pendingTasks} />
+                </div>
+              )}
 
-          <h2 className="mb-3 text-2xl font-bold">Coming Soon</h2>
-          <p className="mb-6 text-silver-light">
-            Your intelligent task manager is coming soon. Action items discussed
-            in coaching sessions will automatically appear here, ready to track
-            and complete.
-          </p>
+              {/* Completed Tasks */}
+              {completedTasks.length > 0 && (
+                <div>
+                  <h2 className="mb-4 text-lg font-semibold text-silver-light">
+                    Completed ({completedTasks.length})
+                  </h2>
+                  <TaskList tasks={completedTasks} />
+                </div>
+              )}
+            </div>
+          ) : (
+            /* Empty State */
+            <div className="card text-center">
+              <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-deep-blue-800 to-silver-darker">
+                <ListTodo className="h-10 w-10 text-silver" />
+              </div>
 
-          <div className="mx-auto mb-8 max-w-2xl rounded-2xl border border-white/5 bg-titanium-900/50 p-6 text-left">
-            <h3 className="mb-4 font-semibold">What's Coming:</h3>
-            <ul className="space-y-3 text-sm text-silver-light">
-              <li className="flex items-start gap-3">
-                <CheckSquare className="mt-0.5 h-4 w-4 flex-shrink-0 text-deep-blue-600" />
-                <span>
-                  Automatic capture of action items from voice and chat sessions
-                </span>
-              </li>
-              <li className="flex items-start gap-3">
-                <Square className="mt-0.5 h-4 w-4 flex-shrink-0 text-deep-blue-600" />
-                <span>
-                  Organize tasks by priority, deadline, and category
-                </span>
-              </li>
-              <li className="flex items-start gap-3">
-                <CheckSquare className="mt-0.5 h-4 w-4 flex-shrink-0 text-deep-blue-600" />
-                <span>
-                  Context-aware reminders based on your conversations
-                </span>
-              </li>
-              <li className="flex items-start gap-3">
-                <Square className="mt-0.5 h-4 w-4 flex-shrink-0 text-deep-blue-600" />
-                <span>
-                  Track completion and review progress over time
-                </span>
-              </li>
-            </ul>
-          </div>
+              <h2 className="mb-3 text-2xl font-bold">No Tasks Yet</h2>
+              <p className="mb-6 text-silver-light">
+                Action items from your coaching sessions will appear here.
+                Start a conversation and mention tasks you want to track!
+              </p>
 
-          <div>
-            <h3 className="mb-3 font-semibold text-silver-light">
-              In the meantime
-            </h3>
-            <Link href="/chat/new" className="btn btn-primary">
-              Start a Coaching Session
-            </Link>
-          </div>
-        </div>
+              <Link href="/voice-coach" className="btn btn-primary">
+                Start a Voice Session
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     </div>
