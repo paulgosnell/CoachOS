@@ -71,7 +71,22 @@ export function DashboardClient({ profile, goalsCount, conversationsCount, isPro
 
         {/* Dashboard Cards - New Layout */}
         <div className="flex flex-col gap-4">
-          {/* Row 1: Chat and Voice - Separate buttons */}
+          {/* Row 1: Progress - Full width with mini data viz */}
+          <Link
+            href={isPro ? "/progress" : "/subscribe"}
+            className="card group relative cursor-pointer transition-all hover:border-silver/30"
+            onClick={() => trackDashboardCardClick('progress')}
+          >
+            {!isPro && (
+              <div className="absolute right-2 top-2 flex items-center gap-1 rounded-full bg-gradient-to-r from-deep-blue-600 to-purple-600 px-2 py-0.5 text-xs font-semibold">
+                <Sparkles className="h-2.5 w-2.5" />
+                PRO
+              </div>
+            )}
+            <MiniProgressChart isPro={isPro} />
+          </Link>
+
+          {/* Row 2: Chat and Voice - Separate buttons */}
           <div className="grid grid-cols-2 gap-4">
             <Link
               href="/chat/new"
@@ -116,7 +131,7 @@ export function DashboardClient({ profile, goalsCount, conversationsCount, isPro
             </Link>
           </div>
 
-          {/* Row 2: Coaching Sessions and Goals */}
+          {/* Row 3: Coaching Sessions and Goals */}
           <div className="grid grid-cols-2 gap-4">
             <Link
               href={isPro ? "/sessions" : "/subscribe"}
@@ -171,26 +186,12 @@ export function DashboardClient({ profile, goalsCount, conversationsCount, isPro
             </Link>
           </div>
 
-          {/* Row 3: Progress - Full width with mini data viz */}
-          <Link
-            href={isPro ? "/progress" : "/subscribe"}
-            className="card group relative cursor-pointer transition-all hover:border-silver/30"
-            onClick={() => trackDashboardCardClick('progress')}
-          >
-            {!isPro && (
-              <div className="absolute right-2 top-2 flex items-center gap-1 rounded-full bg-gradient-to-r from-deep-blue-600 to-purple-600 px-2 py-0.5 text-xs font-semibold">
-                <Sparkles className="h-2.5 w-2.5" />
-                PRO
-              </div>
-            )}
-            <MiniProgressChart isPro={isPro} />
-          </Link>
-
           {/* Row 4: Tasks and Brain Dump */}
           <div className="grid grid-cols-2 gap-4">
             <Link
               href="/tasks"
-              className="card group cursor-pointer transition-all hover:border-silver/30 bg-titanium-900/30"
+              className="card group cursor-pointer transition-all hover:border-silver/30"
+              onClick={() => trackDashboardCardClick('tasks')}
             >
               <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-deep-blue-800/50">
                 <ListTodo className="h-5 w-5 text-silver" />
@@ -203,9 +204,8 @@ export function DashboardClient({ profile, goalsCount, conversationsCount, isPro
               </p>
             </Link>
 
-            <Link
-              href="/brain-dump"
-              className="card group cursor-pointer transition-all hover:border-silver/30 bg-titanium-900/30"
+            <div
+              className="card group cursor-not-allowed transition-all bg-titanium-900/30 opacity-60"
             >
               <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-deep-blue-800/50">
                 <Brain className="h-5 w-5 text-silver" />
@@ -217,7 +217,7 @@ export function DashboardClient({ profile, goalsCount, conversationsCount, isPro
                 Quick capture
               </p>
               <p className="mt-2 text-xs text-gray-500">Coming soon</p>
-            </Link>
+            </div>
           </div>
         </div>
       </div>
