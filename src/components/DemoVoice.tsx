@@ -63,6 +63,7 @@ export function DemoVoice({ onClose }: DemoVoiceProps) {
     const audioStreamRef = useRef<MediaStream | null>(null)
     const remoteAudioRef = useRef<HTMLAudioElement>(null)
     const timerIntervalRef = useRef<NodeJS.Timeout | null>(null)
+    const selectedVoiceRef = useRef(selectedVoice)
 
     // Countdown timer
     useEffect(() => {
@@ -103,13 +104,13 @@ export function DemoVoice({ onClose }: DemoVoiceProps) {
 
             switch (msg.type) {
                 case 'session.created':
-                    console.log('Demo session created')
+                    console.log('Demo session created with voice:', selectedVoiceRef.current)
                     if (dataChannelRef.current) {
                         dataChannelRef.current.send(JSON.stringify({
                             type: 'session.update',
                             session: {
                                 instructions: DEMO_SYSTEM_PROMPT,
-                                voice: selectedVoice,
+                                voice: selectedVoiceRef.current,
                                 input_audio_transcription: { model: 'whisper-1' },
                                 turn_detection: {
                                     type: 'server_vad',
@@ -260,7 +261,7 @@ export function DemoVoice({ onClose }: DemoVoiceProps) {
         }
     }
 
-    const endConversation = () => {
+    const cleanupConnection = () => {
         // Close connections
         if (dataChannelRef.current) {
             dataChannelRef.current.close()
@@ -277,10 +278,25 @@ export function DemoVoice({ onClose }: DemoVoiceProps) {
         if (timerIntervalRef.current) {
             clearInterval(timerIntervalRef.current)
         }
-
         setIsConnected(false)
         setIsSpeaking(false)
+        setIsAiSpeaking(false)
+    }
+
+    const endConversation = () => {
+        cleanupConnection()
         onClose()
+    }
+
+    const switchVoice = (newVoice: string) => {
+        setSelectedVoice(newVoice)
+        selectedVoiceRef.current = newVoice
+        setShowVoiceMenu(false)
+
+        // Restart session with new voice
+        cleanupConnection()
+        sessionIdRef.current = crypto.randomUUID()
+        startConversation()
     }
 
     const formatTime = (seconds: number) => {
@@ -376,10 +392,7 @@ export function DemoVoice({ onClose }: DemoVoiceProps) {
                                         {VOICES.map(voice => (
                                             <button
                                                 key={voice.id}
-                                                onClick={() => {
-                                                    setSelectedVoice(voice.id)
-                                                    setShowVoiceMenu(false)
-                                                }}
+                                                onClick={() => switchVoice(voice.id)}
                                                 className={`w-full px-4 py-2 text-left text-sm hover:bg-titanium-700 transition-colors ${
                                                     selectedVoice === voice.id ? 'bg-titanium-700 text-silver' : 'text-silver-light'
                                                 }`}
