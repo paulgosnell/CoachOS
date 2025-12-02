@@ -1,7 +1,14 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { Mic, Loader2, X } from 'lucide-react'
+import { Mic, Loader2, X, ChevronDown } from 'lucide-react'
+
+const VOICES = [
+    { id: 'verse', name: 'Verse', description: 'Calm & thoughtful' },
+    { id: 'alloy', name: 'Alloy', description: 'Warm & balanced' },
+    { id: 'echo', name: 'Echo', description: 'Clear & direct' },
+    { id: 'shimmer', name: 'Shimmer', description: 'Bright & friendly' },
+]
 
 const DEMO_SYSTEM_PROMPT = `You are an executive coach providing a 3-minute demo session. Give the visitor an authentic taste of coaching - be helpful and insightful within this short window.
 
@@ -45,7 +52,10 @@ export function DemoVoice({ onClose }: DemoVoiceProps) {
     const [isConnected, setIsConnected] = useState(false)
     const [isConnecting, setIsConnecting] = useState(false)
     const [isSpeaking, setIsSpeaking] = useState(false)
+    const [isAiSpeaking, setIsAiSpeaking] = useState(false)
     const [timeRemaining, setTimeRemaining] = useState(180) // 3 minutes
+    const [selectedVoice, setSelectedVoice] = useState('verse')
+    const [showVoiceMenu, setShowVoiceMenu] = useState(false)
 
     const sessionIdRef = useRef<string>(crypto.randomUUID())
     const peerConnectionRef = useRef<RTCPeerConnection | null>(null)
@@ -99,7 +109,7 @@ export function DemoVoice({ onClose }: DemoVoiceProps) {
                             type: 'session.update',
                             session: {
                                 instructions: DEMO_SYSTEM_PROMPT,
-                                voice: 'verse',
+                                voice: selectedVoice,
                                 input_audio_transcription: { model: 'whisper-1' },
                                 turn_detection: {
                                     type: 'server_vad',
@@ -113,11 +123,29 @@ export function DemoVoice({ onClose }: DemoVoiceProps) {
                     break
 
                 case 'session.updated':
-                    console.log('Demo session updated, ready for user input')
+                    console.log('Demo session updated, triggering welcome message')
                     setIsConnected(true)
                     setIsConnecting(false)
-                    // No automatic greeting - let the user speak first
-                    // The system prompt will handle the greeting when they do
+                    // Trigger AI to speak first with welcome message
+                    if (dataChannelRef.current) {
+                        dataChannelRef.current.send(JSON.stringify({
+                            type: 'response.create',
+                            response: {
+                                modalities: ['text', 'audio'],
+                                instructions: 'Greet the user briefly and warmly, then ask what\'s on their mind today. Keep it under 10 seconds.'
+                            }
+                        }))
+                    }
+                    break
+
+                case 'response.audio_transcript.delta':
+                case 'response.audio.delta':
+                    setIsAiSpeaking(true)
+                    break
+
+                case 'response.audio_transcript.done':
+                case 'response.done':
+                    setIsAiSpeaking(false)
                     break
 
                 case 'input_audio_buffer.speech_started':
@@ -314,22 +342,54 @@ export function DemoVoice({ onClose }: DemoVoiceProps) {
                     ) : isConnected ? (
                         <>
                             <div
-                                className={`flex h - 32 w - 32 items - center justify - center rounded - full transition - all duration - 300 ${
-    isSpeaking
-        ? 'animate-pulse bg-deep-blue-600 shadow-2xl shadow-deep-blue-600/40 scale-110'
-        : 'bg-deep-blue-800/50'
-} `}
+                                className={`flex h-32 w-32 items-center justify-center rounded-full transition-all duration-300 ${
+                                    isAiSpeaking
+                                        ? 'animate-pulse bg-green-600 shadow-2xl shadow-green-600/40 scale-110'
+                                        : isSpeaking
+                                            ? 'animate-pulse bg-deep-blue-600 shadow-2xl shadow-deep-blue-600/40 scale-110'
+                                            : 'bg-deep-blue-800/50'
+                                }`}
                             >
                                 <Mic className="h-12 w-12 text-silver" />
                             </div>
 
                             <div className="text-center">
                                 <p className="text-lg font-medium text-silver mb-2">
-                                    {isSpeaking ? 'Listening...' : 'Your coach is ready'}
+                                    {isAiSpeaking ? 'Coach is speaking...' : isSpeaking ? 'Listening...' : 'Your coach is ready'}
                                 </p>
                                 <p className="text-sm text-silver-dark">
                                     Share what's on your mind - a decision, challenge, or goal
                                 </p>
+                            </div>
+
+                            {/* Voice Selector */}
+                            <div className="relative">
+                                <button
+                                    onClick={() => setShowVoiceMenu(!showVoiceMenu)}
+                                    className="flex items-center gap-2 px-4 py-2 rounded-lg bg-titanium-800 border border-white/10 text-sm text-silver-light hover:bg-titanium-700 transition-colors"
+                                >
+                                    Voice: {VOICES.find(v => v.id === selectedVoice)?.name}
+                                    <ChevronDown className="h-4 w-4" />
+                                </button>
+                                {showVoiceMenu && (
+                                    <div className="absolute bottom-full left-0 mb-2 w-48 rounded-lg bg-titanium-800 border border-white/10 shadow-xl overflow-hidden">
+                                        {VOICES.map(voice => (
+                                            <button
+                                                key={voice.id}
+                                                onClick={() => {
+                                                    setSelectedVoice(voice.id)
+                                                    setShowVoiceMenu(false)
+                                                }}
+                                                className={`w-full px-4 py-2 text-left text-sm hover:bg-titanium-700 transition-colors ${
+                                                    selectedVoice === voice.id ? 'bg-titanium-700 text-silver' : 'text-silver-light'
+                                                }`}
+                                            >
+                                                <span className="font-medium">{voice.name}</span>
+                                                <span className="text-silver-dark ml-2">{voice.description}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
 
                             <button
