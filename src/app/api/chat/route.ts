@@ -3,14 +3,12 @@ import { assembleUserContextWithRAG } from '@/lib/ai/context'
 import { generateSystemPrompt } from '@/lib/ai/prompts'
 import { processMessageEmbedding } from '@/lib/memory/embeddings'
 import { extractActionItems, saveActionItems } from '@/lib/ai/actions'
-import OpenAI from 'openai'
+import { GoogleGenerativeAI } from '@google/generative-ai'
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-})
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY || '')
 
 export async function POST(req: Request) {
   try {
@@ -76,51 +74,60 @@ export async function POST(req: Request) {
     // Generate system prompt
     const systemPrompt = generateSystemPrompt(context)
 
-    // Prepare messages for OpenAI
-    const messages = [
-      {
-        role: 'system' as const,
-        content: systemPrompt,
-      },
-      ...context.recentHistory.map((msg) => ({
-        role: msg.role,
-        content: msg.content,
-      })),
-      {
-        role: 'user' as const,
-        content: message,
-      },
-    ]
+    // Prepare chat history for Gemini
+    const chatHistory = context.recentHistory.map((msg) => ({
+      role: msg.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: msg.content }],
+    }))
 
-    // Call OpenAI with streaming and stream_options to get usage
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o',
-      messages,
-      temperature: 0.7,
-      max_tokens: 1000,
-      stream: true,
-      stream_options: { include_usage: true }, // Get token usage with streaming
+    // Initialize Gemini model with system instruction
+    const model = genAI.getGenerativeModel({
+      model: 'gemini-2.5-flash-preview-05-20',
+      systemInstruction: systemPrompt,
+      generationConfig: {
+        temperature: 0.7,
+        maxOutputTokens: 1000,
+      },
     })
+
+    // Start chat with history
+    const chat = model.startChat({
+      history: chatHistory,
+    })
+
+    // Stream the response
+    const result = await chat.sendMessageStream(message)
 
     // Create a streaming response
     let fullResponse = ''
-    let usageData: any = null
     const encoder = new TextEncoder()
 
     const stream = new ReadableStream({
       async start(controller) {
-        for await (const chunk of response) {
-          const content = chunk.choices[0]?.delta?.content || ''
+        let inputTokens = 0
+        let outputTokens = 0
+
+        for await (const chunk of result.stream) {
+          const content = chunk.text()
           if (content) {
             fullResponse += content
-            // Send chunk in streaming format
-            controller.enqueue(encoder.encode(`0:"${content}"\n`))
+            // Send chunk in streaming format (escape special chars for JSON)
+            const escaped = content.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n')
+            controller.enqueue(encoder.encode(`0:"${escaped}"\n`))
           }
 
-          // Capture usage data from final chunk
-          if (chunk.usage) {
-            usageData = chunk.usage
+          // Try to get usage metadata from chunk
+          if (chunk.usageMetadata) {
+            inputTokens = chunk.usageMetadata.promptTokenCount || 0
+            outputTokens = chunk.usageMetadata.candidatesTokenCount || 0
           }
+        }
+
+        // Get final usage from response
+        const response = await result.response
+        if (response.usageMetadata) {
+          inputTokens = response.usageMetadata.promptTokenCount || 0
+          outputTokens = response.usageMetadata.candidatesTokenCount || 0
         }
 
         // Save complete response to database
@@ -154,16 +161,13 @@ export async function POST(req: Request) {
           }
 
           // Track token usage
-          if (usageData) {
+          if (inputTokens > 0 || outputTokens > 0) {
             try {
-              // Calculate cost using database function
-              const { data: costData } = await supabase.rpc('calculate_token_cost', {
-                p_model: 'gpt-4o',
-                p_input_tokens: usageData.prompt_tokens || 0,
-                p_output_tokens: usageData.completion_tokens || 0,
-                p_input_audio_tokens: 0,
-                p_output_audio_tokens: 0,
-              })
+              // Calculate cost for Gemini 2.5 Flash
+              // Pricing: $0.30/1M input, $2.50/1M output (non-thinking mode)
+              const inputCost = (inputTokens / 1_000_000) * 0.30
+              const outputCost = (outputTokens / 1_000_000) * 2.50
+              const totalCost = inputCost + outputCost
 
               // Save token usage
               await supabase.from('token_usage').insert({
@@ -171,13 +175,13 @@ export async function POST(req: Request) {
                 conversation_id: conversationId,
                 message_id: assistantMessage?.id,
                 session_type: 'chat',
-                model: 'gpt-4o',
-                input_tokens: usageData.prompt_tokens || 0,
-                output_tokens: usageData.completion_tokens || 0,
-                total_tokens: usageData.total_tokens || 0,
-                input_cost: costData?.input_cost || 0,
-                output_cost: costData?.output_cost || 0,
-                total_cost: costData?.total_cost || 0,
+                model: 'gemini-2.5-flash',
+                input_tokens: inputTokens,
+                output_tokens: outputTokens,
+                total_tokens: inputTokens + outputTokens,
+                input_cost: inputCost,
+                output_cost: outputCost,
+                total_cost: totalCost,
               })
             } catch (err) {
               console.error('Failed to track token usage:', err)

@@ -14,24 +14,14 @@ export async function POST(req: Request) {
       return new Response('Unauthorized', { status: 401 })
     }
 
-    // Check if OpenAI API key is configured
-    if (!process.env.OPENAI_API_KEY) {
+    // Check Gemini API key
+    const geminiKey = process.env.GOOGLE_AI_API_KEY || process.env.GEMINI_API_KEY
+    if (!geminiKey) {
       return new Response(
-        JSON.stringify({ error: 'OpenAI API key not configured' }),
+        JSON.stringify({ error: 'Google AI API key not configured' }),
         { status: 500, headers: { 'Content-Type': 'application/json' } }
       )
     }
-
-    // Assemble full user context (profile, goals, business, RAG memories)
-    const context = await assembleUserContext(
-      user.id,
-      '', // No current message for initial setup
-      5 // memoryLimit
-    )
-
-    // Generate the Coach OS system prompt with full context
-    const systemPrompt = generateSystemPrompt(context)
-    const firstName = context.profile.fullName.split(' ')[0]
 
     // Get voice preferences from profile
     const { data: profile } = await supabase
@@ -42,13 +32,25 @@ export async function POST(req: Request) {
 
     const voicePreference = profile?.coach_preference || {}
 
-    // Return the configuration for OpenAI Realtime API
+    // Assemble full user context (profile, goals, business, RAG memories)
+    const context = await assembleUserContext(
+      user.id,
+      '', // No current message for initial setup
+      5 // memoryLimit
+    )
+
+    // Generate system prompt
+    const systemPrompt = generateSystemPrompt(context)
+
+    const firstName = context.profile.fullName.split(' ')[0]
+
+    // Return the configuration
     return new Response(
       JSON.stringify({
         systemPrompt,
         firstName,
         voiceSettings: {
-          voice: voicePreference.voice || 'verse',
+          geminiVoice: voicePreference.gemini_voice || 'Puck',
           speed: voicePreference.voice_speed || 1.0,
           vadThreshold: voicePreference.vad_threshold || 0.5,
           vadSilenceDuration: voicePreference.vad_silence_duration || 500,

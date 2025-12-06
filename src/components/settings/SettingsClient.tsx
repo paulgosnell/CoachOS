@@ -11,6 +11,7 @@ interface SettingsClientProps {
     email: string
     coach_preference?: {
       voice?: string
+      gemini_voice?: string
       voice_speed?: number
       vad_threshold?: number
       vad_silence_duration?: number
@@ -39,8 +40,8 @@ export function SettingsClient({ profile, businessProfile }: SettingsClientProps
   // Personal info
   const [fullName, setFullName] = useState(profile.full_name)
 
-  // Voice preferences
-  const [voice, setVoice] = useState(profile.coach_preference?.voice || 'verse')
+  // Voice preferences (Gemini only now)
+  const [geminiVoice, setGeminiVoice] = useState(profile.coach_preference?.gemini_voice || 'Puck')
   const [voiceSpeed, setVoiceSpeed] = useState(profile.coach_preference?.voice_speed || 1.0)
   const [vadThreshold, setVadThreshold] = useState(profile.coach_preference?.vad_threshold || 0.5)
   const [vadSilenceDuration, setVadSilenceDuration] = useState(profile.coach_preference?.vad_silence_duration || 500)
@@ -69,22 +70,22 @@ export function SettingsClient({ profile, businessProfile }: SettingsClientProps
         body: JSON.stringify({
           fullName,
           coachPreference: {
-            voice,
+            gemini_voice: geminiVoice,
             voice_speed: voiceSpeed,
             vad_threshold: vadThreshold,
             vad_silence_duration: vadSilenceDuration,
           },
           businessProfile: {
-            industry,
-            company_stage: companyStage,
-            company_name: companyName,
-            role,
-            team_size: teamSize,
-            revenue_range: revenueRange,
-            location,
-            target_markets: targetMarkets,
-            key_challenges: keyChallenges,
-            reports_to: reportsTo,
+            industry: industry || null,
+            company_stage: companyStage || null,
+            company_name: companyName || null,
+            role: role || null,
+            team_size: teamSize ? parseInt(teamSize.split('-')[0]) : null,
+            revenue_range: revenueRange || null,
+            location: location || null,
+            markets: targetMarkets ? targetMarkets.split(',').map((m: string) => m.trim()).filter(Boolean) : [],
+            key_challenges: keyChallenges ? keyChallenges.split(',').map((c: string) => c.trim()).filter(Boolean) : [],
+            reports_to: reportsTo || null,
             direct_reports: directReports ? parseInt(directReports) : null,
           },
         }),
@@ -182,20 +183,15 @@ export function SettingsClient({ profile, businessProfile }: SettingsClientProps
               Voice
             </label>
             <select
-              value={voice}
-              onChange={(e) => setVoice(e.target.value)}
+              value={geminiVoice}
+              onChange={(e) => setGeminiVoice(e.target.value)}
               className="w-full rounded-lg border border-white/10 bg-titanium-800 px-3 py-2 text-silver focus:border-white/20 focus:outline-none"
             >
-              <option value="alloy">Alloy - Neutral, balanced (gender-neutral)</option>
-              <option value="ash">Ash - Clear, articulate (masculine)</option>
-              <option value="ballad">Ballad - Smooth, warm (masculine)</option>
-              <option value="coral">Coral - Friendly, upbeat (feminine)</option>
-              <option value="echo">Echo - Deep, resonant (masculine)</option>
-              <option value="sage">Sage - Calm, wise (masculine)</option>
-              <option value="shimmer">Shimmer - Bright, energetic (feminine)</option>
-              <option value="verse">Verse - Natural, conversational (Default, masculine)</option>
-              <option value="cedar">Cedar - Rich, steady (masculine)</option>
-              <option value="marin">Marin - Professional, crisp (feminine)</option>
+              <option value="Puck">Puck - Energetic, playful (Default)</option>
+              <option value="Kore">Kore - Calm, supportive</option>
+              <option value="Aoede">Aoede - Warm, melodic</option>
+              <option value="Charon">Charon - Deep, grounding</option>
+              <option value="Fenrir">Fenrir - Bold, direct</option>
             </select>
             <p className="mt-1 text-xs text-silver-light">
               Choose the voice personality for your AI coach

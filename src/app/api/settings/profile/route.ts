@@ -14,7 +14,10 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { fullName, coachPreference, businessProfile } = await request.json()
+    const body = await request.json()
+    const { fullName, coachPreference, businessProfile } = body
+
+    console.log('Settings update request:', JSON.stringify(body, null, 2))
 
     // Update profile
     const updates: any = {}
