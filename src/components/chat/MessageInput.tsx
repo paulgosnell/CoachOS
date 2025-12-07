@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Send, Loader2 } from 'lucide-react'
 import { trackMessageSent } from '@/lib/analytics'
 
@@ -12,19 +12,33 @@ interface MessageInputProps {
 export function MessageInput({ onSend, disabled = false }: MessageInputProps) {
   const [message, setMessage] = useState('')
   const [sending, setSending] = useState(false)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  // Auto-focus on mount and after sending
+  useEffect(() => {
+    if (!disabled && !sending) {
+      textareaRef.current?.focus()
+    }
+  }, [disabled, sending])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     if (!message.trim() || sending || disabled) return
 
+    const messageToSend = message.trim()
+
+    // Clear input immediately for better UX
+    setMessage('')
     setSending(true)
+    trackMessageSent('text')
+
     try {
-      await onSend(message.trim())
-      trackMessageSent('text')
-      setMessage('')
+      await onSend(messageToSend)
     } catch (error) {
       console.error('Failed to send message:', error)
+      // Restore message on error so user doesn't lose their input
+      setMessage(messageToSend)
     } finally {
       setSending(false)
     }
@@ -42,6 +56,7 @@ export function MessageInput({ onSend, disabled = false }: MessageInputProps) {
     <form onSubmit={handleSubmit} className="w-full">
       <div className="flex items-center gap-2">
         <textarea
+          ref={textareaRef}
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           onKeyDown={handleKeyDown}

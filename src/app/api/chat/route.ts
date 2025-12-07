@@ -87,7 +87,17 @@ export async function POST(req: Request) {
       : generateSystemPrompt(context)
 
     // Prepare chat history for Gemini
-    const chatHistory = context.recentHistory.map((msg) => ({
+    // Gemini requires first message to be from 'user', so filter out any leading assistant messages
+    let historyStartIndex = 0
+    for (let i = 0; i < context.recentHistory.length; i++) {
+      if (context.recentHistory[i].role === 'user') {
+        historyStartIndex = i
+        break
+      }
+    }
+    const validHistory = context.recentHistory.slice(historyStartIndex)
+
+    const chatHistory = validHistory.map((msg) => ({
       role: msg.role === 'assistant' ? 'model' : 'user',
       parts: [{ text: msg.content }],
     }))

@@ -1,5 +1,6 @@
 import { User, Bot } from 'lucide-react'
 import { AudioPlayer } from '@/components/voice/AudioPlayer'
+import ReactMarkdown from 'react-markdown'
 
 interface MessageBubbleProps {
   role: 'user' | 'assistant'
@@ -37,7 +38,13 @@ export function MessageBubble({ role, content, timestamp, showAudio = false }: M
               : 'message-coach bg-titanium-900/50 border border-white/5 text-silver-light rounded-bl-md'
           }`}
         >
-          <p className="whitespace-pre-wrap text-sm leading-relaxed">{content}</p>
+          {isUser ? (
+            <p className="whitespace-pre-wrap text-sm leading-relaxed">{content}</p>
+          ) : (
+            <div className="prose prose-sm prose-invert max-w-none text-silver-light prose-p:my-1 prose-p:leading-relaxed prose-strong:text-silver prose-em:text-silver-light">
+              <ReactMarkdown>{content}</ReactMarkdown>
+            </div>
+          )}
 
           {/* Audio Player for assistant messages */}
           {!isUser && showAudio && (

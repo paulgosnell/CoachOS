@@ -222,10 +222,17 @@ export default function ChatPage() {
 
         for (const line of lines) {
           if (line.startsWith('0:')) {
-            // Extract the text from the streaming format
-            const text = line.slice(2).replace(/^"/, '').replace(/"$/, '')
-            fullMessage += text
-            setStreamingMessage(fullMessage)
+            // Extract and decode the JSON-encoded text from the streaming format
+            try {
+              const text = JSON.parse(line.slice(2))
+              fullMessage += text
+              setStreamingMessage(fullMessage)
+            } catch {
+              // Fallback for non-JSON chunks
+              const text = line.slice(2).replace(/^"/, '').replace(/"$/, '')
+              fullMessage += text
+              setStreamingMessage(fullMessage)
+            }
           }
           // Ignore other streaming metadata (e.g., agent types, session info)
         }
