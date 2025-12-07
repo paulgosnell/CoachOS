@@ -27,12 +27,13 @@ export function SessionsList() {
 
   useEffect(() => {
     fetchSessions()
-  }, [showCompleted])
+  }, [])
 
   const fetchSessions = async () => {
     try {
+      // Always fetch all sessions (completed=true includes all)
       const url = new URL('/api/sessions', window.location.origin)
-      url.searchParams.set('completed', showCompleted.toString())
+      url.searchParams.set('completed', 'true')
 
       const response = await fetch(url.toString())
       const data = await response.json()

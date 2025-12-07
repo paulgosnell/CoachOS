@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { assembleUserContext } from '@/lib/ai/context'
 import { generateSystemPrompt } from '@/lib/ai/prompts'
+import { generateADHDCoachPrompt } from '@/lib/ai/prompts-adhd'
 
 export async function POST(req: Request) {
   try {
@@ -23,7 +24,7 @@ export async function POST(req: Request) {
       )
     }
 
-    // Get voice preferences from profile
+    // Get voice preferences and coach type from profile
     const { data: profile } = await supabase
       .from('profiles')
       .select('coach_preference')
@@ -31,6 +32,7 @@ export async function POST(req: Request) {
       .single()
 
     const voicePreference = profile?.coach_preference || {}
+    const coachType = voicePreference.coach_type || 'standard'
 
     // Assemble full user context (profile, goals, business, RAG memories)
     const context = await assembleUserContext(
@@ -39,8 +41,10 @@ export async function POST(req: Request) {
       5 // memoryLimit
     )
 
-    // Generate system prompt
-    const systemPrompt = generateSystemPrompt(context)
+    // Generate system prompt based on coach type
+    const systemPrompt = coachType === 'adhd'
+      ? generateADHDCoachPrompt(context)
+      : generateSystemPrompt(context)
 
     const firstName = context.profile.fullName.split(' ')[0]
 
@@ -49,6 +53,7 @@ export async function POST(req: Request) {
       JSON.stringify({
         systemPrompt,
         firstName,
+        coachType,
         voiceSettings: {
           geminiVoice: voicePreference.gemini_voice || 'Puck',
           speed: voicePreference.voice_speed || 1.0,

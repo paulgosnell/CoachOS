@@ -272,6 +272,10 @@ export function GeminiVoiceConversation({ config, router }: GeminiVoiceConversat
                     voiceName: geminiVoice
                   }
                 }
+              },
+              // Disable thinking mode to avoid reasoning traces in output
+              thinkingConfig: {
+                thinkingBudget: 0
               }
             },
             systemInstruction: {
@@ -344,12 +348,27 @@ export function GeminiVoiceConversation({ config, router }: GeminiVoiceConversat
                 await playAudio(part.inlineData.data)
               }
               if (part.text) {
-                // Text transcript from the agent
-                console.log('Agent text:', part.text)
-                const assistantEntry = { role: 'assistant', message: part.text }
-                setTranscript(prev => [...prev, assistantEntry])
-                transcriptRef.current = [...transcriptRef.current, assistantEntry]
-                saveMessage('assistant', part.text)
+                // Filter out thinking/reasoning traces (they start with ** markdown headers)
+                const isThinkingContent = part.text.trim().startsWith('**') &&
+                  (part.text.includes('Considering') ||
+                   part.text.includes('Recognizing') ||
+                   part.text.includes('Acknowledging') ||
+                   part.text.includes('Thinking') ||
+                   part.text.includes('Processing') ||
+                   part.text.includes('Analyzing') ||
+                   part.text.includes('Evaluating') ||
+                   part.text.includes('Reflecting'))
+
+                if (!isThinkingContent) {
+                  // Text transcript from the agent
+                  console.log('Agent text:', part.text)
+                  const assistantEntry = { role: 'assistant', message: part.text }
+                  setTranscript(prev => [...prev, assistantEntry])
+                  transcriptRef.current = [...transcriptRef.current, assistantEntry]
+                  saveMessage('assistant', part.text)
+                } else {
+                  console.log('Filtered thinking content:', part.text.substring(0, 50))
+                }
               }
             }
           }

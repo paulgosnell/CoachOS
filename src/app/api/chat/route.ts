@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { assembleUserContextWithRAG } from '@/lib/ai/context'
 import { generateSystemPrompt } from '@/lib/ai/prompts'
+import { generateADHDCoachPrompt } from '@/lib/ai/prompts-adhd'
 import { processMessageEmbedding } from '@/lib/memory/embeddings'
 import { extractActionItems, saveActionItems } from '@/lib/ai/actions'
 import { GoogleGenerativeAI } from '@google/generative-ai'
@@ -68,11 +69,22 @@ export async function POST(req: Request) {
       ).catch((err) => console.error('Failed to process user message embedding:', err))
     }
 
+    // Get user's coach type preference
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('coach_preference')
+      .eq('id', user.id)
+      .single()
+
+    const coachType = profile?.coach_preference?.coach_type || 'standard'
+
     // Assemble user context with RAG (semantic search for relevant past conversations)
     const context = await assembleUserContextWithRAG(user.id, conversationId, message, 20, 5)
 
-    // Generate system prompt
-    const systemPrompt = generateSystemPrompt(context)
+    // Generate system prompt based on coach type
+    const systemPrompt = coachType === 'adhd'
+      ? generateADHDCoachPrompt(context)
+      : generateSystemPrompt(context)
 
     // Prepare chat history for Gemini
     const chatHistory = context.recentHistory.map((msg) => ({
@@ -82,7 +94,7 @@ export async function POST(req: Request) {
 
     // Initialize Gemini model with system instruction
     const model = genAI.getGenerativeModel({
-      model: 'gemini-2.5-flash-preview-05-20',
+      model: 'gemini-2.5-flash',
       systemInstruction: systemPrompt,
       generationConfig: {
         temperature: 0.7,
@@ -111,9 +123,8 @@ export async function POST(req: Request) {
           const content = chunk.text()
           if (content) {
             fullResponse += content
-            // Send chunk in streaming format (escape special chars for JSON)
-            const escaped = content.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n')
-            controller.enqueue(encoder.encode(`0:"${escaped}"\n`))
+            // Send chunk in streaming format using JSON.stringify for proper escaping
+            controller.enqueue(encoder.encode(`0:${JSON.stringify(content)}\n`))
           }
 
           // Try to get usage metadata from chunk
