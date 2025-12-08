@@ -26,6 +26,14 @@ export interface UserContext {
     targetDate?: string
     status: string
   }>
+  actionItems: Array<{
+    task: string
+    description?: string
+    priority: 'low' | 'medium' | 'high'
+    dueDate?: string
+    status: string
+    createdAt: Date
+  }>
   recentHistory: Array<{
     role: 'user' | 'assistant'
     content: string
@@ -76,6 +84,16 @@ export async function assembleUserContext(
     .order('priority', { ascending: true })
     .limit(5)
 
+  // Fetch pending action items (tasks)
+  const { data: actionItems } = await supabase
+    .from('action_items')
+    .select('task, description, priority, due_date, status, created_at')
+    .eq('user_id', userId)
+    .eq('status', 'pending')
+    .order('due_date', { ascending: true, nullsFirst: false })
+    .order('priority', { ascending: false })
+    .limit(10)
+
   // Fetch recent conversation history
   const { data: messages } = await supabase
     .from('messages')
@@ -109,6 +127,14 @@ export async function assembleUserContext(
       priority: g.priority,
       targetDate: g.target_date || undefined,
       status: g.status,
+    })),
+    actionItems: (actionItems || []).map((a) => ({
+      task: a.task,
+      description: a.description || undefined,
+      priority: a.priority as 'low' | 'medium' | 'high',
+      dueDate: a.due_date || undefined,
+      status: a.status,
+      createdAt: new Date(a.created_at),
     })),
     recentHistory: (messages || [])
       .reverse()
@@ -225,6 +251,18 @@ export function formatUserContext(context: UserContext): string {
       if (goal.description) parts.push(`   ${goal.description}`)
       if (goal.category) parts.push(`   Category: ${goal.category}`)
       if (goal.targetDate) parts.push(`   Target: ${goal.targetDate}`)
+    })
+    parts.push('')
+  }
+
+  // Action Items (Tasks)
+  if (context.actionItems && context.actionItems.length > 0) {
+    parts.push(`OUTSTANDING TASKS:`)
+    context.actionItems.forEach((item, index) => {
+      const priorityLabel = item.priority === 'high' ? '🔴' : item.priority === 'medium' ? '🟡' : '🟢'
+      const dueStr = item.dueDate ? ` (due: ${item.dueDate})` : ''
+      parts.push(`${index + 1}. ${priorityLabel} ${item.task}${dueStr}`)
+      if (item.description) parts.push(`   ${item.description}`)
     })
     parts.push('')
   }
