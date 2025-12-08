@@ -48,6 +48,15 @@ export interface UserContext {
     daily: string[]
     weekly: string[]
   }
+  recentSessionSummaries?: Array<{
+    summary: string
+    keyTopics: string[]
+    decisions: string[]
+    breakthroughs: string[]
+    patterns: string[]
+    userState: string | null
+    daysAgo: number
+  }>
 }
 
 /**
@@ -167,6 +176,7 @@ export async function assembleUserContextWithRAG(
     // Import memory utilities (dynamic to avoid circular deps)
     const { generateEmbedding, searchSimilarMessages } = await import('@/lib/memory/embeddings')
     const { getRecentSummaries } = await import('@/lib/memory/summaries')
+    const { getRecentConversationSummaries } = await import('@/lib/memory/conversation-summary')
 
     // Generate embedding for current message
     const queryEmbedding = await generateEmbedding(currentMessage)
@@ -197,6 +207,21 @@ export async function assembleUserContextWithRAG(
         daily: summaries.dailySummaries.map((s) => s.summary),
         weekly: summaries.weeklySummaries.map((s) => s.summary),
       }
+    }
+
+    // Get recent conversation summaries (MemoryOS)
+    const sessionSummaries = await getRecentConversationSummaries(userId, 10)
+    if (sessionSummaries.length > 0) {
+      const now = Date.now()
+      context.recentSessionSummaries = sessionSummaries.map((s) => ({
+        summary: s.summary,
+        keyTopics: s.key_topics || [],
+        decisions: s.decisions_made || [],
+        breakthroughs: s.breakthroughs || [],
+        patterns: s.patterns_noticed || [],
+        userState: s.user_state,
+        daysAgo: Math.floor((now - new Date(s.generated_at).getTime()) / (1000 * 60 * 60 * 24)),
+      }))
     }
   } catch (error) {
     console.error('Failed to fetch RAG context:', error)
@@ -288,6 +313,33 @@ export function formatUserContext(context: UserContext): string {
       })
       parts.push('')
     }
+  }
+
+  // Recent Session Summaries (from MemoryOS)
+  if (context.recentSessionSummaries && context.recentSessionSummaries.length > 0) {
+    parts.push(`RECENT SESSION HISTORY (MemoryOS):`)
+    parts.push(`(Key insights from recent coaching conversations)`)
+    context.recentSessionSummaries.slice(0, 5).forEach((session, index) => {
+      const timeAgo = session.daysAgo === 0 ? 'today' : session.daysAgo === 1 ? 'yesterday' : `${session.daysAgo} days ago`
+      parts.push(``)
+      parts.push(`${index + 1}. [${timeAgo}] ${session.summary}`)
+      if (session.keyTopics.length > 0) {
+        parts.push(`   Topics: ${session.keyTopics.join(', ')}`)
+      }
+      if (session.decisions.length > 0) {
+        parts.push(`   Decisions: ${session.decisions.slice(0, 2).join('; ')}`)
+      }
+      if (session.breakthroughs.length > 0) {
+        parts.push(`   Breakthroughs: ${session.breakthroughs.join('; ')}`)
+      }
+      if (session.patterns.length > 0) {
+        parts.push(`   Patterns: ${session.patterns.join('; ')}`)
+      }
+      if (session.userState) {
+        parts.push(`   User state: ${session.userState}`)
+      }
+    })
+    parts.push('')
   }
 
   // Relevant Memories (from RAG)
