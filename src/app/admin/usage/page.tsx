@@ -134,7 +134,7 @@ export default async function AdminUsagePage() {
             Back to Admin
           </Link>
           <h1 className="mb-2 text-3xl font-bold">Usage & Costs</h1>
-          <p className="text-silver-light">Monitor OpenAI API usage and costs (Last 30 days)</p>
+          <p className="text-silver-light">Monitor AI API usage and costs (Last 30 days)</p>
         </div>
 
         {/* Top Stats */}

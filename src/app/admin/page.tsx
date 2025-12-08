@@ -40,10 +40,13 @@ export default async function AdminDashboard() {
   const sevenDaysAgo = new Date()
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
 
-  const { count: activeUsersWeek } = await supabase
+  // Get distinct active users in last 7 days
+  const { data: recentConversations } = await supabase
     .from('conversations')
-    .select('user_id', { count: 'exact', head: true })
+    .select('user_id')
     .gte('started_at', sevenDaysAgo.toISOString())
+
+  const activeUsersWeek = new Set(recentConversations?.map(c => c.user_id) || []).size
 
   const { count: conversationsWeek } = await supabase
     .from('conversations')
