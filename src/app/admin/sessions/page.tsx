@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { MessageSquare, ArrowLeft, Clock, TrendingUp, Target, Sparkles } from 'lucide-react'
+import { MessageSquare, ArrowLeft, Clock, TrendingUp, Target, Sparkles, Brain, ChevronDown, ChevronUp, Lightbulb, ListChecks } from 'lucide-react'
 import Link from 'next/link'
 
 interface Session {
@@ -24,12 +24,31 @@ interface Session {
   depth_score: number | null
   action_items_count: number | null
   breakthrough_detected: boolean | null
+  has_summary: boolean
+  summary_preview: string | null
+  summary_topics: string[]
+  summary_user_state: string | null
+  summary_breakthroughs: string[]
+  summary_decisions: string[]
 }
 
 export default function AdminSessionsPage() {
   const [sessions, setSessions] = useState<Session[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [expandedSummaries, setExpandedSummaries] = useState<Set<string>>(new Set())
+
+  const toggleSummary = (sessionId: string) => {
+    setExpandedSummaries(prev => {
+      const next = new Set(prev)
+      if (next.has(sessionId)) {
+        next.delete(sessionId)
+      } else {
+        next.add(sessionId)
+      }
+      return next
+    })
+  }
 
   useEffect(() => {
     loadSessions()
@@ -166,6 +185,17 @@ export default function AdminSessionsPage() {
               %
             </div>
           </div>
+
+          <div className="card">
+            <div className="text-sm text-silver-light">Summarized</div>
+            <div className="flex items-center gap-2">
+              <Brain className="h-5 w-5 text-purple-400" />
+              <span className="text-2xl font-bold">
+                {sessions.filter((s) => s.has_summary).length}
+              </span>
+              <span className="text-sm text-silver-light">/ {sessions.length}</span>
+            </div>
+          </div>
         </div>
 
         {/* Sessions List */}
@@ -179,6 +209,11 @@ export default function AdminSessionsPage() {
                     {session.breakthrough_detected && (
                       <span title="Breakthrough moment!">
                         <Sparkles className="h-4 w-4 text-yellow-400" />
+                      </span>
+                    )}
+                    {session.has_summary && (
+                      <span title="Has AI summary">
+                        <Brain className="h-4 w-4 text-purple-400" />
                       </span>
                     )}
                   </div>
@@ -254,13 +289,90 @@ export default function AdminSessionsPage() {
                 )}
               </div>
 
-              <div className="mt-4">
+              {/* Summary Preview */}
+              {session.has_summary && (
+                <div className="mt-4 border-t border-titanium-800 pt-4">
+                  <button
+                    onClick={() => toggleSummary(session.id)}
+                    className="flex w-full items-center justify-between text-left"
+                  >
+                    <div className="flex items-center gap-2 text-sm font-medium text-purple-400">
+                      <Brain className="h-4 w-4" />
+                      AI Summary
+                      {session.summary_user_state && (
+                        <span className="rounded bg-titanium-800 px-2 py-0.5 text-xs capitalize text-silver-light">
+                          {session.summary_user_state}
+                        </span>
+                      )}
+                    </div>
+                    {expandedSummaries.has(session.id) ? (
+                      <ChevronUp className="h-4 w-4 text-silver-light" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4 text-silver-light" />
+                    )}
+                  </button>
+
+                  {expandedSummaries.has(session.id) && (
+                    <div className="mt-3 space-y-3">
+                      {/* Summary text */}
+                      <p className="text-sm text-silver">{session.summary_preview}</p>
+
+                      {/* Topics */}
+                      {session.summary_topics.length > 0 && (
+                        <div className="flex flex-wrap gap-1">
+                          {session.summary_topics.map((topic, i) => (
+                            <span key={i} className="rounded bg-blue-500/10 px-2 py-0.5 text-xs text-blue-300">
+                              {topic}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Breakthroughs & Decisions */}
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        {session.summary_breakthroughs.length > 0 && (
+                          <div className="rounded-lg bg-yellow-500/5 p-3">
+                            <div className="mb-2 flex items-center gap-1 text-xs font-medium text-yellow-400">
+                              <Lightbulb className="h-3 w-3" />
+                              Breakthroughs
+                            </div>
+                            <ul className="space-y-1">
+                              {session.summary_breakthroughs.slice(0, 3).map((b, i) => (
+                                <li key={i} className="text-xs text-silver">{b}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        {session.summary_decisions.length > 0 && (
+                          <div className="rounded-lg bg-green-500/5 p-3">
+                            <div className="mb-2 flex items-center gap-1 text-xs font-medium text-green-400">
+                              <ListChecks className="h-3 w-3" />
+                              Decisions
+                            </div>
+                            <ul className="space-y-1">
+                              {session.summary_decisions.slice(0, 3).map((d, i) => (
+                                <li key={i} className="text-xs text-silver">{d}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className="mt-4 flex items-center justify-between">
                 <Link
                   href={`/admin/sessions/${session.id}`}
                   className="text-sm text-deep-blue-600 hover:text-deep-blue-500"
                 >
                   View Details →
                 </Link>
+                {!session.has_summary && (
+                  <span className="text-xs text-silver-light">No summary yet</span>
+                )}
               </div>
             </div>
           ))}
