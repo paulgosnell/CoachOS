@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
-import { assembleUserContext } from '@/lib/ai/context'
 import { generateSystemPrompt } from '@/lib/ai/prompts'
 import { generateADHDCoachPrompt } from '@/lib/ai/prompts-adhd'
+import type { UserContext } from '@/lib/ai/context'
 
 export async function POST(req: Request) {
   try {
@@ -24,23 +24,79 @@ export async function POST(req: Request) {
       )
     }
 
-    // Get voice preferences and coach type from profile
+    // Get profile with coach preference
     const { data: profile } = await supabase
       .from('profiles')
-      .select('coach_preference')
+      .select('full_name, email, coach_preference')
       .eq('id', user.id)
       .single()
 
     const voicePreference = profile?.coach_preference || {}
     const coachType = voicePreference.coach_type || 'standard'
 
-    // Assemble user context (profile, goals, business info)
-    // Pass empty conversationId since we're just getting initial config
-    const context = await assembleUserContext(
-      user.id,
-      '', // No conversation yet - just getting user context
-      0 // No message history needed for initial setup
-    )
+    // Get business profile
+    const { data: businessProfile } = await supabase
+      .from('business_profiles')
+      .select('*')
+      .eq('user_id', user.id)
+      .single()
+
+    // Get active goals
+    const { data: goals } = await supabase
+      .from('goals')
+      .select('title, description, category, priority, target_date, status')
+      .eq('user_id', user.id)
+      .eq('status', 'active')
+      .order('priority', { ascending: true })
+      .limit(5)
+
+    // Get pending action items
+    const { data: actionItems } = await supabase
+      .from('action_items')
+      .select('task, description, priority, due_date, status, created_at')
+      .eq('user_id', user.id)
+      .eq('status', 'pending')
+      .order('due_date', { ascending: true, nullsFirst: false })
+      .order('priority', { ascending: false })
+      .limit(10)
+
+    // Build context directly (simpler, no conversation history needed for voice init)
+    const context: UserContext = {
+      profile: {
+        fullName: profile?.full_name || 'User',
+        email: profile?.email || '',
+      },
+      business: {
+        industry: businessProfile?.industry,
+        companyStage: businessProfile?.company_stage,
+        role: businessProfile?.role,
+        companyName: businessProfile?.company_name,
+        teamSize: businessProfile?.team_size,
+        location: businessProfile?.location,
+        revenueRange: businessProfile?.revenue_range,
+        markets: businessProfile?.markets,
+        keyChallenges: businessProfile?.key_challenges,
+        reportsTo: businessProfile?.reports_to,
+        directReports: businessProfile?.direct_reports,
+      },
+      goals: (goals || []).map((g) => ({
+        title: g.title,
+        description: g.description || undefined,
+        category: g.category || undefined,
+        priority: g.priority,
+        targetDate: g.target_date || undefined,
+        status: g.status,
+      })),
+      actionItems: (actionItems || []).map((a) => ({
+        task: a.task,
+        description: a.description || undefined,
+        priority: a.priority as 'low' | 'medium' | 'high',
+        dueDate: a.due_date || undefined,
+        status: a.status,
+        createdAt: new Date(a.created_at),
+      })),
+      recentHistory: [],
+    }
 
     // Generate system prompt based on coach type
     const systemPrompt = coachType === 'adhd'
