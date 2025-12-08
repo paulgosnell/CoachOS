@@ -201,6 +201,33 @@ export async function getRecentConversationSummaries(
 }
 
 /**
+ * Get milestone summaries - sessions with breakthroughs or major decisions
+ * These are always included regardless of recency
+ */
+export async function getMilestoneSummaries(
+  userId: string,
+  limit: number = 5
+): Promise<ConversationSummary[]> {
+  const supabase = await createClient()
+
+  // Get recent summaries and filter for ones with breakthroughs or decisions
+  const { data: allData } = await supabase
+    .from('conversation_summaries')
+    .select('*')
+    .eq('user_id', userId)
+    .order('generated_at', { ascending: false })
+    .limit(50)
+
+  // Filter to only include sessions with breakthroughs or decisions
+  return (allData || [])
+    .filter(s =>
+      (s.breakthroughs && s.breakthroughs.length > 0) ||
+      (s.decisions_made && s.decisions_made.length > 0)
+    )
+    .slice(0, limit)
+}
+
+/**
  * Search summaries by semantic similarity
  */
 export async function searchSummaries(

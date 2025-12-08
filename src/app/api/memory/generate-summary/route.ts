@@ -1,8 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
-import { generateDailySummary, generateWeeklySummary } from '@/lib/memory/summaries'
+import { generateWeeklySummary, generateMonthlySummary } from '@/lib/memory/summaries'
 
 /**
- * API route to generate daily or weekly summaries
+ * API route to generate weekly or monthly summaries
  * Can be called via cron job or manually
  */
 export async function POST(req: Request) {
@@ -26,12 +26,12 @@ export async function POST(req: Request) {
     const targetDate = new Date(date)
 
     let result
-    if (type === 'daily') {
-      result = await generateDailySummary(user.id, targetDate)
-    } else if (type === 'weekly') {
+    if (type === 'weekly') {
       result = await generateWeeklySummary(user.id, targetDate)
+    } else if (type === 'monthly') {
+      result = await generateMonthlySummary(user.id, targetDate)
     } else {
-      return new Response('Invalid type. Must be "daily" or "weekly"', { status: 400 })
+      return new Response('Invalid type. Must be "weekly" or "monthly"', { status: 400 })
     }
 
     if (!result) {

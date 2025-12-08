@@ -44,9 +44,19 @@ export interface UserContext {
     similarity: number
     createdAt: Date
   }>
-  recentSummaries?: {
-    daily: string[]
-    weekly: string[]
+  weeklySummaries?: Array<{
+    summary: string
+    wins: string[]
+    challenges: string[]
+    decisions: string[]
+    weeksAgo: number
+  }>
+  monthlySummary?: {
+    summary: string
+    patterns: string[]
+    growthAreas: string[]
+    focusAreas: string[]
+    coachObservations: string | null
   }
   recentSessionSummaries?: Array<{
     summary: string
@@ -56,6 +66,8 @@ export interface UserContext {
     patterns: string[]
     userState: string | null
     daysAgo: number
+    isMilestone?: boolean
+    isRelevant?: boolean
   }>
 }
 
@@ -176,7 +188,7 @@ export async function assembleUserContextWithRAG(
     // Import memory utilities (dynamic to avoid circular deps)
     const { generateEmbedding, searchSimilarMessages } = await import('@/lib/memory/embeddings')
     const { getRecentSummaries } = await import('@/lib/memory/summaries')
-    const { getRecentConversationSummaries } = await import('@/lib/memory/conversation-summary')
+    const { getRecentConversationSummaries, getMilestoneSummaries, searchSummaries } = await import('@/lib/memory/conversation-summary')
 
     // Generate embedding for current message
     const queryEmbedding = await generateEmbedding(currentMessage)
@@ -199,29 +211,101 @@ export async function assembleUserContextWithRAG(
       }))
     }
 
-    // Get recent summaries
-    const summaries = await getRecentSummaries(userId, 7)
+    // Get weekly and monthly summaries
+    const summaries = await getRecentSummaries(userId, 4) // Last 4 weeks
+    const now = Date.now()
 
-    if (summaries.dailySummaries.length > 0 || summaries.weeklySummaries.length > 0) {
-      context.recentSummaries = {
-        daily: summaries.dailySummaries.map((s) => s.summary),
-        weekly: summaries.weeklySummaries.map((s) => s.summary),
+    if (summaries.weeklySummaries.length > 0) {
+      context.weeklySummaries = summaries.weeklySummaries.map((s) => ({
+        summary: s.summary,
+        wins: s.wins || [],
+        challenges: s.challenges_faced || [],
+        decisions: s.key_decisions || [],
+        weeksAgo: Math.floor((now - new Date(s.week_start).getTime()) / (1000 * 60 * 60 * 24 * 7)),
+      }))
+    }
+
+    if (summaries.monthlySummaries.length > 0) {
+      const latest = summaries.monthlySummaries[0]
+      context.monthlySummary = {
+        summary: latest.summary,
+        patterns: latest.behavioral_patterns || [],
+        growthAreas: latest.growth_areas || [],
+        focusAreas: latest.focus_areas_next_month || [],
+        coachObservations: latest.coach_observations,
       }
     }
 
     // Get recent conversation summaries (MemoryOS)
     const sessionSummaries = await getRecentConversationSummaries(userId, 10)
-    if (sessionSummaries.length > 0) {
-      const now = Date.now()
-      context.recentSessionSummaries = sessionSummaries.map((s) => ({
-        summary: s.summary,
-        keyTopics: s.key_topics || [],
-        decisions: s.decisions_made || [],
-        breakthroughs: s.breakthroughs || [],
-        patterns: s.patterns_noticed || [],
-        userState: s.user_state,
-        daysAgo: Math.floor((now - new Date(s.generated_at).getTime()) / (1000 * 60 * 60 * 24)),
-      }))
+
+    // Get milestone summaries (breakthroughs/decisions from ANY time)
+    const milestoneSummaries = await getMilestoneSummaries(userId, 5)
+
+    // Search for semantically relevant summaries based on current message
+    let relevantSummaries: Awaited<ReturnType<typeof searchSummaries>> = []
+    try {
+      relevantSummaries = await searchSummaries(userId, queryEmbedding, 3, 0.6)
+    } catch (e) {
+      console.error('Failed to search summaries:', e)
+    }
+
+    // Merge all summaries, deduplicating by conversation_id
+    const seenIds = new Set<string>()
+    const allSummaries: typeof context.recentSessionSummaries = []
+
+    // Add recent summaries first
+    for (const s of sessionSummaries) {
+      if (!seenIds.has(s.conversation_id)) {
+        seenIds.add(s.conversation_id)
+        allSummaries.push({
+          summary: s.summary,
+          keyTopics: s.key_topics || [],
+          decisions: s.decisions_made || [],
+          breakthroughs: s.breakthroughs || [],
+          patterns: s.patterns_noticed || [],
+          userState: s.user_state,
+          daysAgo: Math.floor((now - new Date(s.generated_at).getTime()) / (1000 * 60 * 60 * 24)),
+        })
+      }
+    }
+
+    // Add milestone summaries (marked as important)
+    for (const s of milestoneSummaries) {
+      if (!seenIds.has(s.conversation_id)) {
+        seenIds.add(s.conversation_id)
+        allSummaries.push({
+          summary: s.summary,
+          keyTopics: s.key_topics || [],
+          decisions: s.decisions_made || [],
+          breakthroughs: s.breakthroughs || [],
+          patterns: s.patterns_noticed || [],
+          userState: s.user_state,
+          daysAgo: Math.floor((now - new Date(s.generated_at).getTime()) / (1000 * 60 * 60 * 24)),
+          isMilestone: true,
+        })
+      }
+    }
+
+    // Add semantically relevant summaries
+    for (const s of relevantSummaries) {
+      if (!seenIds.has(s.conversation_id)) {
+        seenIds.add(s.conversation_id)
+        allSummaries.push({
+          summary: s.summary,
+          keyTopics: s.key_topics || [],
+          decisions: s.decisions_made || [],
+          breakthroughs: s.breakthroughs || [],
+          patterns: s.patterns_noticed || [],
+          userState: s.user_state,
+          daysAgo: Math.floor((now - new Date(s.generated_at).getTime()) / (1000 * 60 * 60 * 24)),
+          isRelevant: true,
+        })
+      }
+    }
+
+    if (allSummaries.length > 0) {
+      context.recentSessionSummaries = allSummaries
     }
   } catch (error) {
     console.error('Failed to fetch RAG context:', error)
@@ -296,33 +380,58 @@ export function formatUserContext(context: UserContext): string {
     parts.push('')
   }
 
-  // Recent Summaries
-  if (context.recentSummaries) {
-    if (context.recentSummaries.weekly.length > 0) {
-      parts.push(`RECENT PROGRESS (Last Week):`)
-      context.recentSummaries.weekly.forEach((summary) => {
-        parts.push(`- ${summary}`)
-      })
-      parts.push('')
+  // Monthly Summary (high-level patterns and coach observations)
+  if (context.monthlySummary) {
+    parts.push(`LAST MONTH'S OVERVIEW:`)
+    parts.push(context.monthlySummary.summary)
+    if (context.monthlySummary.patterns.length > 0) {
+      parts.push(`Behavioral Patterns: ${context.monthlySummary.patterns.join('; ')}`)
     }
+    if (context.monthlySummary.growthAreas.length > 0) {
+      parts.push(`Growth Areas: ${context.monthlySummary.growthAreas.join('; ')}`)
+    }
+    if (context.monthlySummary.focusAreas.length > 0) {
+      parts.push(`Focus Areas This Month: ${context.monthlySummary.focusAreas.join('; ')}`)
+    }
+    if (context.monthlySummary.coachObservations) {
+      parts.push(`Coach Observations: ${context.monthlySummary.coachObservations}`)
+    }
+    parts.push('')
+  }
 
-    if (context.recentSummaries.daily.length > 0) {
-      parts.push(`RECENT SESSIONS (Last 7 Days):`)
-      context.recentSummaries.daily.slice(0, 3).forEach((summary) => {
-        parts.push(`- ${summary}`)
-      })
-      parts.push('')
-    }
+  // Weekly Summaries (recent weeks progress)
+  if (context.weeklySummaries && context.weeklySummaries.length > 0) {
+    parts.push(`RECENT WEEKS:`)
+    context.weeklySummaries.slice(0, 4).forEach((week, index) => {
+      const timeLabel = week.weeksAgo === 0 ? 'This week' : week.weeksAgo === 1 ? 'Last week' : `${week.weeksAgo} weeks ago`
+      parts.push(``)
+      parts.push(`${timeLabel}: ${week.summary}`)
+      if (week.wins.length > 0) {
+        parts.push(`  Wins: ${week.wins.slice(0, 3).join('; ')}`)
+      }
+      if (week.challenges.length > 0) {
+        parts.push(`  Challenges: ${week.challenges.slice(0, 2).join('; ')}`)
+      }
+      if (week.decisions.length > 0) {
+        parts.push(`  Key Decisions: ${week.decisions.slice(0, 2).join('; ')}`)
+      }
+    })
+    parts.push('')
   }
 
   // Recent Session Summaries (from MemoryOS)
   if (context.recentSessionSummaries && context.recentSessionSummaries.length > 0) {
-    parts.push(`RECENT SESSION HISTORY (MemoryOS):`)
-    parts.push(`(Key insights from recent coaching conversations)`)
-    context.recentSessionSummaries.slice(0, 5).forEach((session, index) => {
+    parts.push(`SESSION HISTORY (MemoryOS):`)
+    parts.push(`(Key insights from coaching conversations - recent + milestones + relevant to current topic)`)
+    context.recentSessionSummaries.slice(0, 15).forEach((session, index) => {
       const timeAgo = session.daysAgo === 0 ? 'today' : session.daysAgo === 1 ? 'yesterday' : `${session.daysAgo} days ago`
+      // Add markers for milestone or relevant summaries
+      const markers: string[] = []
+      if (session.isMilestone) markers.push('MILESTONE')
+      if (session.isRelevant) markers.push('RELEVANT TO CURRENT TOPIC')
+      const markerStr = markers.length > 0 ? ` [${markers.join(', ')}]` : ''
       parts.push(``)
-      parts.push(`${index + 1}. [${timeAgo}] ${session.summary}`)
+      parts.push(`${index + 1}. [${timeAgo}]${markerStr} ${session.summary}`)
       if (session.keyTopics.length > 0) {
         parts.push(`   Topics: ${session.keyTopics.join(', ')}`)
       }
