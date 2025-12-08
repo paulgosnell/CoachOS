@@ -94,13 +94,17 @@ export async function assembleUserContext(
     .order('priority', { ascending: false })
     .limit(10)
 
-  // Fetch recent conversation history
-  const { data: messages } = await supabase
-    .from('messages')
-    .select('role, content')
-    .eq('conversation_id', conversationId)
-    .order('created_at', { ascending: false })
-    .limit(messageLimit)
+  // Fetch recent conversation history (only if conversationId provided)
+  let messages: { role: string; content: string }[] | null = null
+  if (conversationId && messageLimit > 0) {
+    const { data } = await supabase
+      .from('messages')
+      .select('role, content')
+      .eq('conversation_id', conversationId)
+      .order('created_at', { ascending: false })
+      .limit(messageLimit)
+    messages = data
+  }
 
   return {
     profile: {

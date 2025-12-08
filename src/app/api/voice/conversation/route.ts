@@ -34,11 +34,12 @@ export async function POST(req: Request) {
     const voicePreference = profile?.coach_preference || {}
     const coachType = voicePreference.coach_type || 'standard'
 
-    // Assemble full user context (profile, goals, business, RAG memories)
+    // Assemble user context (profile, goals, business info)
+    // Pass empty conversationId since we're just getting initial config
     const context = await assembleUserContext(
       user.id,
-      '', // No current message for initial setup
-      5 // memoryLimit
+      '', // No conversation yet - just getting user context
+      0 // No message history needed for initial setup
     )
 
     // Generate system prompt based on coach type
