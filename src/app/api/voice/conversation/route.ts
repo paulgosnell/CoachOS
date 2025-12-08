@@ -4,9 +4,13 @@ import { generateADHDCoachPrompt } from '@/lib/ai/prompts-adhd'
 import type { UserContext } from '@/lib/ai/context'
 
 export async function POST(req: Request) {
+  let step = 'init'
   try {
     // Verify authentication
+    step = 'createClient'
     const supabase = await createClient()
+
+    step = 'getUser'
     const {
       data: { user },
     } = await supabase.auth.getUser()
@@ -19,6 +23,7 @@ export async function POST(req: Request) {
     }
 
     // Check Gemini API key
+    step = 'checkApiKey'
     const geminiKey = process.env.GOOGLE_AI_API_KEY || process.env.GEMINI_API_KEY
     if (!geminiKey) {
       return new Response(
@@ -28,20 +33,19 @@ export async function POST(req: Request) {
     }
 
     // Get profile with coach preference
-    const { data: profile, error: profileError } = await supabase
+    step = 'fetchProfile'
+    const { data: profile } = await supabase
       .from('profiles')
       .select('full_name, email, coach_preference')
       .eq('id', user.id)
-      .single()
+      .maybeSingle()
 
-    if (profileError) {
-      console.error('Profile fetch error:', profileError)
-    }
-
+    step = 'parseVoicePreference'
     const voicePreference = (profile?.coach_preference as Record<string, unknown>) || {}
     const coachType = (voicePreference.coach_type as string) || 'standard'
 
     // Get business profile (may not exist)
+    step = 'fetchBusinessProfile'
     const { data: businessProfile } = await supabase
       .from('business_profiles')
       .select('*')
@@ -49,6 +53,7 @@ export async function POST(req: Request) {
       .maybeSingle()
 
     // Get active goals (may be empty)
+    step = 'fetchGoals'
     const { data: goals } = await supabase
       .from('goals')
       .select('title, description, category, priority, target_date, status')
@@ -58,6 +63,7 @@ export async function POST(req: Request) {
       .limit(5)
 
     // Get pending action items (may be empty)
+    step = 'fetchActionItems'
     const { data: actionItems } = await supabase
       .from('action_items')
       .select('task, description, priority, due_date, status, created_at')
@@ -67,6 +73,7 @@ export async function POST(req: Request) {
       .limit(10)
 
     // Build context directly (simpler, no conversation history needed for voice init)
+    step = 'buildContext'
     const context: UserContext = {
       profile: {
         fullName: profile?.full_name || 'User',
@@ -105,13 +112,16 @@ export async function POST(req: Request) {
     }
 
     // Generate system prompt based on coach type
+    step = 'generatePrompt'
     const systemPrompt = coachType === 'adhd'
       ? generateADHDCoachPrompt(context)
       : generateSystemPrompt(context)
 
+    step = 'extractFirstName'
     const firstName = (context.profile.fullName || 'User').split(' ')[0]
 
     // Return the configuration
+    step = 'returnResponse'
     return new Response(
       JSON.stringify({
         systemPrompt,
@@ -128,10 +138,15 @@ export async function POST(req: Request) {
         headers: { 'Content-Type': 'application/json' },
       }
     )
-  } catch (error: any) {
-    console.error('Voice conversation configuration error:', error)
+  } catch (error: unknown) {
+    const err = error as Error
+    console.error(`Voice conversation error at step "${step}":`, err)
     return new Response(
-      JSON.stringify({ error: error.message || 'Internal server error', stack: error.stack }),
+      JSON.stringify({
+        error: err.message || 'Internal server error',
+        step,
+        stack: err.stack
+      }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     )
   }
