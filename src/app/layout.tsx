@@ -3,6 +3,7 @@ import { Suspense } from 'react'
 import { Playfair_Display } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/react'
 import { AnalyticsProvider } from '@/components/AnalyticsProvider'
+import { Navbar } from '@/components/Navbar'
 import './globals.css'
 
 const playfair = Playfair_Display({
@@ -194,6 +195,7 @@ export default function RootLayout({
         />
       </head>
       <body className={`${playfair.variable} min-h-screen`}>
+        <Navbar />
         <Suspense fallback={null}>
           <AnalyticsProvider>
             {children}
