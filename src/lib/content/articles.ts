@@ -1,4 +1,4 @@
-import { Article, ArticleCategory, ArticleType } from './types'
+import { Article, ArticleCategory, ArticleType, FAQ } from './types'
 import fs from 'fs'
 import path from 'path'
 import matter from 'gray-matter'
@@ -32,6 +32,7 @@ function loadArticlesFromFiles(): Article[] {
       tags: data.tags || [],
       metaTitle: data.metaTitle,
       metaDescription: data.metaDescription,
+      faqs: data.faqs as FAQ[] | undefined,
     }
   })
 
@@ -62,6 +63,20 @@ const inlineArticles: Article[] = [
     readingTime: 12,
     featured: true,
     tags: ['ADHD', 'entrepreneurship', 'productivity', 'business'],
+    faqs: [
+      {
+        question: 'Are ADHD entrepreneurs more successful?',
+        answer: 'ADHD entrepreneurs are 300% more likely to start their own businesses. Traits like hyperfocus, creative thinking, and risk tolerance can be significant advantages. However, success requires building systems that work with your brain.',
+      },
+      {
+        question: 'What are the best business structures for ADHD entrepreneurs?',
+        answer: 'ADHD entrepreneurs thrive with external accountability, task extraction systems, and environments designed to minimise distractions. Working with coaches, using AI tools for task management, and having accountability partners are particularly effective.',
+      },
+      {
+        question: 'How can I manage my ADHD while running a business?',
+        answer: 'Focus on external structure rather than willpower. Use body doubling, accountability partners, voice-first tools for capturing ideas, and automated task extraction from conversations. Build systems that accommodate your energy fluctuations.',
+      },
+    ],
   },
 
   // ADHD Business
@@ -159,6 +174,20 @@ const inlineArticles: Article[] = [
     readingTime: 6,
     featured: false,
     tags: ['coaching', 'pricing', 'AI coaching', 'executive'],
+    faqs: [
+      {
+        question: 'How much does executive coaching cost in 2025?',
+        answer: 'Executive coaching typically costs £300-500 per session in the UK, or £14,400-24,000 annually for weekly sessions. Senior and C-suite specialists can charge £500-1,000+ per session.',
+      },
+      {
+        question: 'Is executive coaching worth the cost?',
+        answer: 'Studies show executive coaching can deliver 5-7x ROI through improved performance and better decisions. However, the high cost makes it inaccessible for many professionals. AI coaching offers an affordable alternative at £30-50/month.',
+      },
+      {
+        question: 'What are cheaper alternatives to executive coaching?',
+        answer: 'Alternatives include group coaching (£200-500/month), peer coaching networks (free), and AI coaching platforms (£10-50/month). Many professionals use a hybrid approach combining AI coaching for daily support with occasional human coaching sessions.',
+      },
+    ],
   },
   {
     slug: 'ai-coaching-vs-human-coaching',

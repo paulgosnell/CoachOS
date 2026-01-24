@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 import { ArticleLayout } from '@/components/blog/ArticleLayout'
 import { getArticleBySlug, articles, getArticleContent } from '@/lib/content/articles'
+import { FAQSchema } from '@/components/FAQSchema'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 
@@ -53,15 +54,18 @@ export default async function ArticlePage({ params }: PageProps) {
   const inlineContent = inlineContentMap[slug]
 
   return (
-    <ArticleLayout article={article}>
-      {markdownContent ? (
-        <MarkdownContent content={markdownContent} />
-      ) : inlineContent ? (
-        inlineContent
-      ) : (
-        <PlaceholderContent />
-      )}
-    </ArticleLayout>
+    <>
+      {article.faqs && article.faqs.length > 0 && <FAQSchema faqs={article.faqs} />}
+      <ArticleLayout article={article}>
+        {markdownContent ? (
+          <MarkdownContent content={markdownContent} />
+        ) : inlineContent ? (
+          inlineContent
+        ) : (
+          <PlaceholderContent />
+        )}
+      </ArticleLayout>
+    </>
   )
 }
 

@@ -59,6 +59,13 @@
   - `/src/app/about/page.tsx` - About page
   - Footer links on landing page
 
+- [x] **8. Add FAQ schema markup** DONE
+  - `/src/lib/content/types.ts` - Added FAQ interface
+  - `/src/components/FAQSchema.tsx` - JSON-LD FAQPage schema component
+  - `/src/app/blog/[slug]/page.tsx` - Schema rendered on article pages
+  - Articles can define FAQs in frontmatter (markdown) or inline (articles.ts)
+  - Example FAQs added to key articles
+
 ### Business Decision
 
 - [x] **7. Pricing set to £40/month** DONE
@@ -77,6 +84,7 @@
 - [x] Legal pages added (Jan 2025)
 - [x] **500+ content pages published (Jan 2025)**
 - [x] Pricing set to £40/month (Jan 2025)
+- [x] FAQ schema markup added (Jan 2025)
 
 ---
 

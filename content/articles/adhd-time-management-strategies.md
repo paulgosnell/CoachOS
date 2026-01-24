@@ -8,6 +8,13 @@ author: "Coach OS"
 readingTime: 3
 featured: false
 tags: ["ADHD", "Time Management", "productivity", "strategies"]
+faqs:
+  - question: "Why is time management harder with ADHD?"
+    answer: "ADHD affects the prefrontal cortex, which controls executive functions like planning and time estimation. This leads to time blindness, difficulty starting tasks, and challenges with prioritisation."
+  - question: "What time management strategies work best for ADHD?"
+    answer: "External structure works better than willpower for ADHD brains. Body doubling, accountability partners, visual timers, and environmental design are more effective than traditional productivity methods."
+  - question: "Can ADHD adults improve their time management?"
+    answer: "Yes. With the right systems that work with your brain rather than against it, ADHD adults can significantly improve time management. The key is using external scaffolding and technology rather than relying on internal motivation."
 ---
 
 

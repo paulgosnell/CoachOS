@@ -16,6 +16,11 @@ export type ArticleType =
   | 'case-study'
   | 'how-to'
 
+export interface FAQ {
+  question: string
+  answer: string
+}
+
 export interface Article {
   slug: string
   title: string
@@ -32,6 +37,7 @@ export interface Article {
   metaTitle?: string
   metaDescription?: string
   ogImage?: string
+  faqs?: FAQ[]
 }
 
 export interface ArticleContent extends Article {

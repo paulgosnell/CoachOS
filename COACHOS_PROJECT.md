@@ -307,7 +307,7 @@ Built as a client project for ADHD parents. Results:
 - [ ] Google Search Console
 - [ ] Bing Webmaster
 - [x] llms.txt
-- [ ] FAQ schema
+- [x] FAQ schema
 - [x] Analytics
 
 ---
@@ -447,6 +447,7 @@ Some users from LinkedIn mention. Need to:
 | Jan 2025 | Pricing set at £40/month |
 | Jan 2025 | Mega menu navbar deployed |
 | Jan 2025 | llms.txt, sitemap, robots.txt configured |
+| Jan 2025 | FAQ schema markup added |
 | | |
 
 ---
@@ -463,7 +464,7 @@ Some users from LinkedIn mention. Need to:
 8. [ ] Gather Pathfinder testimonials
 9. [ ] Set up Google Search Console
 10. [ ] Set up Bing Webmaster Tools
-11. [ ] Add FAQ schema markup
+11. [x] ~~Add FAQ schema markup~~
 12. [ ] Update landing page (clearer ICP messaging, social proof)
 
 ---
