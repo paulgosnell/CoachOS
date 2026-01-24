@@ -674,6 +674,15 @@ export default function HomePage() {
         <footer className="border-t border-white/5 py-12">
           <div className="container mx-auto max-w-6xl px-6">
             <div className="flex flex-col items-center justify-center gap-6">
+              {/* Links */}
+              <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-gray-400">
+                <Link href="/about" className="hover:text-white transition-colors">About</Link>
+                <Link href="/blog" className="hover:text-white transition-colors">Resources</Link>
+                <Link href="/privacy" className="hover:text-white transition-colors">Privacy</Link>
+                <Link href="/terms" className="hover:text-white transition-colors">Terms</Link>
+              </div>
+
+              {/* TVL Badge */}
               <a
                 href="https://thriveventurelabs.com"
                 target="_blank"
