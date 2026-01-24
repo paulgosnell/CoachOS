@@ -1,9 +1,17 @@
 import OpenAI from 'openai'
 import { createClient } from '@/lib/supabase/server'
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-})
+// Lazy-load OpenAI client to avoid build-time errors
+let openaiClient: OpenAI | null = null
+
+function getOpenAI(): OpenAI {
+  if (!openaiClient) {
+    openaiClient = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    })
+  }
+  return openaiClient
+}
 
 interface ActionItem {
   task: string
@@ -27,7 +35,7 @@ export async function extractActionItems(
       .map((msg) => `${msg.role === 'user' ? 'User' : 'Coach'}: ${msg.content}`)
       .join('\n\n')
 
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAI().chat.completions.create({
       model: 'gpt-4o-mini', // Cheaper model for extraction
       messages: [
         {

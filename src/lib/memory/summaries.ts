@@ -1,9 +1,16 @@
 import OpenAI from 'openai'
 import { createClient } from '@/lib/supabase/server'
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-})
+let openaiClient: OpenAI | null = null
+
+function getOpenAI(): OpenAI {
+  if (!openaiClient) {
+    openaiClient = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    })
+  }
+  return openaiClient
+}
 
 export interface WeeklySummary {
   id: string
@@ -95,7 +102,7 @@ User State: ${s.user_state || 'Unknown'}
   const allBlockers = conversationSummaries.flatMap(s => s.blockers_identified || [])
 
   // Generate weekly summary using GPT
-  const response = await openai.chat.completions.create({
+  const response = await getOpenAI().chat.completions.create({
     model: 'gpt-4o-mini',
     messages: [
       {
@@ -220,7 +227,7 @@ Progress: ${w.goals_progress?.map((g: any) => g.note).join(', ') || 'None'}
   const goalsText = goals?.map((g) => `- ${g.title} (${g.status}): ${g.description || ''}`).join('\n') || 'None'
 
   // Generate monthly summary using GPT
-  const response = await openai.chat.completions.create({
+  const response = await getOpenAI().chat.completions.create({
     model: 'gpt-4o-mini',
     messages: [
       {

@@ -2,9 +2,16 @@ import OpenAI from 'openai'
 import { createClient } from '@/lib/supabase/server'
 import { generateEmbedding } from './embeddings'
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-})
+let openaiClient: OpenAI | null = null
+
+function getOpenAI(): OpenAI {
+  if (!openaiClient) {
+    openaiClient = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    })
+  }
+  return openaiClient
+}
 
 export interface ConversationSummary {
   id: string
@@ -73,7 +80,7 @@ export async function generateConversationSummary(
     .join('\n\n')
 
   // Generate summary using GPT
-  const response = await openai.chat.completions.create({
+  const response = await getOpenAI().chat.completions.create({
     model: 'gpt-4o-mini',
     messages: [
       {

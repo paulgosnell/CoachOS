@@ -6,9 +6,16 @@ import {
   extractSessionActionItems,
 } from '@/lib/ai/frameworks'
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-})
+let openaiClient: OpenAI | null = null
+
+function getOpenAI(): OpenAI {
+  if (!openaiClient) {
+    openaiClient = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    })
+  }
+  return openaiClient
+}
 
 export async function POST(
   request: Request,
@@ -91,7 +98,7 @@ export async function POST(
         messages
       )
 
-      const summaryResponse = await openai.chat.completions.create({
+      const summaryResponse = await getOpenAI().chat.completions.create({
         model: 'gpt-4o',
         messages: [
           {
@@ -108,7 +115,7 @@ export async function POST(
       // Extract action items
       const actionItemsPrompt = extractSessionActionItems(messages)
 
-      const actionItemsResponse = await openai.chat.completions.create({
+      const actionItemsResponse = await getOpenAI().chat.completions.create({
         model: 'gpt-4o-mini',
         messages: [
           {
