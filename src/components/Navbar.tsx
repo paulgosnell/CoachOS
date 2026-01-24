@@ -263,7 +263,7 @@ export function Navbar() {
               Sign in
             </Link>
             <Link
-              href="/subscribe"
+              href="/auth/signup"
               className="hidden sm:inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-navy-500 to-navy-600 px-4 py-2 text-sm font-medium text-white shadow-lg transition-all hover:from-navy-400 hover:to-navy-500"
             >
               Get Started
@@ -348,7 +348,7 @@ export function Navbar() {
                 Sign in
               </Link>
               <Link
-                href="/subscribe"
+                href="/auth/signup"
                 className="block w-full text-center px-4 py-3 text-base font-medium text-white rounded-lg bg-gradient-to-r from-navy-500 to-navy-600"
               >
                 Get Started
