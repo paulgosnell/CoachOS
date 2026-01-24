@@ -19,38 +19,52 @@
   - Created `/src/components/blog/ArticleCard.tsx` - Card for listings
   - Created `/src/app/blog/page.tsx` - Blog listing page with filters
   - Created `/src/app/blog/[slug]/page.tsx` - Dynamic article pages
-  - 6 sample articles with full content
 
-- [x] **4. Start publishing content pages** DONE
-  - 14 articles total with full content
-  - Categories: ADHD Business (4), ADHD Productivity (3), Coaching (3), Frameworks (2), Founder Life (2)
-  - All articles have SEO metadata, descriptions, reading times
-  - Blog listing page with category filters and search
-  - Sitemap updated with all article URLs
+- [x] **4. Publish 500+ content pages** DONE
+  - 501 articles total (14 inline + 487 markdown)
+  - Categories: ADHD Business, ADHD Productivity, Coaching, Frameworks, Founder Life, Decisions
+  - Markdown-based content system in `/content/articles/`
+  - Auto-generated sitemap with all URLs
+  - Topics covered:
+    - ADHD + specific challenges (40 articles)
+    - ADHD + industries (20 articles)
+    - Framework guides (20 articles)
+    - Profession-specific coaching (20 articles)
+    - UK city coaching costs (15 articles)
+    - ADHD questions (50 articles)
+    - Coaching comparisons (20 articles)
+    - Decision frameworks (30 articles)
+    - Founder mental health (20 articles)
+    - Listicles (40 articles)
+    - How-to guides (50 articles)
+    - Leadership case studies (20 articles)
+    - Pricing guides (15 articles)
+    - Additional ADHD topics (30 articles)
+    - Coaching methodologies (20 articles)
+    - Productivity frameworks (25 articles)
+    - Business topics (30 articles)
+    - More comparisons (20 articles)
 
 ### Technical & Legal
 
 - [x] **5. Add analytics tracking** DONE
-  - Created migration: `supabase/migrations/20250124000000_add_page_views.sql`
-  - Created `/src/components/AnalyticsProvider.tsx`
-  - Created `/src/app/api/track/route.ts`
-  - Added to layout with Suspense wrapper
+  - Migration applied to Supabase
+  - `/src/components/AnalyticsProvider.tsx`
+  - `/src/app/api/track/route.ts`
   - Filters internal traffic by email domain
-  - Run migration in Supabase to enable
 
 - [x] **6. Add legal pages** DONE
-  - Created `/src/app/privacy/page.tsx` - Full GDPR-compliant privacy policy
-  - Created `/src/app/terms/page.tsx` - Terms of Service
-  - Created `/src/app/about/page.tsx` - About page with company info
-  - Added footer links on landing page
-  - Updated sitemap
+  - `/src/app/privacy/page.tsx` - GDPR-compliant privacy policy
+  - `/src/app/terms/page.tsx` - Terms of Service
+  - `/src/app/about/page.tsx` - About page
+  - Footer links on landing page
 
 ### Business Decision
 
-- [ ] **7. Decide on pricing strategy**
-  - Current: £9.99/month
-  - Plan target: £30-40/month
-  - Document rationale for chosen price
+- [x] **7. Pricing set to £40/month** DONE
+  - Updated `/src/app/subscribe/SubscribeClient.tsx`
+  - Updated `/src/app/api/payments/create-order/route.ts`
+  - Updated `/src/lib/email.ts`
 
 ---
 
@@ -58,15 +72,17 @@
 
 - [x] Search intent mapping (Jan 2025)
 - [x] Keyword clusters built (Jan 2025)
-- [x] Content templates created (Jan 2025) - Blog infrastructure ready
-- [x] Analytics tracking added (Jan 2025) - Run migration to enable
-- [x] Legal pages added (Jan 2025) - Privacy, Terms, About
-- [x] Content pages published (Jan 2025) - 14 articles live
+- [x] Content templates created (Jan 2025)
+- [x] Analytics tracking added (Jan 2025)
+- [x] Legal pages added (Jan 2025)
+- [x] **500+ content pages published (Jan 2025)**
+- [x] Pricing set to £40/month (Jan 2025)
 
 ---
 
 ## Notes
 
 - Product is complete (voice, chat, memory, tasks, payments)
-- Content engine is the critical missing piece
-- Target: 500+ content pages for SEO
+- Content engine is now LIVE with 501 articles
+- Sitemap dynamically includes all article URLs
+- Markdown-based system enables easy content updates

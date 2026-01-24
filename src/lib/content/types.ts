@@ -14,6 +14,7 @@ export type ArticleType =
   | 'comparison'
   | 'listicle'
   | 'case-study'
+  | 'how-to'
 
 export interface Article {
   slug: string

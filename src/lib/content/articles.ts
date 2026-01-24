@@ -1,7 +1,54 @@
-import { Article } from './types'
+import { Article, ArticleCategory, ArticleType } from './types'
+import fs from 'fs'
+import path from 'path'
+import matter from 'gray-matter'
 
-// Articles - in production, this would come from a CMS or MDX files
-export const articles: Article[] = [
+const contentDirectory = path.join(process.cwd(), 'content/articles')
+
+// Load all articles from markdown files
+function loadArticlesFromFiles(): Article[] {
+  if (!fs.existsSync(contentDirectory)) {
+    console.warn('Content directory not found, using inline articles')
+    return inlineArticles
+  }
+
+  const files = fs.readdirSync(contentDirectory).filter(file => file.endsWith('.md'))
+
+  const articles: Article[] = files.map(file => {
+    const filePath = path.join(contentDirectory, file)
+    const fileContents = fs.readFileSync(filePath, 'utf8')
+    const { data } = matter(fileContents)
+
+    return {
+      slug: file.replace('.md', ''),
+      title: data.title || 'Untitled',
+      description: data.description || '',
+      category: (data.category as ArticleCategory) || 'coaching',
+      type: (data.type as ArticleType) || 'guide',
+      publishedAt: data.publishedAt || new Date().toISOString().split('T')[0],
+      author: data.author || 'Coach OS',
+      readingTime: data.readingTime || 5,
+      featured: data.featured || false,
+      tags: data.tags || [],
+      metaTitle: data.metaTitle,
+      metaDescription: data.metaDescription,
+    }
+  })
+
+  // Combine with inline articles (original 14)
+  const combined = [...inlineArticles, ...articles]
+
+  // Remove duplicates by slug (prefer inline articles)
+  const seen = new Set<string>()
+  return combined.filter(article => {
+    if (seen.has(article.slug)) return false
+    seen.add(article.slug)
+    return true
+  })
+}
+
+// Original inline articles (the 14 already created)
+const inlineArticles: Article[] = [
   // Featured
   {
     slug: 'adhd-entrepreneur-guide',
@@ -197,20 +244,44 @@ export const articles: Article[] = [
   },
 ]
 
+// Cache for articles
+let articlesCache: Article[] | null = null
+
+export function getArticles(): Article[] {
+  if (articlesCache) return articlesCache
+  articlesCache = loadArticlesFromFiles()
+  return articlesCache
+}
+
+// For static generation - we need this to be synchronous
+export const articles = loadArticlesFromFiles()
+
 export function getArticleBySlug(slug: string): Article | undefined {
-  return articles.find((article) => article.slug === slug)
+  return getArticles().find((article) => article.slug === slug)
 }
 
 export function getArticlesByCategory(category: string): Article[] {
-  return articles.filter((article) => article.category === category)
+  return getArticles().filter((article) => article.category === category)
 }
 
 export function getFeaturedArticles(): Article[] {
-  return articles.filter((article) => article.featured)
+  return getArticles().filter((article) => article.featured)
 }
 
 export function getRecentArticles(limit: number = 6): Article[] {
-  return [...articles]
+  return [...getArticles()]
     .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
     .slice(0, limit)
+}
+
+export function getArticleContent(slug: string): string | null {
+  const filePath = path.join(contentDirectory, `${slug}.md`)
+
+  if (!fs.existsSync(filePath)) {
+    return null
+  }
+
+  const fileContents = fs.readFileSync(filePath, 'utf8')
+  const { content } = matter(fileContents)
+  return content
 }

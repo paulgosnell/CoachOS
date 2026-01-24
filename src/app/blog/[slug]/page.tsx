@@ -1,7 +1,9 @@
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 import { ArticleLayout } from '@/components/blog/ArticleLayout'
-import { getArticleBySlug, articles } from '@/lib/content/articles'
+import { getArticleBySlug, articles, getArticleContent } from '@/lib/content/articles'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 
 interface PageProps {
   params: Promise<{ slug: string }>
@@ -44,40 +46,31 @@ export default async function ArticlePage({ params }: PageProps) {
     notFound()
   }
 
-  // In a real implementation, you would fetch MDX content here
-  // For now, we'll render placeholder content based on the article type
+  // Try to get markdown content from file
+  const markdownContent = getArticleContent(slug)
+
+  // Check if this is one of the original inline articles
+  const inlineContent = inlineContentMap[slug]
+
   return (
     <ArticleLayout article={article}>
-      <ArticleContent slug={slug} />
+      {markdownContent ? (
+        <MarkdownContent content={markdownContent} />
+      ) : inlineContent ? (
+        inlineContent
+      ) : (
+        <PlaceholderContent />
+      )}
     </ArticleLayout>
   )
 }
 
-// Content components - replace with MDX loader in production
-function ArticleContent({ slug }: { slug: string }) {
-  const contentMap: Record<string, React.ReactNode> = {
-    // ADHD Business
-    'adhd-entrepreneur-guide': <ADHDEntrepreneurGuide />,
-    'why-productivity-advice-fails-adhd': <WhyProductivityFailsADHD />,
-    'adhd-accountability': <ADHDAccountability />,
-    'adhd-time-blindness-business': <ADHDTimeBlindness />,
-    // ADHD Productivity
-    'adhd-task-management-systems': <ADHDTaskManagementGuide />,
-    'adhd-decision-fatigue': <ADHDDecisionFatigueGuide />,
-    'adhd-overwhelm-spiral': <ADHDOverwhelmSpiral />,
-    // Coaching
-    'executive-coaching-cost-2025': <ExecutiveCoachingCostGuide />,
-    'ai-coaching-vs-human-coaching': <AIvsHumanCoaching />,
-    'coaching-vs-therapy': <CoachingVsTherapy />,
-    // Frameworks
-    'grow-coaching-model-adhd': <GROWModelGuide />,
-    'coaching-frameworks-entrepreneurs': <CoachingFrameworks />,
-    // Founder Life
-    'founder-loneliness': <FounderLonelinessGuide />,
-    'decision-making-founders': <DecisionMakingFounders />,
-  }
-
-  return contentMap[slug] || <PlaceholderContent />
+function MarkdownContent({ content }: { content: string }) {
+  return (
+    <div className="prose prose-invert prose-lg max-w-none prose-headings:text-white prose-p:text-silver-light prose-strong:text-white prose-a:text-deep-blue-400 prose-a:no-underline hover:prose-a:text-deep-blue-300 prose-ul:text-silver-light prose-ol:text-silver-light prose-li:marker:text-deep-blue-400 prose-table:border-collapse prose-th:border prose-th:border-titanium-700 prose-th:bg-titanium-800 prose-th:p-3 prose-th:text-white prose-td:border prose-td:border-titanium-700 prose-td:p-3 prose-td:text-silver-light prose-hr:border-titanium-700">
+      <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+    </div>
+  )
 }
 
 function PlaceholderContent() {
@@ -88,6 +81,25 @@ function PlaceholderContent() {
   )
 }
 
+// Original inline content for the first 14 articles
+const inlineContentMap: Record<string, React.ReactNode> = {
+  'adhd-entrepreneur-guide': <ADHDEntrepreneurGuide />,
+  'why-productivity-advice-fails-adhd': <WhyProductivityFailsADHD />,
+  'adhd-accountability': <ADHDAccountability />,
+  'adhd-time-blindness-business': <ADHDTimeBlindness />,
+  'adhd-task-management-systems': <ADHDTaskManagementGuide />,
+  'adhd-decision-fatigue': <ADHDDecisionFatigueGuide />,
+  'adhd-overwhelm-spiral': <ADHDOverwhelmSpiral />,
+  'executive-coaching-cost-2025': <ExecutiveCoachingCostGuide />,
+  'ai-coaching-vs-human-coaching': <AIvsHumanCoaching />,
+  'coaching-vs-therapy': <CoachingVsTherapy />,
+  'grow-coaching-model-adhd': <GROWModelGuide />,
+  'coaching-frameworks-entrepreneurs': <CoachingFrameworks />,
+  'founder-loneliness': <FounderLonelinessGuide />,
+  'decision-making-founders': <DecisionMakingFounders />,
+}
+
+// Original inline content components
 function ADHDEntrepreneurGuide() {
   return (
     <div className="space-y-8 text-silver-light">
@@ -98,414 +110,85 @@ function ADHDEntrepreneurGuide() {
 
       <h2 className="text-2xl font-bold text-white">Why ADHD Brains Excel at Entrepreneurship</h2>
       <p>
-        The ADHD brain is wired differently. Where neurotypical minds see obstacles, we see opportunities.
-        Our hyperfocus, when channeled correctly, can accomplish in hours what takes others days.
-        Our risk tolerance helps us make the bold moves that startups require.
-      </p>
-      <ul className="list-disc space-y-2 pl-6">
-        <li><strong className="text-silver">Creativity and innovation</strong> - We connect dots others do not see</li>
-        <li><strong className="text-silver">Hyperfocus</strong> - When engaged, we can work with intense concentration</li>
-        <li><strong className="text-silver">Risk tolerance</strong> - Impulsivity becomes willingness to take chances</li>
-        <li><strong className="text-silver">Resilience</strong> - Years of overcoming challenges builds mental toughness</li>
-        <li><strong className="text-silver">Quick thinking</strong> - We stay calm in chaotic situations</li>
-      </ul>
-
-      <h2 className="text-2xl font-bold text-white">The Real Challenges (And How to Address Them)</h2>
-
-      <h3 className="text-xl font-semibold text-silver">1. Task Initiation</h3>
-      <p>
-        You know exactly what needs to be done. You just cannot start. This is not laziness - it is a
-        neurological difference in how our brains process motivation and reward.
-      </p>
-      <p>
-        <strong className="text-silver">Solution:</strong> External accountability. Whether it is a coach, body double,
-        or AI assistant that captures your commitments, having someone or something to answer to
-        makes starting dramatically easier.
+        Research consistently shows that ADHD entrepreneurs bring unique strengths to business. The ability to hyperfocus,
+        think creatively, take calculated risks, and pivot quickly are all ADHD traits that translate directly to entrepreneurial success.
       </p>
 
-      <h3 className="text-xl font-semibold text-silver">2. Time Blindness</h3>
-      <p>
-        The ADHD brain processes time as either "now" or "not now". There is no middle ground.
-        This makes planning, estimating task duration, and meeting deadlines genuinely difficult.
-      </p>
-      <p>
-        <strong className="text-silver">Solution:</strong> External systems that make time visible. Visual timers,
-        calendar blocking, and deadline reminders from tools (not your own memory) are essential.
-      </p>
-
-      <h3 className="text-xl font-semibold text-silver">3. Forgetting Everything</h3>
-      <p>
-        Great idea at 2am? Gone by morning. Commitment made in a meeting? Lost by end of day.
-        ADHD working memory is limited, and information slips away before we can act on it.
-      </p>
-      <p>
-        <strong className="text-silver">Solution:</strong> Capture systems that work automatically. Task extraction
-        that pulls action items from conversations. A coach that remembers what you said and follows up.
-      </p>
-
-      <h2 className="text-2xl font-bold text-white">Systems That Work</h2>
-      <p>
-        Traditional productivity advice fails ADHD entrepreneurs because it assumes consistent motivation
-        and reliable memory. Instead, build systems that work with your brain:
-      </p>
-      <ul className="list-disc space-y-2 pl-6">
-        <li><strong className="text-silver">One non-negotiable task per day</strong> - Set the bar low to build momentum</li>
-        <li><strong className="text-silver">External accountability</strong> - Coaches, partners, or tools that check in</li>
-        <li><strong className="text-silver">Automatic task capture</strong> - Stop relying on memory</li>
-        <li><strong className="text-silver">Batching similar tasks</strong> - Reduce context switching costs</li>
-        <li><strong className="text-silver">Body doubling</strong> - Work alongside others, even virtually</li>
-      </ul>
-
-      <h2 className="text-2xl font-bold text-white">Getting Support</h2>
-      <p>
-        Human executive coaches charge £300-500 per session. They are often unavailable when you need them most
-        (like at 11pm when anxiety hits). AI coaching offers an alternative: framework-based guidance,
-        automatic task extraction, and availability whenever you need it.
-      </p>
-      <p>
-        The key is finding support that understands ADHD - not generic advice that assumes neurotypical patterns.
-      </p>
-    </div>
-  )
-}
-
-function GROWModelGuide() {
-  return (
-    <div className="space-y-8 text-silver-light">
-      <p className="text-xl leading-relaxed">
-        The GROW model is the most widely used coaching framework in the world. Developed in the 1980s by
-        Sir John Whitmore, it provides a simple but powerful structure for goal setting and problem solving.
-      </p>
-
-      <h2 className="text-2xl font-bold text-white">What is GROW?</h2>
-      <p>
-        GROW is an acronym that guides a coaching conversation through four stages:
-      </p>
-
-      <div className="rounded-xl bg-titanium-800 p-6 space-y-4">
-        <div>
-          <h3 className="text-lg font-bold text-white">G - Goal</h3>
-          <p>What do you want to achieve? Define the purpose and desired outcome of the conversation.</p>
-        </div>
-        <div>
-          <h3 className="text-lg font-bold text-white">R - Reality</h3>
-          <p>What is happening now? Assess the current situation with facts and honest reflection.</p>
-        </div>
-        <div>
-          <h3 className="text-lg font-bold text-white">O - Options</h3>
-          <p>What could you do? Brainstorm possible approaches without judgement.</p>
-        </div>
-        <div>
-          <h3 className="text-lg font-bold text-white">W - Will / Way Forward</h3>
-          <p>What will you do? Commit to specific actions with deadlines.</p>
-        </div>
+      <div className="rounded-lg border border-titanium-700 bg-titanium-900/50 p-6">
+        <h3 className="mb-4 text-lg font-semibold text-white">Famous ADHD Entrepreneurs</h3>
+        <ul className="space-y-2">
+          <li><strong className="text-white">Richard Branson</strong> - Virgin Group</li>
+          <li><strong className="text-white">David Neeleman</strong> - JetBlue Airways</li>
+          <li><strong className="text-white">Barbara Corcoran</strong> - Shark Tank investor</li>
+          <li><strong className="text-white">Paul Orfalea</strong> - Kinko&apos;s founder</li>
+        </ul>
       </div>
 
-      <h2 className="text-2xl font-bold text-white">GROW for ADHD Brains</h2>
+      <h2 className="text-2xl font-bold text-white">The Challenges Are Real</h2>
       <p>
-        The GROW model works particularly well for ADHD entrepreneurs because it provides external structure.
-        However, some adaptations help:
-      </p>
-      <ul className="list-disc space-y-2 pl-6">
-        <li><strong className="text-silver">Keep goals small and immediate</strong> - Big goals trigger overwhelm</li>
-        <li><strong className="text-silver">Spend more time on Reality</strong> - ADHD brains often skip assessment</li>
-        <li><strong className="text-silver">Limit options to 3-4</strong> - Too many choices cause paralysis</li>
-        <li><strong className="text-silver">Capture commitments externally</strong> - Do not rely on memory for the Will stage</li>
-      </ul>
-
-      <h2 className="text-2xl font-bold text-white">Sample GROW Questions</h2>
-      <p>A good coach guides through questions, not instructions:</p>
-
-      <h3 className="text-xl font-semibold text-silver">Goal Questions</h3>
-      <ul className="list-disc space-y-1 pl-6">
-        <li>What would you like to focus on today?</li>
-        <li>What would make this conversation valuable?</li>
-        <li>If we solve this, what changes?</li>
-      </ul>
-
-      <h3 className="text-xl font-semibold text-silver">Reality Questions</h3>
-      <ul className="list-disc space-y-1 pl-6">
-        <li>What is actually happening right now?</li>
-        <li>What have you already tried?</li>
-        <li>What is getting in the way?</li>
-      </ul>
-
-      <h3 className="text-xl font-semibold text-silver">Options Questions</h3>
-      <ul className="list-disc space-y-1 pl-6">
-        <li>What are your options?</li>
-        <li>What else could you do?</li>
-        <li>What would you advise a friend in this situation?</li>
-      </ul>
-
-      <h3 className="text-xl font-semibold text-silver">Will Questions</h3>
-      <ul className="list-disc space-y-1 pl-6">
-        <li>What will you do first?</li>
-        <li>When will you do it?</li>
-        <li>What might get in the way, and how will you handle that?</li>
-      </ul>
-    </div>
-  )
-}
-
-function ExecutiveCoachingCostGuide() {
-  return (
-    <div className="space-y-8 text-silver-light">
-      <p className="text-xl leading-relaxed">
-        Executive coaching delivers real results - studies show ROI of $7.90 for every $1 invested.
-        But the costs can be prohibitive. Here is what you are actually paying for.
+        But let&apos;s be honest: running a business with ADHD also comes with significant challenges. Time blindness,
+        difficulty with routine tasks, emotional dysregulation, and struggles with follow-through can all impact your business.
       </p>
 
-      <h2 className="text-2xl font-bold text-white">What Executive Coaching Costs in 2025</h2>
+      <p>
+        The key is not to &quot;fix&quot; your ADHD, but to build systems that work <em>with</em> your brain rather than against it.
+      </p>
 
-      <div className="rounded-xl bg-titanium-800 p-6 space-y-4">
-        <div className="flex justify-between border-b border-white/10 pb-2">
-          <span>Hourly rate (average)</span>
-          <span className="font-bold text-white">£300-500</span>
-        </div>
-        <div className="flex justify-between border-b border-white/10 pb-2">
-          <span>Monthly session</span>
-          <span className="font-bold text-white">£300-500/month</span>
-        </div>
-        <div className="flex justify-between border-b border-white/10 pb-2">
-          <span>6-month program</span>
-          <span className="font-bold text-white">£5,000-15,000</span>
-        </div>
-        <div className="flex justify-between border-b border-white/10 pb-2">
-          <span>C-suite specialist</span>
-          <span className="font-bold text-white">£800-1,500/hour</span>
-        </div>
-        <div className="flex justify-between">
-          <span>Annual investment (monthly sessions)</span>
-          <span className="font-bold text-white">£3,600-6,000/year</span>
-        </div>
+      <h2 className="text-2xl font-bold text-white">Building ADHD-Friendly Business Systems</h2>
+
+      <h3 className="text-xl font-semibold text-white">1. External Accountability</h3>
+      <p>
+        ADHD brains thrive on external accountability. This might mean a business partner, a coach, regular mastermind meetings,
+        or even an AI coach that helps you stay on track. The key is having someone or something outside yourself to report to.
+      </p>
+
+      <h3 className="text-xl font-semibold text-white">2. Capture Systems</h3>
+      <p>
+        Your brilliant ideas will disappear if you do not capture them immediately. Build a simple, always-accessible system
+        for capturing thoughts, ideas, and tasks. Voice notes work well for many ADHD entrepreneurs.
+      </p>
+
+      <h3 className="text-xl font-semibold text-white">3. Task Extraction</h3>
+      <p>
+        Turn conversations and ideas into concrete action items. This is where tools like Coach OS can help - automatically
+        extracting tasks from coaching sessions so nothing falls through the cracks.
+      </p>
+
+      <h3 className="text-xl font-semibold text-white">4. Environment Design</h3>
+      <p>
+        Your environment shapes your behavior more than willpower ever will. Design your workspace, tools, and routines
+        to make the right actions easy and distractions hard to access.
+      </p>
+
+      <h2 className="text-2xl font-bold text-white">The Role of Coaching</h2>
+      <p>
+        Many ADHD entrepreneurs find coaching invaluable. A coach provides the external structure, accountability, and
+        thinking partner that ADHD brains often need. Traditional executive coaching can be expensive at £300-500 per session,
+        but AI coaching offers an accessible alternative that&apos;s available 24/7.
+      </p>
+
+      <div className="rounded-lg border border-deep-blue-600/30 bg-deep-blue-900/20 p-6">
+        <h3 className="mb-2 text-lg font-semibold text-white">Coach OS is Built for ADHD Entrepreneurs</h3>
+        <p>
+          Our AI coaching platform uses proven frameworks like GROW and provides the external accountability
+          ADHD brains need. Voice coaching, automatic task extraction, and 24/7 availability mean support is there
+          when you need it.
+        </p>
       </div>
 
-      <h2 className="text-2xl font-bold text-white">What You Get (And Do Not Get)</h2>
-      <p>Human executive coaching provides:</p>
-      <ul className="list-disc space-y-2 pl-6">
-        <li>Deep expertise and pattern recognition</li>
-        <li>Empathetic human connection</li>
-        <li>Accountability between sessions</li>
-        <li>Framework-based guidance</li>
-      </ul>
-      <p>But there are limitations:</p>
-      <ul className="list-disc space-y-2 pl-6">
-        <li>Scheduled weeks in advance - no help when you need it now</li>
-        <li>Limited recall of past conversations</li>
-        <li>No task extraction or follow-up between sessions</li>
-        <li>Price excludes most people who need coaching</li>
-      </ul>
-
-      <h2 className="text-2xl font-bold text-white">AI Coaching: A Real Alternative?</h2>
+      <h2 className="text-2xl font-bold text-white">Next Steps</h2>
       <p>
-        AI coaching has matured significantly. Modern AI coaches can apply frameworks like GROW,
-        maintain context across conversations, and extract action items automatically.
-      </p>
-      <p>At 1/10th to 1/100th the cost, AI coaching makes executive-level guidance accessible to:</p>
-      <ul className="list-disc space-y-2 pl-6">
-        <li>Early-stage founders without big budgets</li>
-        <li>Managers who want to develop but cannot justify £500/session</li>
-        <li>Executives who need support between human coaching sessions</li>
-        <li>Anyone who needs help at 11pm, not next Tuesday</li>
-      </ul>
-
-      <h2 className="text-2xl font-bold text-white">Making the Choice</h2>
-      <p>
-        Human coaching and AI coaching are not mutually exclusive. Many leaders use both:
-        monthly sessions with a human coach for deep work, and AI coaching for daily support,
-        quick decisions, and accountability between sessions.
-      </p>
-    </div>
-  )
-}
-
-function ADHDTaskManagementGuide() {
-  return (
-    <div className="space-y-8 text-silver-light">
-      <p className="text-xl leading-relaxed">
-        Traditional to-do list systems assume reliable memory and consistent motivation.
-        ADHD brains have neither. Here are systems designed for how you actually think.
-      </p>
-
-      <h2 className="text-2xl font-bold text-white">Why Normal To-Do Lists Fail</h2>
-      <p>
-        To-do lists are just externalized memory. But ADHD brains struggle with:
+        If you&apos;re an ADHD entrepreneur looking to build better systems, start with these questions:
       </p>
       <ul className="list-disc space-y-2 pl-6">
-        <li><strong className="text-silver">Task initiation</strong> - Seeing the list does not mean starting</li>
-        <li><strong className="text-silver">Prioritization</strong> - Everything feels equally urgent (or not urgent at all)</li>
-        <li><strong className="text-silver">Time estimation</strong> - Tasks take longer than expected</li>
-        <li><strong className="text-silver">Out of sight, out of mind</strong> - Lists in apps get forgotten</li>
+        <li>What external accountability do I currently have?</li>
+        <li>How am I capturing ideas and tasks right now?</li>
+        <li>What environment changes would support better focus?</li>
+        <li>Where do I need thinking partner support?</li>
       </ul>
 
-      <h2 className="text-2xl font-bold text-white">5 Systems That Work</h2>
-
-      <h3 className="text-xl font-semibold text-silver">1. The One Thing Method</h3>
       <p>
-        Each day, identify ONE non-negotiable task. If that one thing gets done, the day is a success.
-        This reduces overwhelm and builds momentum. Usually, once you start, you do more.
-      </p>
-
-      <h3 className="text-xl font-semibold text-silver">2. Brain Dump + Daily Transfer</h3>
-      <p>
-        Keep a running list where you capture everything. Daily, transfer just 3-5 items to a fresh
-        daily list. The big list is for capture, the small list is for action.
-      </p>
-
-      <h3 className="text-xl font-semibold text-silver">3. Visual Task Boards</h3>
-      <p>
-        Physical whiteboards or Kanban boards keep tasks visible. ADHD brains forget what they cannot see.
-        Sticky notes, Trello boards, or a whiteboard by your desk can help.
-      </p>
-
-      <h3 className="text-xl font-semibold text-silver">4. Body Doubling</h3>
-      <p>
-        Work alongside someone else - in person or virtually. Apps like Focusmate pair you with
-        accountability partners for 50-minute work sessions. The presence of another person
-        makes starting and focusing dramatically easier.
-      </p>
-
-      <h3 className="text-xl font-semibold text-silver">5. Automatic Task Extraction</h3>
-      <p>
-        The best system is one you do not have to maintain. Tools that automatically capture
-        commitments from conversations mean you never forget what you said you would do.
-        Coaching sessions become action items without extra work.
-      </p>
-
-      <h2 className="text-2xl font-bold text-white">The Key Principle</h2>
-      <p>
-        No system will fix your life. The goal is "good enough" - a system that captures most things
-        and helps you act on the important ones. Perfectionism about systems is another form of procrastination.
-      </p>
-    </div>
-  )
-}
-
-function ADHDDecisionFatigueGuide() {
-  return (
-    <div className="space-y-8 text-silver-light">
-      <p className="text-xl leading-relaxed">
-        Decision fatigue affects everyone. But for ADHD brains, the cognitive burden of choice
-        is particularly heavy. Understanding why helps you protect your mental energy.
-      </p>
-
-      <h2 className="text-2xl font-bold text-white">Why Decisions Hit Harder with ADHD</h2>
-      <p>
-        Your prefrontal cortex - the brain region responsible for decision-making - functions differently
-        with ADHD. Brain scans show increased activation across multiple regions during decision tasks,
-        meaning your brain works harder for the same cognitive output.
-      </p>
-      <p>
-        Dopamine dysregulation compounds this. Making decisions depletes dopamine faster than in
-        neurotypical brains, leaving you mentally exhausted earlier in the day.
-      </p>
-
-      <h2 className="text-2xl font-bold text-white">Strategies That Help</h2>
-
-      <h3 className="text-xl font-semibold text-silver">1. Reduce Options</h3>
-      <p>
-        Fewer choices mean less depletion. Capsule wardrobes, recurring meals, and standardized
-        routines eliminate daily decisions that drain your reserves.
-      </p>
-
-      <h3 className="text-xl font-semibold text-silver">2. Create Default Decisions</h3>
-      <p>
-        Pre-decide recurring situations. "When X happens, I do Y." Remove the need to think
-        about routine choices.
-      </p>
-
-      <h3 className="text-xl font-semibold text-silver">3. Set Decision Deadlines</h3>
-      <p>
-        Perfectionism extends decision time. Give yourself a deadline - even an arbitrary one -
-        to prevent overthinking. A good decision now beats a perfect decision never.
-      </p>
-
-      <h3 className="text-xl font-semibold text-silver">4. Schedule Important Decisions Early</h3>
-      <p>
-        Cognitive resources are highest in the morning for most people. Save major decisions
-        for when you have full capacity.
-      </p>
-
-      <h3 className="text-xl font-semibold text-silver">5. Use Decision Frameworks</h3>
-      <p>
-        Frameworks like GROW or simple pros/cons lists externalize the thinking process.
-        When the structure is provided, your brain does not have to create it.
-      </p>
-
-      <h3 className="text-xl font-semibold text-silver">6. Get External Input</h3>
-      <p>
-        Talking through decisions with a coach, advisor, or even AI helps process options
-        without carrying the full cognitive load yourself.
-      </p>
-
-      <h2 className="text-2xl font-bold text-white">Let Go of Perfectionism</h2>
-      <p>
-        The pursuit of the best decision is mentally taxing. Most decisions are reversible.
-        Focus on "good enough" rather than optimal, and save your mental energy for what truly matters.
-      </p>
-    </div>
-  )
-}
-
-function FounderLonelinessGuide() {
-  return (
-    <div className="space-y-8 text-silver-light">
-      <p className="text-xl leading-relaxed">
-        55% of CEOs experienced mental health issues in 2024 - a 24 percentage point increase from the previous year.
-        The isolation at the top is not weakness. It is structural.
-      </p>
-
-      <h2 className="text-2xl font-bold text-white">Why Founders Feel Alone</h2>
-      <p>
-        Leadership creates isolation by design:
-      </p>
-      <ul className="list-disc space-y-2 pl-6">
-        <li><strong className="text-silver">Hierarchy</strong> - Being the boss makes friendship with reports complicated</li>
-        <li><strong className="text-silver">Burden of decisions</strong> - Some things you cannot share with your team</li>
-        <li><strong className="text-silver">Expectations</strong> - Investors, employees, and partners all need you to project confidence</li>
-        <li><strong className="text-silver">Few true peers</strong> - Other founders understand, but competition can limit openness</li>
-        <li><strong className="text-silver">Rare honest feedback</strong> - People filter what they tell the CEO</li>
-      </ul>
-
-      <h2 className="text-2xl font-bold text-white">The Numbers Are Sobering</h2>
-      <ul className="list-disc space-y-2 pl-6">
-        <li>27% of entrepreneurs struggle with loneliness and isolation</li>
-        <li>81% of founders are not open about their stressors</li>
-        <li>Younger founders (under 34) are hit hardest - 30.7% report struggling</li>
-        <li>Average loneliness rating among founders: 7.6 out of 10</li>
-      </ul>
-
-      <h2 className="text-2xl font-bold text-white">What Actually Helps</h2>
-
-      <h3 className="text-xl font-semibold text-silver">Peer Networks</h3>
-      <p>
-        CEO groups like YPO exist for a reason. Having 2-3 fellow founders you can be completely
-        vulnerable with - outside your company, with no agenda - is invaluable.
-      </p>
-
-      <h3 className="text-xl font-semibold text-silver">Trusted Advisors</h3>
-      <p>
-        Build a small group of people who will give you honest, unvarnished feedback.
-        Board members, mentors, or coaches who understand leadership challenges.
-      </p>
-
-      <h3 className="text-xl font-semibold text-silver">Professional Support</h3>
-      <p>
-        Therapy offers structured space to process feelings. Coaching provides strategic thinking
-        partnership. Neither is weakness - both are tools high performers use.
-      </p>
-
-      <h3 className="text-xl font-semibold text-silver">24/7 Access</h3>
-      <p>
-        Some of the hardest moments come at 11pm or 3am. Having someone or something available
-        outside business hours - whether a trusted friend, therapist on-call, or AI coach -
-        ensures you are never truly alone with your thoughts.
-      </p>
-
-      <h2 className="text-2xl font-bold text-white">You Are Not Alone in Feeling Alone</h2>
-      <p>
-        The isolation you feel is shared by most founders. Acknowledging it is the first step.
-        Building support structures is the second. You do not have to carry everything yourself.
+        Your ADHD is not a limitation on your entrepreneurial success - with the right systems, it can be your greatest advantage.
       </p>
     </div>
   )
@@ -515,74 +198,83 @@ function WhyProductivityFailsADHD() {
   return (
     <div className="space-y-8 text-silver-light">
       <p className="text-xl leading-relaxed">
-        You have tried Pomodoro. GTD. Time blocking. Eat the frog. Every productivity system
-        recommended by successful entrepreneurs. None of it sticks. Here is why.
+        You have tried Pomodoro. You have tried time blocking. You have tried GTD, bullet journaling, and every productivity
+        app on the market. And they all fail you eventually. <strong className="text-white">It is not your fault.</strong>
       </p>
 
-      <h2 className="text-2xl font-bold text-white">The Problem with Standard Productivity Advice</h2>
+      <h2 className="text-2xl font-bold text-white">The Problem with Traditional Productivity</h2>
       <p>
-        Most productivity systems were designed by neurotypical people, for neurotypical brains.
-        They assume consistent motivation, reliable memory, and linear time perception.
-        ADHD brains have none of these.
+        Most productivity systems were designed by neurotypical people for neurotypical brains. They assume you can:
+      </p>
+      <ul className="list-disc space-y-2 pl-6">
+        <li>Estimate how long tasks will take (time blindness says no)</li>
+        <li>Start tasks when scheduled (initiation difficulties say no)</li>
+        <li>Maintain consistent routines (novelty-seeking says no)</li>
+        <li>Feel motivated by distant rewards (dopamine differences say no)</li>
+      </ul>
+
+      <h2 className="text-2xl font-bold text-white">Why Specific Methods Fail</h2>
+
+      <h3 className="text-xl font-semibold text-white">The Pomodoro Technique</h3>
+      <p>
+        25 minutes on, 5 minutes off sounds great in theory. But ADHD brains do not work in predictable intervals.
+        When you are in hyperfocus, a timer interrupts your flow. When you are struggling, 25 minutes feels like torture.
+        The rigid structure fights against your brain&apos;s natural rhythms.
       </p>
 
-      <h3 className="text-xl font-semibold text-silver">Assumption 1: Motivation is Consistent</h3>
+      <h3 className="text-xl font-semibold text-white">Time Blocking</h3>
       <p>
-        Standard advice says "just do the important things first" or "discipline beats motivation."
-        But ADHD brains run on an interest-based nervous system. We cannot force engagement with
-        tasks that do not stimulate us - no amount of willpower changes brain chemistry.
+        Scheduling your entire day in advance assumes you can predict your energy, focus, and interruptions.
+        For ADHD brains, this creates a setup for failure. One derailed block cascades into a day of missed commitments
+        and shame spirals.
       </p>
 
-      <h3 className="text-xl font-semibold text-silver">Assumption 2: Memory is Reliable</h3>
+      <h3 className="text-xl font-semibold text-white">Getting Things Done (GTD)</h3>
       <p>
-        "Write it in your calendar and you will remember." But ADHD working memory is limited.
-        We forget to check the calendar. We forget we made the list. Out of sight, out of mind
-        is not laziness - it is neurology.
-      </p>
-
-      <h3 className="text-xl font-semibold text-silver">Assumption 3: Time Feels Linear</h3>
-      <p>
-        "Schedule 2 hours for this project." But for ADHD brains, time is either "now" or "not now."
-        We cannot feel the passage of time the way neurotypical people can. Deadlines in the future
-        do not feel real until they are immediate.
+        GTD requires extensive capture, processing, and review systems. For ADHD brains, the overhead of maintaining
+        the system often exceeds the benefit. Plus, the weekly review becomes another task you feel guilty about skipping.
       </p>
 
       <h2 className="text-2xl font-bold text-white">What Actually Works</h2>
 
-      <h3 className="text-xl font-semibold text-silver">Work with Interest, Not Against It</h3>
+      <h3 className="text-xl font-semibold text-white">1. External Accountability</h3>
       <p>
-        Instead of forcing yourself to do boring tasks, find ways to make them interesting.
-        Add novelty, challenge, or urgency. Pair unpleasant tasks with pleasant environments.
-        Use your hyperfocus periods for meaningful work.
+        Instead of relying on internal motivation, create external structures. Body doubling, accountability partners,
+        and coaches provide the external pressure ADHD brains often need to initiate and complete tasks.
       </p>
 
-      <h3 className="text-xl font-semibold text-silver">Externalize Everything</h3>
+      <h3 className="text-xl font-semibold text-white">2. Flexible Systems</h3>
       <p>
-        Do not rely on memory. Use visible reminders - whiteboards, sticky notes, phone alerts.
-        Better yet, use external accountability - coaches, partners, or AI tools that follow up
-        on your commitments.
+        Build systems that adapt to your energy and focus levels. On high-energy days, tackle challenging work.
+        On low-energy days, have a list of &quot;low-stakes&quot; tasks ready. The system serves you, not the other way around.
       </p>
 
-      <h3 className="text-xl font-semibold text-silver">Create Artificial Urgency</h3>
+      <h3 className="text-xl font-semibold text-white">3. Immediate Rewards</h3>
       <p>
-        ADHD brains respond to urgency. Create it artificially with deadlines, body doubling,
-        or public commitments. The activation energy to start is highest - once you begin,
-        momentum often carries you.
+        ADHD brains are motivated by immediate rewards, not distant goals. Build small rewards into your work process.
+        Gamification, frequent breaks, and celebrating small wins can all help.
       </p>
 
-      <h3 className="text-xl font-semibold text-silver">Embrace Imperfection</h3>
+      <h3 className="text-xl font-semibold text-white">4. Reduce Friction</h3>
       <p>
-        Perfectionism is procrastination in disguise. Done is better than perfect.
-        Start messy, iterate later. The best productivity system is the one you actually use,
-        not the theoretically optimal one.
+        The harder something is to start, the less likely you are to do it. Remove every possible barrier between you
+        and the task. Prepare the night before. Keep tools accessible. Simplify your processes.
       </p>
 
-      <h2 className="text-2xl font-bold text-white">The Real Secret</h2>
+      <div className="rounded-lg border border-titanium-700 bg-titanium-900/50 p-6">
+        <h3 className="mb-2 text-lg font-semibold text-white">The Coach OS Approach</h3>
+        <p>
+          Coach OS adapts to how ADHD brains actually work. Voice coaching meets you where you are.
+          Automatic task extraction removes the burden of capturing action items. Available 24/7, so support is there
+          when motivation strikes - even at midnight.
+        </p>
+      </div>
+
+      <h2 className="text-2xl font-bold text-white">The Bottom Line</h2>
       <p>
-        Stop trying to fix yourself. ADHD is not a character flaw to overcome.
-        Build systems that work with your brain, not against it. The entrepreneurs who succeed
-        with ADHD are not the ones who conquered their symptoms - they are the ones who
-        designed their lives around them.
+        Stop trying to force yourself into systems designed for different brains. Instead, build systems that leverage
+        your strengths and accommodate your challenges. Your productivity system should feel sustainable, not like
+        a constant battle against yourself.
       </p>
     </div>
   )
@@ -592,68 +284,74 @@ function ADHDAccountability() {
   return (
     <div className="space-y-8 text-silver-light">
       <p className="text-xl leading-relaxed">
-        You know what you should do. You even want to do it. But without someone watching,
-        it does not happen. This is not weakness - it is how ADHD brains are wired.
+        If you have ADHD, you have probably noticed something: you can move mountains when someone else is counting on you,
+        but struggle to complete basic tasks for yourself. <strong className="text-white">This is not a character flaw - it is how your brain works.</strong>
       </p>
 
-      <h2 className="text-2xl font-bold text-white">Why External Accountability Works</h2>
+      <h2 className="text-2xl font-bold text-white">The Science of External Accountability</h2>
       <p>
-        ADHD brains struggle with self-directed motivation. But put another person in the equation
-        and everything changes. Research shows accountability partners can increase follow-through
-        by over 70% for people with ADHD.
+        ADHD brains have differences in dopamine regulation that affect motivation and reward processing.
+        Internal motivation (&quot;I should do this&quot;) often is not enough to trigger action. External accountability
+        (&quot;Someone is expecting this from me&quot;) provides the external pressure that helps bridge the gap between intention and action.
       </p>
-      <p>
-        This is because external accountability creates what ADHD brains need most:
-      </p>
-      <ul className="list-disc space-y-2 pl-6">
-        <li><strong className="text-silver">Immediate consequences</strong> - Someone is waiting, so "now" matters</li>
-        <li><strong className="text-silver">Social pressure</strong> - We do not want to let others down</li>
-        <li><strong className="text-silver">External structure</strong> - The framework comes from outside, not from our executive function</li>
-        <li><strong className="text-silver">Dopamine boost</strong> - Social connection provides the stimulation we need</li>
-      </ul>
 
       <h2 className="text-2xl font-bold text-white">Types of External Accountability</h2>
 
-      <h3 className="text-xl font-semibold text-silver">Body Doubling</h3>
+      <h3 className="text-xl font-semibold text-white">Body Doubling</h3>
       <p>
-        Working alongside someone else - even silently - dramatically improves focus and productivity.
-        Virtual body doubling through apps like Focusmate brings this benefit online.
-        Just knowing someone is there changes everything.
+        Working alongside someone else - even if they are doing completely different work - can dramatically improve focus and productivity.
+        The presence of another person provides gentle accountability and reduces the sense of isolation that can trigger avoidance.
       </p>
 
-      <h3 className="text-xl font-semibold text-silver">Accountability Partners</h3>
+      <h3 className="text-xl font-semibold text-white">Accountability Partners</h3>
       <p>
-        A peer who checks in regularly on your commitments. This works best when it is mutual -
-        you hold each other accountable. Weekly check-ins with clear, specific goals work well.
+        Regular check-ins with someone who asks &quot;Did you do what you said you would?&quot; creates external deadlines
+        and social pressure that can help ADHD brains follow through on commitments.
       </p>
 
-      <h3 className="text-xl font-semibold text-silver">Coaches</h3>
+      <h3 className="text-xl font-semibold text-white">Coaching</h3>
       <p>
-        Professional accountability with expertise. ADHD coaches understand the neurology and
-        can help you build systems, not just check boxes. The investment creates additional
-        motivation to show up prepared.
+        A coach provides structured accountability plus the thinking partner support that helps ADHD brains process
+        decisions and plan actions. The combination of accountability and guidance can be transformative.
       </p>
 
-      <h3 className="text-xl font-semibold text-silver">AI Accountability</h3>
+      <h3 className="text-xl font-semibold text-white">AI Coaching</h3>
       <p>
-        AI coaching tools can provide 24/7 accountability without the scheduling constraints
-        of human coaches. They remember your commitments, follow up, and extract action items
-        from conversations automatically.
+        AI coaches like Coach OS provide always-available accountability without the scheduling constraints of human
+        coaches. When motivation strikes at 10pm or you need to process a decision at 6am, support is there.
       </p>
 
-      <h2 className="text-2xl font-bold text-white">Making Accountability Work</h2>
-      <ul className="list-disc space-y-2 pl-6">
-        <li><strong className="text-silver">Be specific</strong> - "I will email John by Friday 5pm" not "I will work on emails"</li>
-        <li><strong className="text-silver">Check in frequently</strong> - Weekly is often not enough for ADHD brains</li>
-        <li><strong className="text-silver">Choose the right person</strong> - Someone who understands ADHD, not someone who will judge</li>
-        <li><strong className="text-silver">Build it into your system</strong> - Accountability should be automatic, not another thing to remember</li>
-      </ul>
+      <h2 className="text-2xl font-bold text-white">Building Your Accountability System</h2>
+      <ol className="list-decimal space-y-4 pl-6">
+        <li>
+          <strong className="text-white">Identify your accountability gaps.</strong> Where do you consistently struggle to follow through?
+        </li>
+        <li>
+          <strong className="text-white">Match the accountability type to the need.</strong> Body doubling for focus, partners for deadlines, coaching for decisions.
+        </li>
+        <li>
+          <strong className="text-white">Start small.</strong> One accountability mechanism is better than an elaborate system you will not maintain.
+        </li>
+        <li>
+          <strong className="text-white">Adjust based on results.</strong> If something is not working, try a different approach.
+        </li>
+      </ol>
 
-      <h2 className="text-2xl font-bold text-white">The Bottom Line</h2>
+      <div className="rounded-lg border border-deep-blue-600/30 bg-deep-blue-900/20 p-6">
+        <h3 className="mb-2 text-lg font-semibold text-white">Coach OS Accountability Features</h3>
+        <ul className="space-y-2">
+          <li><strong className="text-white">24/7 availability</strong> - Accountability when you need it</li>
+          <li><strong className="text-white">Task tracking</strong> - Visual progress on your commitments</li>
+          <li><strong className="text-white">Regular check-ins</strong> - Framework-based sessions that keep you on track</li>
+          <li><strong className="text-white">Voice support</strong> - Talk through challenges and decisions anytime</li>
+        </ul>
+      </div>
+
+      <h2 className="text-2xl font-bold text-white">The Key Insight</h2>
       <p>
-        Needing external accountability is not a failure of willpower. It is smart system design
-        for how your brain works. The most successful ADHD entrepreneurs surround themselves with
-        people and tools that keep them on track.
+        Needing external accountability is not a weakness to overcome. It is a feature of your brain to work with.
+        The most successful ADHD entrepreneurs build robust external accountability systems rather than trying to
+        generate motivation from within.
       </p>
     </div>
   )
@@ -663,70 +361,236 @@ function ADHDTimeBlindness() {
   return (
     <div className="space-y-8 text-silver-light">
       <p className="text-xl leading-relaxed">
-        "Just be on time." "Plan ahead." "Give yourself buffer." If it were that simple,
-        you would have figured it out by now. Time blindness is one of the most misunderstood
-        aspects of ADHD.
+        For most people, time flows in a predictable stream. For ADHD brains, time exists in two states:
+        <strong className="text-white">&quot;now&quot; and &quot;not now.&quot;</strong> This phenomenon, called time blindness,
+        is one of the most challenging aspects of running a business with ADHD.
       </p>
 
-      <h2 className="text-2xl font-bold text-white">What Time Blindness Actually Is</h2>
+      <h2 className="text-2xl font-bold text-white">What Is Time Blindness?</h2>
       <p>
-        For ADHD brains, time does not feel like a continuous flow. It exists in two states:
-        "now" and "not now." A deadline three weeks away feels the same as one three months away -
-        both are "not now" until suddenly they are immediate.
+        Time blindness is the difficulty perceiving and estimating the passage of time. It manifests as:
       </p>
-      <p>
-        This is not poor planning or laziness. Brain imaging studies show that ADHD affects
-        the regions responsible for time perception and future planning. You literally
-        experience time differently.
-      </p>
-
-      <h2 className="text-2xl font-bold text-white">How It Shows Up in Business</h2>
       <ul className="list-disc space-y-2 pl-6">
-        <li><strong className="text-silver">Chronic lateness</strong> - Underestimating how long tasks and travel take</li>
-        <li><strong className="text-silver">Missed deadlines</strong> - Projects that seemed far away are suddenly due</li>
-        <li><strong className="text-silver">Poor estimation</strong> - Promising delivery times you cannot meet</li>
-        <li><strong className="text-silver">Hyperfocus traps</strong> - Losing hours to a task without realizing</li>
-        <li><strong className="text-silver">Planning paralysis</strong> - Unable to break long-term goals into actionable steps</li>
+        <li>Underestimating how long tasks will take</li>
+        <li>Losing track of time while working (or procrastinating)</li>
+        <li>Difficulty planning for future events that feel &quot;far away&quot;</li>
+        <li>Chronically running late despite best intentions</li>
+        <li>Struggling to break down projects into realistic timelines</li>
+      </ul>
+
+      <h2 className="text-2xl font-bold text-white">The Business Impact</h2>
+      <p>
+        In business, time blindness can lead to:
+      </p>
+      <ul className="list-disc space-y-2 pl-6">
+        <li>Missed deadlines and damaged client relationships</li>
+        <li>Underpriced projects (because you underestimate the time required)</li>
+        <li>Overwhelming workloads from over-committing</li>
+        <li>Chronic stress and last-minute scrambles</li>
+        <li>Difficulty with long-term strategic planning</li>
       </ul>
 
       <h2 className="text-2xl font-bold text-white">Strategies That Help</h2>
 
-      <h3 className="text-xl font-semibold text-silver">Make Time Visible</h3>
+      <h3 className="text-xl font-semibold text-white">1. Make Time Visible</h3>
       <p>
-        Use visual timers, countdown clocks, and time-tracking apps. When you can see time
-        passing, it becomes more real. Put clocks everywhere - especially where you lose track of time.
+        Use visual timers, analog clocks, and calendar blocking to make the passage of time tangible.
+        Digital timers with visual countdowns can help you &quot;see&quot; time passing.
       </p>
 
-      <h3 className="text-xl font-semibold text-silver">Build in Buffers</h3>
+      <h3 className="text-xl font-semibold text-white">2. Time Boxing with Buffer</h3>
       <p>
-        Whatever you think something will take, add 50%. Build transition time between meetings.
-        Set fake deadlines before real ones. Your brain will treat the fake deadline as real.
+        When estimating how long something will take, double or triple your initial estimate.
+        Build buffer time into every schedule. It is better to finish early than to constantly run behind.
       </p>
 
-      <h3 className="text-xl font-semibold text-silver">Use External Anchors</h3>
+      <h3 className="text-xl font-semibold text-white">3. External Time Keepers</h3>
       <p>
-        Appointments, meetings, and commitments to others create "now" moments in your day.
-        Schedule important tasks right before external commitments - the urgency of the
-        appointment creates activation energy.
+        Use alarms, reminders, and people to alert you when it is time to transition.
+        Do not rely on your internal sense of time - it will mislead you.
       </p>
 
-      <h3 className="text-xl font-semibold text-silver">Work Backwards from Deadlines</h3>
+      <h3 className="text-xl font-semibold text-white">4. Reverse Engineering Deadlines</h3>
       <p>
-        When you have a project, work backwards from the deadline and schedule specific
-        milestones with their own deadlines. Make each milestone feel like its own "now" moment.
+        Start from the deadline and work backward, scheduling specific tasks with buffer time.
+        Make &quot;future&quot; deadlines feel &quot;now&quot; by breaking them into immediate action items.
       </p>
 
-      <h3 className="text-xl font-semibold text-silver">Automate Reminders</h3>
+      <h3 className="text-xl font-semibold text-white">5. Same-Day Planning</h3>
       <p>
-        Do not rely on memory to remind you about time. Set multiple alarms, use calendar
-        notifications, and consider tools that follow up on your commitments automatically.
+        Plan your day the morning of, not the night before. ADHD brains respond better to immediate relevance.
+        Adjust your plan based on your actual energy and focus that day.
       </p>
 
-      <h2 className="text-2xl font-bold text-white">Acceptance and Adaptation</h2>
+      <div className="rounded-lg border border-titanium-700 bg-titanium-900/50 p-6">
+        <h3 className="mb-2 text-lg font-semibold text-white">How Coach OS Helps</h3>
+        <p>
+          Coach OS provides the external structure and check-ins that help compensate for time blindness.
+          Regular coaching sessions create recurring &quot;now&quot; moments. Task tracking makes progress visible.
+          And 24/7 availability means you can process and plan whenever time blindness lets you down.
+        </p>
+      </div>
+
+      <h2 className="text-2xl font-bold text-white">The Key Mindset Shift</h2>
       <p>
-        Time blindness is not going away. The goal is not to "fix" it but to build systems
-        that compensate for it. The most successful ADHD entrepreneurs accept this reality
-        and design their businesses around it.
+        Accept that your internal time perception is unreliable. This is not a moral failing - it is a neurological
+        difference. Build external systems to compensate, and stop beating yourself up when your time sense fails you.
+      </p>
+    </div>
+  )
+}
+
+function ADHDTaskManagementGuide() {
+  return (
+    <div className="space-y-8 text-silver-light">
+      <p className="text-xl leading-relaxed">
+        If traditional to-do lists leave you feeling overwhelmed and paralyzed, you are not alone.
+        Here are <strong className="text-white">5 task management systems</strong> designed for how ADHD brains actually work.
+      </p>
+
+      <h2 className="text-2xl font-bold text-white">1. The Brain Dump + Daily 3</h2>
+      <p>
+        Instead of maintaining an overwhelming master list, do a complete brain dump whenever you feel cluttered.
+        Get everything out of your head onto paper (or a digital tool). Then each morning, choose just THREE tasks
+        to focus on that day. This reduces decision fatigue and creates achievable daily goals.
+      </p>
+      <div className="rounded-lg border border-titanium-700 bg-titanium-900/50 p-4">
+        <p className="text-sm"><strong className="text-white">Best for:</strong> Those who feel paralyzed by long lists</p>
+      </div>
+
+      <h2 className="text-2xl font-bold text-white">2. Visual Kanban Boards</h2>
+      <p>
+        ADHD brains respond well to visual systems. A Kanban board with columns like &quot;To Do,&quot; &quot;Doing,&quot; and &quot;Done&quot;
+        makes progress tangible. Moving cards between columns provides small dopamine hits that maintain motivation.
+        Tools like Trello or physical sticky notes work well.
+      </p>
+      <div className="rounded-lg border border-titanium-700 bg-titanium-900/50 p-4">
+        <p className="text-sm"><strong className="text-white">Best for:</strong> Visual thinkers who need to see progress</p>
+      </div>
+
+      <h2 className="text-2xl font-bold text-white">3. Time-Based Task Buckets</h2>
+      <p>
+        Instead of organizing by project or priority, organize by how long tasks take: 5 minutes, 15 minutes, 30 minutes, 1 hour+.
+        When you have a pocket of time, grab a task from the matching bucket. This removes the friction of deciding what to do
+        and matches tasks to available energy windows.
+      </p>
+      <div className="rounded-lg border border-titanium-700 bg-titanium-900/50 p-4">
+        <p className="text-sm"><strong className="text-white">Best for:</strong> Those with unpredictable schedules</p>
+      </div>
+
+      <h2 className="text-2xl font-bold text-white">4. The Capture and Process System</h2>
+      <p>
+        Have ONE place to capture everything that comes to mind - ideas, tasks, reminders. Use voice notes if writing
+        is a barrier. Once daily (or whenever), process your captures into actionable items or delete them.
+        The key is instant capture with delayed processing.
+      </p>
+      <div className="rounded-lg border border-titanium-700 bg-titanium-900/50 p-4">
+        <p className="text-sm"><strong className="text-white">Best for:</strong> Those who lose ideas and forget tasks</p>
+      </div>
+
+      <h2 className="text-2xl font-bold text-white">5. External Task Extraction</h2>
+      <p>
+        Let someone else extract your tasks. In coaching conversations, your coach identifies action items and tracks them for you.
+        This removes the cognitive load of self-monitoring and provides built-in accountability.
+        Coach OS does this automatically from voice sessions.
+      </p>
+      <div className="rounded-lg border border-titanium-700 bg-titanium-900/50 p-4">
+        <p className="text-sm"><strong className="text-white">Best for:</strong> Those who struggle to identify and track their own tasks</p>
+      </div>
+
+      <h2 className="text-2xl font-bold text-white">Choosing Your System</h2>
+      <p>
+        The best system is the one you will actually use. Experiment with each approach for at least a week before deciding.
+        And remember: you can combine elements from multiple systems to create something that works for your unique brain.
+      </p>
+
+      <div className="rounded-lg border border-deep-blue-600/30 bg-deep-blue-900/20 p-6">
+        <h3 className="mb-2 text-lg font-semibold text-white">Start Here</h3>
+        <p>
+          If you are not sure which system to try first, start with the Brain Dump + Daily 3.
+          It requires minimal setup and immediately reduces overwhelm. You can always add complexity later.
+        </p>
+      </div>
+    </div>
+  )
+}
+
+function ADHDDecisionFatigueGuide() {
+  return (
+    <div className="space-y-8 text-silver-light">
+      <p className="text-xl leading-relaxed">
+        Should you answer that email now or later? What should you work on next? What should you have for lunch?
+        For ADHD brains, even <strong className="text-white">small choices can feel impossibly heavy</strong>.
+        This is decision fatigue, and it hits ADHD brains harder than neurotypical ones.
+      </p>
+
+      <h2 className="text-2xl font-bold text-white">Why ADHD Brains Struggle with Decisions</h2>
+      <p>
+        ADHD affects the prefrontal cortex - the part of your brain responsible for executive functions like decision-making.
+        Combined with difficulties in prioritization and emotional regulation, even simple decisions can become paralyzing.
+      </p>
+
+      <h3 className="text-xl font-semibold text-white">The ADHD Decision Spiral</h3>
+      <ol className="list-decimal space-y-2 pl-6">
+        <li>Face a decision (big or small)</li>
+        <li>Struggle to evaluate options due to executive function challenges</li>
+        <li>Become overwhelmed by the cognitive load</li>
+        <li>Avoid the decision through procrastination or distraction</li>
+        <li>Feel guilt and anxiety about the unmade decision</li>
+        <li>Have even less cognitive capacity for the next decision</li>
+      </ol>
+
+      <h2 className="text-2xl font-bold text-white">Strategies to Reduce Decision Fatigue</h2>
+
+      <h3 className="text-xl font-semibold text-white">1. Reduce the Number of Decisions</h3>
+      <p>
+        Every decision you can eliminate saves cognitive energy for decisions that matter. Pre-decide as much as possible:
+      </p>
+      <ul className="list-disc space-y-2 pl-6">
+        <li>Wear the same type of outfit (Steve Jobs style)</li>
+        <li>Eat the same breakfast each day</li>
+        <li>Have set routines for repetitive tasks</li>
+        <li>Use templates and systems for recurring decisions</li>
+      </ul>
+
+      <h3 className="text-xl font-semibold text-white">2. Make Important Decisions Early</h3>
+      <p>
+        Your decision-making capacity is highest in the morning (for most people).
+        Front-load important decisions before the day drains your cognitive resources.
+      </p>
+
+      <h3 className="text-xl font-semibold text-white">3. Set Decision Deadlines</h3>
+      <p>
+        Give yourself a time limit for decisions. &quot;I will decide by 3pm&quot; prevents endless rumination.
+        Often a &quot;good enough&quot; decision made quickly beats a &quot;perfect&quot; decision made too late.
+      </p>
+
+      <h3 className="text-xl font-semibold text-white">4. Use Decision Frameworks</h3>
+      <p>
+        Frameworks like GROW give you a structured process for working through decisions.
+        Instead of free-floating anxiety, you have concrete steps to follow.
+      </p>
+
+      <h3 className="text-xl font-semibold text-white">5. Get External Input</h3>
+      <p>
+        A coach, mentor, or trusted advisor can help you process decisions without the full cognitive load falling on you.
+        Sometimes just talking through options out loud is enough to find clarity.
+      </p>
+
+      <div className="rounded-lg border border-deep-blue-600/30 bg-deep-blue-900/20 p-6">
+        <h3 className="mb-2 text-lg font-semibold text-white">How Coach OS Helps</h3>
+        <p>
+          Coach OS provides a thinking partner for decisions whenever you need one.
+          Using frameworks like GROW, it guides you through structured decision-making that reduces cognitive overwhelm.
+          Available 24/7, so decision support is there when you need it - not just during scheduled sessions.
+        </p>
+      </div>
+
+      <h2 className="text-2xl font-bold text-white">The Permission to Decide Imperfectly</h2>
+      <p>
+        Perfectionism often underlies decision paralysis. Give yourself permission to make &quot;good enough&quot; decisions.
+        Most decisions are reversible. Most &quot;wrong&quot; choices teach valuable lessons. The cost of not deciding
+        usually exceeds the cost of deciding imperfectly.
       </p>
     </div>
   )
@@ -736,72 +600,195 @@ function ADHDOverwhelmSpiral() {
   return (
     <div className="space-y-8 text-silver-light">
       <p className="text-xl leading-relaxed">
-        Everything feels urgent. You cannot decide where to start. So you start nothing.
-        The list grows. The anxiety builds. Welcome to the ADHD overwhelm spiral.
+        You have a to-do list that feels infinite. Everything seems equally urgent. The more you think about what to do,
+        the less you actually do. <strong className="text-white">Welcome to the ADHD overwhelm spiral</strong> - and here is how to escape it.
       </p>
 
-      <h2 className="text-2xl font-bold text-white">Understanding the Spiral</h2>
+      <h2 className="text-2xl font-bold text-white">Understanding the Overwhelm Spiral</h2>
       <p>
-        The overwhelm spiral follows a predictable pattern:
+        The ADHD overwhelm spiral typically follows this pattern:
       </p>
       <ol className="list-decimal space-y-2 pl-6">
-        <li>Too many tasks compete for attention</li>
-        <li>ADHD brain cannot prioritize - everything feels equally important</li>
-        <li>Analysis paralysis sets in - you cannot decide what to do first</li>
-        <li>Avoidance begins - you do something easier (or nothing)</li>
-        <li>Tasks pile up, making the overwhelm worse</li>
-        <li>Shame and self-criticism add emotional weight</li>
-        <li>The cycle repeats, intensifying</li>
+        <li><strong className="text-white">Trigger:</strong> Multiple demands compete for attention</li>
+        <li><strong className="text-white">Paralysis:</strong> Unable to prioritize, you freeze</li>
+        <li><strong className="text-white">Avoidance:</strong> You distract yourself to escape the discomfort</li>
+        <li><strong className="text-white">Accumulation:</strong> Tasks pile up while you avoid</li>
+        <li><strong className="text-white">Shame:</strong> Guilt about avoidance adds emotional weight</li>
+        <li><strong className="text-white">Deeper paralysis:</strong> The combined load becomes even more overwhelming</li>
       </ol>
 
       <h2 className="text-2xl font-bold text-white">Breaking the Spiral</h2>
 
-      <h3 className="text-xl font-semibold text-silver">Step 1: Stop and Breathe</h3>
+      <h3 className="text-xl font-semibold text-white">Step 1: Acknowledge Without Judgment</h3>
       <p>
-        When you notice the spiral starting, pause. The urge is to keep spinning, but that
-        makes it worse. Five deep breaths. Step away from your computer. Get a glass of water.
-        Break the momentum.
+        First, recognize that you are in an overwhelm spiral. This is not a character flaw - it is a common ADHD experience.
+        Self-criticism only adds to the cognitive load. Notice what is happening with curiosity, not judgment.
       </p>
 
-      <h3 className="text-xl font-semibold text-silver">Step 2: Brain Dump</h3>
+      <h3 className="text-xl font-semibold text-white">Step 2: Physical Reset</h3>
       <p>
-        Get everything out of your head onto paper or screen. Every task, worry, and thought.
-        Do not organize yet - just capture. The goal is to externalize the chaos so your
-        brain can stop trying to hold it all.
+        Overwhelm lives in your nervous system, not just your mind. Before trying to think your way out:
+      </p>
+      <ul className="list-disc space-y-2 pl-6">
+        <li>Take 5 deep breaths (exhale longer than inhale)</li>
+        <li>Move your body - even a 5-minute walk helps</li>
+        <li>Change your physical environment</li>
+        <li>Drink water, eat if you have not recently</li>
+      </ul>
+
+      <h3 className="text-xl font-semibold text-white">Step 3: Brain Dump Everything</h3>
+      <p>
+        Get every single task, worry, and &quot;should&quot; out of your head and onto paper.
+        Do not organize - just dump. This externalizes the overwhelm and makes it tangible rather than infinite.
       </p>
 
-      <h3 className="text-xl font-semibold text-silver">Step 3: Choose ONE Thing</h3>
+      <h3 className="text-xl font-semibold text-white">Step 4: Find ONE Thing</h3>
       <p>
-        From your brain dump, pick one task - not the most important, just one you can
-        start right now. The bar is low deliberately. Progress on anything breaks the paralysis.
+        From your brain dump, identify ONE small task you can complete in the next 15 minutes.
+        It does not have to be the most important thing. It just needs to be completable.
+        Completing anything breaks the paralysis loop.
       </p>
 
-      <h3 className="text-xl font-semibold text-silver">Step 4: Make It Tiny</h3>
+      <h3 className="text-xl font-semibold text-white">Step 5: Build Momentum</h3>
       <p>
-        Whatever task you chose, make it smaller. "Write report" becomes "open document."
-        "Email client" becomes "write first sentence." Tiny tasks have tiny activation energy.
-      </p>
-
-      <h3 className="text-xl font-semibold text-silver">Step 5: Set a Timer</h3>
-      <p>
-        Work on your tiny task for just 10 minutes. Knowing there is an end makes starting easier.
-        Often, once you start, you will keep going. But if not, 10 minutes is still progress.
+        After completing one task, choose another small one. Do not try to tackle the big stuff yet.
+        Let small wins accumulate until you feel your capacity returning.
       </p>
 
       <h2 className="text-2xl font-bold text-white">Preventing Future Spirals</h2>
       <ul className="list-disc space-y-2 pl-6">
-        <li><strong className="text-silver">Keep lists short</strong> - A daily list of 3 items, not 30</li>
-        <li><strong className="text-silver">Regular brain dumps</strong> - Do not let things pile up in your head</li>
-        <li><strong className="text-silver">External support</strong> - Coaches or accountability partners who help you prioritize</li>
-        <li><strong className="text-silver">Recognize early signs</strong> - Learn your personal overwhelm triggers</li>
-        <li><strong className="text-silver">Self-compassion</strong> - Shame makes everything worse</li>
+        <li><strong className="text-white">Regular brain dumps</strong> - Do not let things accumulate in your head</li>
+        <li><strong className="text-white">Daily limits</strong> - Cap your &quot;must do&quot; list at 3 items</li>
+        <li><strong className="text-white">External accountability</strong> - Coaches and partners catch spirals early</li>
+        <li><strong className="text-white">Scheduled recovery</strong> - Build rest into your routine before you need it</li>
       </ul>
 
-      <h2 className="text-2xl font-bold text-white">When It Is Really Bad</h2>
+      <div className="rounded-lg border border-titanium-700 bg-titanium-900/50 p-6">
+        <h3 className="mb-2 text-lg font-semibold text-white">When You are Spiraling Now</h3>
+        <p>
+          If you are currently in an overwhelm spiral, close this article after reading this:
+          Stand up. Take 3 deep breaths. Write down everything in your head on paper.
+          Pick ONE tiny thing from the list and do it immediately. Then decide what comes next.
+        </p>
+      </div>
+    </div>
+  )
+}
+
+function ExecutiveCoachingCostGuide() {
+  return (
+    <div className="space-y-8 text-silver-light">
+      <p className="text-xl leading-relaxed">
+        Executive coaching can transform careers and businesses. But with rates of
+        <strong className="text-white"> £300-500 per session</strong>, it is out of reach for most professionals.
+        Let&apos;s break down the real costs and explore alternatives.
+      </p>
+
+      <h2 className="text-2xl font-bold text-white">What Executive Coaching Actually Costs</h2>
+
+      <div className="overflow-x-auto">
+        <table className="min-w-full border-collapse">
+          <thead>
+            <tr className="border-b border-titanium-700">
+              <th className="px-4 py-3 text-left font-semibold text-white">Coach Level</th>
+              <th className="px-4 py-3 text-left font-semibold text-white">Per Session</th>
+              <th className="px-4 py-3 text-left font-semibold text-white">Monthly (4 sessions)</th>
+              <th className="px-4 py-3 text-left font-semibold text-white">Annual</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr className="border-b border-titanium-800">
+              <td className="px-4 py-3">Junior/New Coach</td>
+              <td className="px-4 py-3">£100-200</td>
+              <td className="px-4 py-3">£400-800</td>
+              <td className="px-4 py-3">£4,800-9,600</td>
+            </tr>
+            <tr className="border-b border-titanium-800">
+              <td className="px-4 py-3">Experienced Coach</td>
+              <td className="px-4 py-3">£200-350</td>
+              <td className="px-4 py-3">£800-1,400</td>
+              <td className="px-4 py-3">£9,600-16,800</td>
+            </tr>
+            <tr className="border-b border-titanium-800">
+              <td className="px-4 py-3">Senior/Executive</td>
+              <td className="px-4 py-3">£300-500</td>
+              <td className="px-4 py-3">£1,200-2,000</td>
+              <td className="px-4 py-3">£14,400-24,000</td>
+            </tr>
+            <tr>
+              <td className="px-4 py-3">C-Suite Specialist</td>
+              <td className="px-4 py-3">£500-1,000+</td>
+              <td className="px-4 py-3">£2,000-4,000+</td>
+              <td className="px-4 py-3">£24,000-48,000+</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 className="text-2xl font-bold text-white">Where the Money Goes</h2>
       <p>
-        Sometimes the spiral goes too deep to break alone. That is when external support matters most.
-        A coach, therapist, or even AI assistant can help you sort through the chaos and find
-        one small step forward. Asking for help is not weakness - it is strategy.
+        Executive coaches justify their rates based on:
+      </p>
+      <ul className="list-disc space-y-2 pl-6">
+        <li>Years of training and certifications (ICF, etc.)</li>
+        <li>One-on-one personal attention</li>
+        <li>Confidentiality and trust relationships</li>
+        <li>Preparation time outside sessions</li>
+        <li>Results and ROI they deliver</li>
+      </ul>
+
+      <h2 className="text-2xl font-bold text-white">The ROI Question</h2>
+      <p>
+        Studies show executive coaching can deliver 5-7x ROI through improved performance, better decisions,
+        and avoided mistakes. For C-suite executives making decisions worth millions, £50,000/year for a coach
+        might be a bargain. But for individual professionals or small business owners, the math is different.
+      </p>
+
+      <h2 className="text-2xl font-bold text-white">Alternatives to Traditional Coaching</h2>
+
+      <h3 className="text-xl font-semibold text-white">Group Coaching</h3>
+      <p>
+        Share a coach with others in similar situations. Costs: £200-500/month.
+        Trade-off: Less personalized attention, but peer learning benefits.
+      </p>
+
+      <h3 className="text-xl font-semibold text-white">Peer Coaching Networks</h3>
+      <p>
+        Form or join a group of peers who coach each other. Cost: Free (time investment).
+        Trade-off: Requires finding the right people and maintaining commitment.
+      </p>
+
+      <h3 className="text-xl font-semibold text-white">AI Coaching</h3>
+      <p>
+        Modern AI coaching platforms use proven frameworks and provide always-available support.
+        Costs: £10-50/month. Trade-off: No human relationship, but 24/7 availability and consistency.
+      </p>
+
+      <div className="rounded-lg border border-deep-blue-600/30 bg-deep-blue-900/20 p-6">
+        <h3 className="mb-2 text-lg font-semibold text-white">Coach OS: £40/month</h3>
+        <p>
+          Coach OS provides framework-based coaching (GROW, SWOT, etc.) with voice and chat options.
+          24/7 availability means support when you need it. Automatic task extraction ensures action items
+          do not get lost. At 1/100th the cost of traditional coaching, it makes professional coaching accessible.
+        </p>
+      </div>
+
+      <h2 className="text-2xl font-bold text-white">When You Need Human Coaching</h2>
+      <p>
+        AI coaching is not a complete replacement for human coaches. Consider human coaching when you need:
+      </p>
+      <ul className="list-disc space-y-2 pl-6">
+        <li>Deep emotional processing</li>
+        <li>Complex interpersonal navigation</li>
+        <li>Industry-specific expertise</li>
+        <li>High-stakes situations requiring experienced judgment</li>
+        <li>Accountability that only a human relationship provides</li>
+      </ul>
+
+      <h2 className="text-2xl font-bold text-white">The Smart Approach</h2>
+      <p>
+        Many professionals now use a hybrid approach: AI coaching for regular support and thinking partner needs,
+        with occasional human coaching sessions for deeper work. This delivers most of the benefit at a fraction of the cost.
       </p>
     </div>
   )
@@ -811,83 +798,103 @@ function AIvsHumanCoaching() {
   return (
     <div className="space-y-8 text-silver-light">
       <p className="text-xl leading-relaxed">
-        AI coaching has matured dramatically. But can it really replace the human connection
-        of a skilled coach? The honest answer: sometimes yes, sometimes no.
+        AI coaching is getting remarkably good. But can it really replace human coaches?
+        <strong className="text-white"> The honest answer: it depends on what you need.</strong>
       </p>
 
       <h2 className="text-2xl font-bold text-white">Where AI Coaching Excels</h2>
 
-      <h3 className="text-xl font-semibold text-silver">Availability</h3>
+      <h3 className="text-xl font-semibold text-white">Availability</h3>
       <p>
-        AI coaches are available 24/7. When anxiety hits at 3am or you need to think through
-        a decision before a meeting in 30 minutes, an AI coach is there. No scheduling,
-        no waiting weeks for an appointment.
+        Human coaches have schedules. AI coaches do not. When you need to process a decision at 11pm or
+        work through anxiety at 6am, AI is there. This 24/7 availability is transformative for many people.
       </p>
 
-      <h3 className="text-xl font-semibold text-silver">Cost</h3>
+      <h3 className="text-xl font-semibold text-white">Consistency</h3>
       <p>
-        Human executive coaching costs £300-500 per session. AI coaching costs a fraction of that.
-        This makes coaching accessible to founders and managers who could never justify
-        the expense of traditional coaching.
+        AI applies frameworks consistently every time. No off days, no distraction, no forgetting what you discussed
+        last session. The methodology is always available and always applied correctly.
       </p>
 
-      <h3 className="text-xl font-semibold text-silver">Memory and Consistency</h3>
+      <h3 className="text-xl font-semibold text-white">Cost</h3>
       <p>
-        Good AI coaches remember every conversation, goal, and commitment you have made.
-        They can reference discussions from months ago. Human coaches, no matter how skilled,
-        cannot retain this level of detail across clients.
+        At £10-50/month versus £300-500/session, AI coaching is 100x more accessible.
+        This democratizes coaching for people who could never afford human coaches.
       </p>
 
-      <h3 className="text-xl font-semibold text-silver">Zero Judgment</h3>
+      <h3 className="text-xl font-semibold text-white">No Judgment</h3>
       <p>
-        Some things are easier to say to an AI than to a human. There is no worry about
-        what they think of you, no social dynamics to manage. For sensitive topics,
-        this psychological safety can be valuable.
+        Some people hold back with human coaches due to fear of judgment. AI creates a safe space to explore
+        thoughts and challenges without social pressure.
       </p>
 
       <h2 className="text-2xl font-bold text-white">Where Human Coaches Excel</h2>
 
-      <h3 className="text-xl font-semibold text-silver">Nuance and Intuition</h3>
+      <h3 className="text-xl font-semibold text-white">Deep Emotional Work</h3>
       <p>
-        Skilled human coaches pick up on subtle cues - tone of voice, body language,
-        what is not being said. They can sense when to push and when to support in ways
-        AI cannot yet match.
+        When coaching touches deep emotional territory - childhood patterns, trauma, identity crises -
+        human presence and empathy matter. AI can support, but human connection is often essential.
       </p>
 
-      <h3 className="text-xl font-semibold text-silver">Deep Expertise</h3>
+      <h3 className="text-xl font-semibold text-white">Complex Interpersonal Dynamics</h3>
       <p>
-        A human coach who has been a CEO, built companies, or navigated specific challenges
-        brings lived experience that AI cannot replicate. Their pattern recognition comes
-        from decades of real-world exposure.
+        Navigating office politics, board relationships, or partner conflicts requires nuanced understanding
+        of human behavior that AI is still developing.
       </p>
 
-      <h3 className="text-xl font-semibold text-silver">Human Connection</h3>
+      <h3 className="text-xl font-semibold text-white">Industry Expertise</h3>
       <p>
-        Sometimes you need to be seen and heard by another human being. The feeling of
-        being truly understood by someone who cares about your success cannot be fully
-        replicated by technology.
+        A coach with 20 years in your industry brings pattern recognition and specific knowledge
+        that general-purpose AI cannot match.
       </p>
 
-      <h3 className="text-xl font-semibold text-silver">Accountability Weight</h3>
+      <h3 className="text-xl font-semibold text-white">Accountability Through Relationship</h3>
       <p>
-        Telling a human coach you did not follow through feels different than telling an AI.
-        The social contract creates additional motivation for some people.
+        Some people need the accountability of a real human relationship. The thought of disappointing
+        someone you respect can be more motivating than any AI prompt.
       </p>
 
       <h2 className="text-2xl font-bold text-white">The Hybrid Approach</h2>
       <p>
-        Many leaders are finding the best results with both: monthly sessions with a human
-        coach for deep strategic work, and AI coaching for daily support, quick decisions,
-        and accountability between sessions. The two approaches complement each other.
+        Many people are finding success with a hybrid approach:
       </p>
+      <ul className="list-disc space-y-2 pl-6">
+        <li><strong className="text-white">AI coaching</strong> for daily/weekly thinking partner needs</li>
+        <li><strong className="text-white">Human coaching</strong> monthly or quarterly for deeper work</li>
+        <li><strong className="text-white">Combined cost</strong> often less than human-only coaching</li>
+        <li><strong className="text-white">Best of both worlds</strong> - accessibility plus depth</li>
+      </ul>
 
-      <h2 className="text-2xl font-bold text-white">Making the Choice</h2>
+      <div className="rounded-lg border border-deep-blue-600/30 bg-deep-blue-900/20 p-6">
+        <h3 className="mb-2 text-lg font-semibold text-white">Coach OS Position</h3>
+        <p>
+          Coach OS is designed as a thinking partner and framework guide, not a replacement for all human coaching.
+          Use it for decision support, goal tracking, and regular check-ins. Add human coaching when you need
+          deep emotional work or specialized expertise.
+        </p>
+      </div>
+
+      <h2 className="text-2xl font-bold text-white">Making Your Choice</h2>
       <p>
-        Consider AI coaching if you need affordable, always-available support, especially
-        for ADHD-related challenges. Consider human coaching if you need deep expertise
-        in a specific area or value the human connection above all. Consider both if
-        you want comprehensive support.
+        Consider AI coaching if you need:
       </p>
+      <ul className="list-disc space-y-2 pl-6">
+        <li>Regular thinking partner support</li>
+        <li>Framework-based decision help</li>
+        <li>Goal tracking and accountability</li>
+        <li>Accessible, affordable coaching</li>
+        <li>24/7 availability</li>
+      </ul>
+      <p className="mt-4">
+        Consider human coaching if you need:
+      </p>
+      <ul className="list-disc space-y-2 pl-6">
+        <li>Deep emotional processing</li>
+        <li>Industry-specific expertise</li>
+        <li>Complex relationship navigation</li>
+        <li>High-stakes situations</li>
+        <li>Human accountability</li>
+      </ul>
     </div>
   )
 }
@@ -896,71 +903,186 @@ function CoachingVsTherapy() {
   return (
     <div className="space-y-8 text-silver-light">
       <p className="text-xl leading-relaxed">
-        "Should I get a coach or a therapist?" It is a common question, and the answer
-        matters. They serve different purposes, and choosing wrong can waste time and money.
+        Both coaching and therapy can help you grow and solve problems.
+        <strong className="text-white"> But they serve different purposes and work in different ways.</strong>
+        Understanding the difference helps you choose the right support.
       </p>
 
-      <h2 className="text-2xl font-bold text-white">The Fundamental Difference</h2>
-      <p>
-        <strong className="text-silver">Therapy</strong> is about healing. It addresses
-        mental health conditions, processes past trauma, and helps you understand why
-        you feel and behave the way you do.
-      </p>
-      <p>
-        <strong className="text-silver">Coaching</strong> is about performance. It helps
-        you set and achieve goals, develop skills, make decisions, and move forward.
-        It assumes you are fundamentally healthy and functional.
-      </p>
+      <h2 className="text-2xl font-bold text-white">Key Differences</h2>
 
-      <h2 className="text-2xl font-bold text-white">Choose Therapy When...</h2>
+      <div className="overflow-x-auto">
+        <table className="min-w-full border-collapse">
+          <thead>
+            <tr className="border-b border-titanium-700">
+              <th className="px-4 py-3 text-left font-semibold text-white">Aspect</th>
+              <th className="px-4 py-3 text-left font-semibold text-white">Coaching</th>
+              <th className="px-4 py-3 text-left font-semibold text-white">Therapy</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr className="border-b border-titanium-800">
+              <td className="px-4 py-3 font-semibold text-white">Focus</td>
+              <td className="px-4 py-3">Future-oriented, goal-driven</td>
+              <td className="px-4 py-3">Past and present, healing-focused</td>
+            </tr>
+            <tr className="border-b border-titanium-800">
+              <td className="px-4 py-3 font-semibold text-white">Approach</td>
+              <td className="px-4 py-3">Action and accountability</td>
+              <td className="px-4 py-3">Understanding and processing</td>
+            </tr>
+            <tr className="border-b border-titanium-800">
+              <td className="px-4 py-3 font-semibold text-white">Starting Point</td>
+              <td className="px-4 py-3">Functional, wanting to improve</td>
+              <td className="px-4 py-3">May be struggling to function</td>
+            </tr>
+            <tr className="border-b border-titanium-800">
+              <td className="px-4 py-3 font-semibold text-white">Practitioner</td>
+              <td className="px-4 py-3">Certified coach (ICF, etc.)</td>
+              <td className="px-4 py-3">Licensed therapist/psychologist</td>
+            </tr>
+            <tr>
+              <td className="px-4 py-3 font-semibold text-white">Duration</td>
+              <td className="px-4 py-3">Usually time-bound (3-12 months)</td>
+              <td className="px-4 py-3">Often ongoing or as-needed</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 className="text-2xl font-bold text-white">When to Choose Coaching</h2>
+      <p>Coaching is appropriate when you:</p>
       <ul className="list-disc space-y-2 pl-6">
-        <li>You are experiencing depression, anxiety, or other mental health symptoms</li>
-        <li>Past trauma is affecting your present functioning</li>
-        <li>You are dealing with addiction or substance use</li>
-        <li>Relationships are consistently problematic</li>
-        <li>You need to understand the root causes of your patterns</li>
-        <li>You are in crisis or having thoughts of self-harm</li>
+        <li>Have specific goals you want to achieve</li>
+        <li>Are generally functioning well but want to improve</li>
+        <li>Need accountability and structure</li>
+        <li>Want to develop specific skills or behaviors</li>
+        <li>Are facing a transition or challenge</li>
+        <li>Need a thinking partner for decisions</li>
       </ul>
 
-      <h2 className="text-2xl font-bold text-white">Choose Coaching When...</h2>
+      <h2 className="text-2xl font-bold text-white">When to Choose Therapy</h2>
+      <p>Therapy is appropriate when you:</p>
       <ul className="list-disc space-y-2 pl-6">
-        <li>You have specific professional or personal goals to achieve</li>
-        <li>You want to improve performance in a particular area</li>
-        <li>You need help with decision-making and strategic thinking</li>
-        <li>You are seeking accountability and structure</li>
-        <li>You want to develop new skills or capabilities</li>
-        <li>You are fundamentally functioning well but want to do better</li>
+        <li>Are struggling with mental health symptoms</li>
+        <li>Have trauma that needs processing</li>
+        <li>Experience depression, anxiety, or other diagnoses</li>
+        <li>Are having difficulty functioning day-to-day</li>
+        <li>Need to work through past experiences</li>
+        <li>Want to understand deep patterns in your life</li>
       </ul>
 
-      <h2 className="text-2xl font-bold text-white">The Grey Areas</h2>
+      <h2 className="text-2xl font-bold text-white">When You Might Need Both</h2>
       <p>
-        Some situations could benefit from either or both:
+        Many people benefit from both coaching and therapy at different times or even simultaneously.
+        Therapy addresses the underlying issues while coaching helps you move forward with goals.
+        The key is recognizing which support serves which need.
       </p>
+
+      <div className="rounded-lg border border-titanium-700 bg-titanium-900/50 p-6">
+        <h3 className="mb-2 text-lg font-semibold text-white">Important Note</h3>
+        <p>
+          If you are experiencing thoughts of self-harm, severe depression, or crisis, please seek professional
+          mental health support. Coaching is not appropriate for mental health emergencies.
+          In the UK, you can contact: Samaritans (116 123) or your GP for urgent mental health support.
+        </p>
+      </div>
+
+      <h2 className="text-2xl font-bold text-white">Coach OS is Coaching, Not Therapy</h2>
+      <p>
+        Coach OS provides coaching - framework-based support for goals, decisions, and accountability.
+        It is designed for people who are generally functioning well and want to improve their performance,
+        make better decisions, or achieve specific objectives. It is not a replacement for mental health treatment.
+      </p>
+    </div>
+  )
+}
+
+function GROWModelGuide() {
+  return (
+    <div className="space-y-8 text-silver-light">
+      <p className="text-xl leading-relaxed">
+        The GROW model is the most widely used coaching framework in the world.
+        Developed in the UK in the 1980s, it provides a simple structure for any coaching conversation.
+        <strong className="text-white"> Here is how to use it, with specific adaptations for ADHD brains.</strong>
+      </p>
+
+      <h2 className="text-2xl font-bold text-white">What is GROW?</h2>
+      <p>GROW is an acronym for the four stages of a coaching conversation:</p>
       <ul className="list-disc space-y-2 pl-6">
-        <li><strong className="text-silver">Burnout</strong> - Coaching for prevention and management, therapy if it has become depression</li>
-        <li><strong className="text-silver">Career transitions</strong> - Coaching for strategy, therapy if identity issues arise</li>
-        <li><strong className="text-silver">Leadership challenges</strong> - Coaching for skills, therapy if personal issues interfere</li>
-        <li><strong className="text-silver">ADHD management</strong> - Both can help - therapy for understanding, coaching for systems</li>
+        <li><strong className="text-white">G - Goal:</strong> What do you want to achieve?</li>
+        <li><strong className="text-white">R - Reality:</strong> Where are you now?</li>
+        <li><strong className="text-white">O - Options:</strong> What could you do?</li>
+        <li><strong className="text-white">W - Will:</strong> What will you do?</li>
       </ul>
 
-      <h2 className="text-2xl font-bold text-white">The Credentials Difference</h2>
+      <h2 className="text-2xl font-bold text-white">Using GROW: Step by Step</h2>
+
+      <h3 className="text-xl font-semibold text-white">G - Goal</h3>
+      <p>Start by clarifying what you want to achieve. Good goal questions include:</p>
+      <ul className="list-disc space-y-2 pl-6">
+        <li>What do you want to accomplish?</li>
+        <li>What would success look like?</li>
+        <li>How will you know when you have achieved it?</li>
+        <li>Why is this important to you?</li>
+      </ul>
+      <div className="rounded-lg border border-titanium-700 bg-titanium-900/50 p-4 mt-4">
+        <p className="text-sm"><strong className="text-white">ADHD Adaptation:</strong> Make goals concrete and visual.
+        &quot;Finish the project&quot; is too vague. &quot;Have the first draft reviewed by Friday&quot; is specific and measurable.</p>
+      </div>
+
+      <h3 className="text-xl font-semibold text-white">R - Reality</h3>
+      <p>Explore the current situation honestly:</p>
+      <ul className="list-disc space-y-2 pl-6">
+        <li>Where are you now in relation to your goal?</li>
+        <li>What have you tried already?</li>
+        <li>What is working? What is not?</li>
+        <li>What obstacles are you facing?</li>
+      </ul>
+      <div className="rounded-lg border border-titanium-700 bg-titanium-900/50 p-4 mt-4">
+        <p className="text-sm"><strong className="text-white">ADHD Adaptation:</strong> Write down the reality.
+        ADHD brains can struggle with objective self-assessment. Getting it on paper makes it tangible.</p>
+      </div>
+
+      <h3 className="text-xl font-semibold text-white">O - Options</h3>
+      <p>Generate possible paths forward:</p>
+      <ul className="list-disc space-y-2 pl-6">
+        <li>What are all the possible options?</li>
+        <li>What else could you do?</li>
+        <li>What would you do if there were no constraints?</li>
+        <li>What has worked for others in similar situations?</li>
+      </ul>
+      <div className="rounded-lg border border-titanium-700 bg-titanium-900/50 p-4 mt-4">
+        <p className="text-sm"><strong className="text-white">ADHD Adaptation:</strong> Generate options quickly without judging them.
+        ADHD creativity shines here. Write everything down, then evaluate separately.</p>
+      </div>
+
+      <h3 className="text-xl font-semibold text-white">W - Will</h3>
+      <p>Commit to specific actions:</p>
+      <ul className="list-disc space-y-2 pl-6">
+        <li>What will you do?</li>
+        <li>When will you do it?</li>
+        <li>How will you hold yourself accountable?</li>
+        <li>What might get in the way, and how will you handle it?</li>
+      </ul>
+      <div className="rounded-lg border border-titanium-700 bg-titanium-900/50 p-4 mt-4">
+        <p className="text-sm"><strong className="text-white">ADHD Adaptation:</strong> Make commitments ultra-specific and immediate.
+        &quot;Work on marketing&quot; will not happen. &quot;Spend 30 minutes on Monday at 9am writing one blog post&quot; might.</p>
+      </div>
+
+      <h2 className="text-2xl font-bold text-white">GROW in Practice</h2>
       <p>
-        Therapists are licensed healthcare professionals with graduate degrees and
-        thousands of hours of supervised clinical training. They can diagnose and treat
-        mental health conditions.
-      </p>
-      <p>
-        Coaches have varied backgrounds. Some have extensive training and certification,
-        others have none. There is no legal requirement to call yourself a coach.
-        Check credentials carefully.
+        A typical GROW conversation takes 30-60 minutes. You can use it with a coach, a peer, or even by yourself
+        using the questions as prompts. The framework works for goals big and small.
       </p>
 
-      <h2 className="text-2xl font-bold text-white">Can You Do Both?</h2>
-      <p>
-        Absolutely. Many people work with both a therapist and a coach simultaneously.
-        Therapy addresses underlying issues while coaching drives forward progress.
-        Just be clear about what each relationship is for.
-      </p>
+      <div className="rounded-lg border border-deep-blue-600/30 bg-deep-blue-900/20 p-6">
+        <h3 className="mb-2 text-lg font-semibold text-white">GROW in Coach OS</h3>
+        <p>
+          Coach OS uses the GROW framework in coaching sessions, guiding you through each stage with relevant questions.
+          At the end of each session, the &quot;Will&quot; commitments become tracked action items, ensuring follow-through
+          on what you decide.
+        </p>
+      </div>
     </div>
   )
 }
@@ -969,79 +1091,160 @@ function CoachingFrameworks() {
   return (
     <div className="space-y-8 text-silver-light">
       <p className="text-xl leading-relaxed">
-        Frameworks are the secret weapon of executive coaches. They provide structure
-        for messy problems and repeatable processes for thinking clearly. Here are five
-        every entrepreneur should know.
+        The best coaches do not just have good instincts - they have proven frameworks.
+        <strong className="text-white"> Here are 5 frameworks every entrepreneur should have in their toolkit.</strong>
       </p>
 
       <h2 className="text-2xl font-bold text-white">1. GROW Model</h2>
-      <p>The most widely used coaching framework in the world.</p>
-      <ul className="list-disc space-y-2 pl-6">
-        <li><strong className="text-silver">G - Goal</strong>: What do you want to achieve?</li>
-        <li><strong className="text-silver">R - Reality</strong>: What is happening now?</li>
-        <li><strong className="text-silver">O - Options</strong>: What could you do?</li>
-        <li><strong className="text-silver">W - Will</strong>: What will you do?</li>
-      </ul>
       <p>
-        Best for: Goal setting, problem solving, performance improvement.
+        The most widely used coaching framework. GROW stands for Goal, Reality, Options, Will.
+        It provides structure for any conversation about goals or challenges.
       </p>
+      <div className="rounded-lg border border-titanium-700 bg-titanium-900/50 p-4">
+        <p className="text-sm"><strong className="text-white">Best for:</strong> Goal setting, problem solving, decision making</p>
+      </div>
 
-      <h2 className="text-2xl font-bold text-white">2. Eisenhower Matrix</h2>
-      <p>Sort tasks by urgency and importance into four quadrants:</p>
-      <ul className="list-disc space-y-2 pl-6">
-        <li><strong className="text-silver">Urgent + Important</strong>: Do immediately</li>
-        <li><strong className="text-silver">Not Urgent + Important</strong>: Schedule time for these</li>
-        <li><strong className="text-silver">Urgent + Not Important</strong>: Delegate if possible</li>
-        <li><strong className="text-silver">Not Urgent + Not Important</strong>: Eliminate</li>
-      </ul>
+      <h2 className="text-2xl font-bold text-white">2. SWOT Analysis</h2>
       <p>
-        Best for: Prioritization, time management, reducing overwhelm.
+        SWOT examines Strengths, Weaknesses, Opportunities, and Threats. It is excellent for strategic planning
+        and assessing situations from multiple angles.
       </p>
+      <div className="rounded-lg border border-titanium-700 bg-titanium-900/50 p-4">
+        <p className="text-sm"><strong className="text-white">Best for:</strong> Strategic planning, competitive analysis, opportunity assessment</p>
+      </div>
 
-      <h2 className="text-2xl font-bold text-white">3. SWOT Analysis</h2>
-      <p>Assess a situation or decision by examining:</p>
-      <ul className="list-disc space-y-2 pl-6">
-        <li><strong className="text-silver">Strengths</strong>: Internal advantages</li>
-        <li><strong className="text-silver">Weaknesses</strong>: Internal limitations</li>
-        <li><strong className="text-silver">Opportunities</strong>: External possibilities</li>
-        <li><strong className="text-silver">Threats</strong>: External risks</li>
-      </ul>
+      <h2 className="text-2xl font-bold text-white">3. Eisenhower Matrix</h2>
       <p>
-        Best for: Strategic planning, decision making, competitive analysis.
+        Categorize tasks by urgency and importance into four quadrants: Do First, Schedule, Delegate, Eliminate.
+        Helps prioritize when everything feels urgent.
       </p>
+      <div className="rounded-lg border border-titanium-700 bg-titanium-900/50 p-4">
+        <p className="text-sm"><strong className="text-white">Best for:</strong> Prioritization, time management, reducing overwhelm</p>
+      </div>
 
       <h2 className="text-2xl font-bold text-white">4. OKRs (Objectives and Key Results)</h2>
-      <p>A goal-setting framework popularized by Google:</p>
-      <ul className="list-disc space-y-2 pl-6">
-        <li><strong className="text-silver">Objective</strong>: What you want to achieve (qualitative, inspiring)</li>
-        <li><strong className="text-silver">Key Results</strong>: How you will measure success (quantitative, specific)</li>
-      </ul>
       <p>
-        Typically set quarterly with 3-5 objectives and 3-4 key results each.
-        Best for: Aligning team efforts, tracking progress, ambitious goal setting.
+        Set ambitious Objectives and define measurable Key Results to track progress.
+        Used by Google, Intel, and thousands of companies to align effort with outcomes.
+      </p>
+      <div className="rounded-lg border border-titanium-700 bg-titanium-900/50 p-4">
+        <p className="text-sm"><strong className="text-white">Best for:</strong> Goal tracking, team alignment, measuring progress</p>
+      </div>
+
+      <h2 className="text-2xl font-bold text-white">5. Pre-Mortem Analysis</h2>
+      <p>
+        Before starting a project, imagine it has failed spectacularly. Then work backward to identify
+        what could cause that failure. This surfaces risks that optimism bias might hide.
+      </p>
+      <div className="rounded-lg border border-titanium-700 bg-titanium-900/50 p-4">
+        <p className="text-sm"><strong className="text-white">Best for:</strong> Risk assessment, project planning, avoiding preventable failures</p>
+      </div>
+
+      <h2 className="text-2xl font-bold text-white">When to Use Which Framework</h2>
+      <ul className="list-disc space-y-2 pl-6">
+        <li><strong className="text-white">Feeling stuck?</strong> Use GROW to clarify goals and options</li>
+        <li><strong className="text-white">Making a big decision?</strong> Use SWOT to see all angles</li>
+        <li><strong className="text-white">Overwhelmed by tasks?</strong> Use Eisenhower to prioritize</li>
+        <li><strong className="text-white">Setting team goals?</strong> Use OKRs for clarity and alignment</li>
+        <li><strong className="text-white">Starting something new?</strong> Use Pre-Mortem to identify risks</li>
+      </ul>
+
+      <div className="rounded-lg border border-deep-blue-600/30 bg-deep-blue-900/20 p-6">
+        <h3 className="mb-2 text-lg font-semibold text-white">Frameworks in Coach OS</h3>
+        <p>
+          Coach OS guides you through these frameworks in context. When you are stuck, it might suggest GROW.
+          When you are planning, it might offer SWOT. The frameworks become tools you use naturally
+          rather than theories you have to remember.
+        </p>
+      </div>
+    </div>
+  )
+}
+
+function FounderLonelinessGuide() {
+  return (
+    <div className="space-y-8 text-silver-light">
+      <p className="text-xl leading-relaxed">
+        55% of CEOs experienced mental health issues in 2024. The isolation at the top is real, and it is affecting
+        founder performance, wellbeing, and company success. <strong className="text-white">Let us talk about what nobody talks about.</strong>
       </p>
 
-      <h2 className="text-2xl font-bold text-white">5. Force Field Analysis</h2>
-      <p>Understand the forces affecting a change or decision:</p>
-      <ul className="list-disc space-y-2 pl-6">
-        <li><strong className="text-silver">Driving Forces</strong>: What pushes toward the goal</li>
-        <li><strong className="text-silver">Restraining Forces</strong>: What holds you back</li>
-      </ul>
+      <h2 className="text-2xl font-bold text-white">The Reality of Founder Isolation</h2>
       <p>
-        Success comes from strengthening driving forces and weakening restraining ones.
-        Best for: Change management, overcoming obstacles, understanding resistance.
+        As a founder or CEO, you face challenges you cannot fully share with:
+      </p>
+      <ul className="list-disc space-y-2 pl-6">
+        <li><strong className="text-white">Your team</strong> - They need confidence, not your anxieties</li>
+        <li><strong className="text-white">Your investors</strong> - They need progress reports, not vulnerability</li>
+        <li><strong className="text-white">Your family</strong> - They might not understand the specifics</li>
+        <li><strong className="text-white">Your friends</strong> - Most have not been where you are</li>
+      </ul>
+      <p className="mt-4">
+        This creates a paradox: the more successful you become, the fewer people you can be honest with.
       </p>
 
-      <h2 className="text-2xl font-bold text-white">Choosing the Right Framework</h2>
+      <h2 className="text-2xl font-bold text-white">The Cost of Isolation</h2>
       <p>
-        No single framework fits every situation. GROW works for most coaching conversations.
-        Eisenhower helps with overwhelm. SWOT suits strategic decisions. OKRs align teams.
-        Force Field Analysis unpacks resistance.
+        Founder isolation is not just uncomfortable - it is dangerous:
       </p>
+      <ul className="list-disc space-y-2 pl-6">
+        <li><strong className="text-white">Poor decisions</strong> - No one to stress-test your thinking</li>
+        <li><strong className="text-white">Blind spots</strong> - Echo chambers reinforce bad patterns</li>
+        <li><strong className="text-white">Burnout</strong> - Unsustainable pace without support</li>
+        <li><strong className="text-white">Mental health</strong> - Anxiety and depression go unaddressed</li>
+        <li><strong className="text-white">Relationship strain</strong> - Partners bear the unprocessed stress</li>
+      </ul>
+
+      <h2 className="text-2xl font-bold text-white">Finding the Right Support</h2>
+
+      <h3 className="text-xl font-semibold text-white">Peer Networks</h3>
       <p>
-        The best framework is the one you will actually use. Start with one, master it,
-        then add others to your toolkit.
+        Groups like YPO, EO, and founder masterminds connect you with people who understand.
+        The shared experience creates space for honesty that is hard to find elsewhere.
       </p>
+
+      <h3 className="text-xl font-semibold text-white">Executive Coaches</h3>
+      <p>
+        A coach provides a confidential thinking partner outside your company. Someone whose only job
+        is to help you succeed, with no political agenda or competing interests.
+      </p>
+
+      <h3 className="text-xl font-semibold text-white">Therapists</h3>
+      <p>
+        When founder stress crosses into mental health territory, professional support matters.
+        Many founders benefit from having both a coach (for performance) and a therapist (for wellbeing).
+      </p>
+
+      <h3 className="text-xl font-semibold text-white">AI Coaching</h3>
+      <p>
+        Sometimes you need to process something at 2am when you cannot sleep. Or talk through a decision
+        before a big meeting. AI coaching provides always-available support without judgment.
+      </p>
+
+      <h2 className="text-2xl font-bold text-white">Building Your Support System</h2>
+      <ol className="list-decimal space-y-4 pl-6">
+        <li>
+          <strong className="text-white">Acknowledge the need.</strong> Pretending you do not need support is not strength - it is risk.
+        </li>
+        <li>
+          <strong className="text-white">Identify your gaps.</strong> Where do you need a thinking partner? Where do you need emotional support?
+        </li>
+        <li>
+          <strong className="text-white">Start with one option.</strong> Do not build an elaborate system. Try one thing and see how it helps.
+        </li>
+        <li>
+          <strong className="text-white">Make it regular.</strong> Sporadic support is not support. Build it into your routine.
+        </li>
+      </ol>
+
+      <div className="rounded-lg border border-deep-blue-600/30 bg-deep-blue-900/20 p-6">
+        <h3 className="mb-2 text-lg font-semibold text-white">Coach OS for Founders</h3>
+        <p>
+          Coach OS provides a thinking partner available 24/7. Process decisions, work through challenges,
+          and have someone to &quot;talk&quot; to when you cannot share with anyone else. Framework-based coaching
+          ensures the support is structured and effective, not just venting.
+        </p>
+      </div>
     </div>
   )
 }
@@ -1050,74 +1253,104 @@ function DecisionMakingFounders() {
   return (
     <div className="space-y-8 text-silver-light">
       <p className="text-xl leading-relaxed">
-        Founders make hundreds of decisions daily. Most do not matter much.
-        Some matter enormously. Learning to tell the difference - and decide well on both -
-        is a core founder skill.
+        Founders make hundreds of decisions every week. The quality of those decisions compounds over time,
+        shaping your company&apos;s trajectory. <strong className="text-white">Here is how to make better decisions, faster.</strong>
       </p>
 
-      <h2 className="text-2xl font-bold text-white">The Two Types of Decisions</h2>
+      <h2 className="text-2xl font-bold text-white">The Founder Decision Burden</h2>
       <p>
-        Amazon CEO Jeff Bezos distinguishes between:
+        As a founder, you face decisions that are:
       </p>
       <ul className="list-disc space-y-2 pl-6">
-        <li><strong className="text-silver">Type 1 (One-way doors)</strong>: Irreversible or very hard to reverse. These need careful analysis.</li>
-        <li><strong className="text-silver">Type 2 (Two-way doors)</strong>: Reversible. Make these quickly and iterate.</li>
+        <li><strong className="text-white">High stakes</strong> - Consequences can be significant and long-lasting</li>
+        <li><strong className="text-white">High volume</strong> - There are many of them every day</li>
+        <li><strong className="text-white">Ambiguous</strong> - Often no clear right answer</li>
+        <li><strong className="text-white">Isolated</strong> - You cannot always discuss them openly</li>
       </ul>
+      <p className="mt-4">
+        This decision burden leads to decision fatigue, analysis paralysis, and sometimes poor choices
+        made simply because you are too tired to think clearly.
+      </p>
+
+      <h2 className="text-2xl font-bold text-white">Principles for Better Decisions</h2>
+
+      <h3 className="text-xl font-semibold text-white">1. Categorize Decisions by Reversibility</h3>
       <p>
-        Most founders treat too many decisions as Type 1. This slows everything down.
-        Default to Type 2 thinking unless proven otherwise.
+        Amazon&apos;s Jeff Bezos distinguishes between &quot;one-way doors&quot; (irreversible) and &quot;two-way doors&quot; (reversible).
+        Spend serious time on one-way doors. Make two-way door decisions quickly and adjust based on results.
+      </p>
+
+      <h3 className="text-xl font-semibold text-white">2. Set Decision Deadlines</h3>
+      <p>
+        &quot;I will decide by Friday&quot; prevents endless rumination. Most decisions are not improved by more time
+        beyond a certain point. The cost of delay often exceeds the cost of a suboptimal choice.
+      </p>
+
+      <h3 className="text-xl font-semibold text-white">3. Use Frameworks Consistently</h3>
+      <p>
+        Frameworks like GROW, SWOT, and pre-mortem analysis give you structured ways to think through decisions.
+        Using them consistently builds decision-making muscle and reduces the cognitive load of each choice.
+      </p>
+
+      <h3 className="text-xl font-semibold text-white">4. Seek Disconfirming Input</h3>
+      <p>
+        Your brain naturally seeks information that confirms what you already believe. Deliberately seek out
+        perspectives and data that challenge your current thinking.
+      </p>
+
+      <h3 className="text-xl font-semibold text-white">5. Document and Review</h3>
+      <p>
+        Keep a decision journal. Note what you decided, why, and what you expected to happen.
+        Reviewing past decisions helps you learn from both successes and failures.
       </p>
 
       <h2 className="text-2xl font-bold text-white">Decision-Making Frameworks</h2>
 
-      <h3 className="text-xl font-semibold text-silver">The 10-10-10 Rule</h3>
+      <h3 className="text-xl font-semibold text-white">The 10-10-10 Rule</h3>
       <p>
-        How will you feel about this decision in 10 minutes? 10 months? 10 years?
-        This helps escape short-term emotional reactions and consider long-term impact.
+        How will you feel about this decision 10 minutes from now? 10 months from now? 10 years from now?
+        This helps balance short-term emotions against long-term impact.
       </p>
 
-      <h3 className="text-xl font-semibold text-silver">Regret Minimization</h3>
+      <h3 className="text-xl font-semibold text-white">The Regret Minimization Framework</h3>
       <p>
-        Project yourself to age 80. Looking back, which choice would you regret not taking?
-        Jeff Bezos used this to decide to start Amazon.
+        Imagine yourself at 80 years old looking back. Which choice would you regret more?
+        This surfaces values and long-term preferences that get buried in day-to-day thinking.
       </p>
 
-      <h3 className="text-xl font-semibold text-silver">Pre-Mortem</h3>
+      <h3 className="text-xl font-semibold text-white">The Newspaper Test</h3>
       <p>
-        Imagine the decision failed spectacularly. What went wrong?
-        This surfaces risks your optimistic brain might overlook.
+        Imagine your decision appeared on the front page of a newspaper. Would you be comfortable with how it looks?
+        This helps identify ethical considerations and reputation risks.
       </p>
 
-      <h3 className="text-xl font-semibold text-silver">Decision Journal</h3>
-      <p>
-        Write down the decision, your reasoning, and expected outcomes.
-        Review later to improve your decision-making process over time.
-      </p>
+      <div className="rounded-lg border border-deep-blue-600/30 bg-deep-blue-900/20 p-6">
+        <h3 className="mb-2 text-lg font-semibold text-white">Coach OS Decision Support</h3>
+        <p>
+          Coach OS provides a thinking partner for decisions whenever you need one. Using frameworks like GROW,
+          it helps you work through choices systematically. Available 24/7, so decision support is there
+          at 2am when you cannot sleep, or before that 8am meeting when you need clarity.
+        </p>
+      </div>
 
-      <h2 className="text-2xl font-bold text-white">Common Decision Traps</h2>
+      <h2 className="text-2xl font-bold text-white">When to Decide Alone vs. With Input</h2>
+      <p>
+        Decide alone when:
+      </p>
       <ul className="list-disc space-y-2 pl-6">
-        <li><strong className="text-silver">Analysis paralysis</strong>: Gathering more data when you have enough</li>
-        <li><strong className="text-silver">Confirmation bias</strong>: Seeking information that supports what you already believe</li>
-        <li><strong className="text-silver">Sunk cost fallacy</strong>: Continuing because of past investment, not future value</li>
-        <li><strong className="text-silver">Decision fatigue</strong>: Making worse decisions as the day progresses</li>
-        <li><strong className="text-silver">Consensus seeking</strong>: Prioritizing agreement over the right answer</li>
+        <li>The decision is clearly your responsibility</li>
+        <li>Speed matters more than buy-in</li>
+        <li>You have all the relevant information</li>
       </ul>
-
-      <h2 className="text-2xl font-bold text-white">Practical Tips</h2>
-      <ul className="list-disc space-y-2 pl-6">
-        <li><strong className="text-silver">Set deadlines</strong>: Decide by X date, even if imperfect</li>
-        <li><strong className="text-silver">Make important decisions early</strong>: When cognitive resources are fresh</li>
-        <li><strong className="text-silver">Sleep on big decisions</strong>: But only once - do not use this to procrastinate</li>
-        <li><strong className="text-silver">Talk it through</strong>: Explaining to someone else often clarifies your own thinking</li>
-        <li><strong className="text-silver">Delegate more</strong>: Not every decision needs to be yours</li>
-      </ul>
-
-      <h2 className="text-2xl font-bold text-white">When You Are Stuck</h2>
-      <p>
-        If you cannot decide, ask yourself: What would I tell a friend in this situation?
-        We often know the answer but resist it. External perspective - from a coach,
-        advisor, or even AI - can help you access what you already know.
+      <p className="mt-4">
+        Seek input when:
       </p>
+      <ul className="list-disc space-y-2 pl-6">
+        <li>Others have relevant expertise</li>
+        <li>Buy-in is crucial for implementation</li>
+        <li>You need to check your blind spots</li>
+        <li>The stakes are very high</li>
+      </ul>
     </div>
   )
 }
