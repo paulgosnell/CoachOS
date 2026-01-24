@@ -108,7 +108,7 @@ export default function SubscribeClient({
 
           {/* Pricing */}
           <div className="mb-6">
-            <div className="mb-2 text-4xl font-bold">£9.99</div>
+            <div className="mb-2 text-4xl font-bold">£40</div>
             <div className="text-silver-light">per month</div>
           </div>
 

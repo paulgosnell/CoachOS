@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     // Define subscription pricing
     const pricing = {
       pro: {
-        amount: 9.99,
+        amount: 40,
         currency: 'GBP',
         description: 'Coach OS Pro - Monthly Subscription',
       },

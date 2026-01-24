@@ -96,7 +96,7 @@ export async function sendSubscriptionActivatedEmail(to: string, userName: strin
             <p><strong>Subscription Details:</strong></p>
             <ul style="padding-left: 20px;">
               <li>Plan: Coach OS Pro</li>
-              <li>Price: £9.99/month</li>
+              <li>Price: £40/month</li>
               <li>Renews: ${expiresAt.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</li>
             </ul>
 
