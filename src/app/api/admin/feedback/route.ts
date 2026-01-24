@@ -1,6 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { isAdmin } from '@/lib/admin'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(req: Request) {
   try {
     // Check admin authorization

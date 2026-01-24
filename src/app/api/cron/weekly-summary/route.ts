@@ -1,6 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { generateWeeklySummary } from '@/lib/memory/summaries'
 
+export const dynamic = 'force-dynamic'
+
 /**
  * Cron job to generate weekly summaries for all active users
  * Called by Vercel Cron every Sunday night
