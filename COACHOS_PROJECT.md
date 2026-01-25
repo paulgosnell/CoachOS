@@ -304,7 +304,7 @@ Built as a client project for ADHD parents. Results:
 
 - [x] XML sitemap
 - [x] robots.txt
-- [ ] Google Search Console
+- [x] Google Search Console
 - [ ] Bing Webmaster
 - [x] llms.txt
 - [x] FAQ schema
@@ -450,6 +450,7 @@ Some users from LinkedIn mention. Need to:
 | Jan 2025 | FAQ schema markup added |
 | Jan 2025 | Landing page overhaul (ADHD callout, pricing comparison, social proof) |
 | Jan 2025 | Public /pricing page created |
+| Jan 2025 | Google Search Console setup, sitemap submitted |
 | | |
 
 ---
@@ -464,7 +465,7 @@ Some users from LinkedIn mention. Need to:
 6. [x] ~~Begin content creation~~ (500+ articles live)
 7. [x] ~~Confirm pricing strategy~~ (£40/month)
 8. [ ] Gather Pathfinder testimonials
-9. [ ] Set up Google Search Console
+9. [x] ~~Set up Google Search Console~~
 10. [ ] Set up Bing Webmaster Tools
 11. [x] ~~Add FAQ schema markup~~
 12. [x] ~~Update landing page (clearer ICP messaging, social proof)~~
