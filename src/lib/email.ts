@@ -64,10 +64,13 @@ export async function sendWelcomeEmail(to: string, userName: string) {
   }
 }
 
-export async function sendSubscriptionActivatedEmail(to: string, userName: string, expiresAt: Date) {
+export async function sendSubscriptionActivatedEmail(to: string, userName: string, expiresAt?: Date) {
+  // Default to 1 month from now if not provided
+  const renewalDate = expiresAt || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+
   try {
     await getResend().emails.send({
-      from: 'Coach OS <onboarding@resend.dev>',
+      from: 'Coach OS <onboarding@coachos.app>',
       to,
       subject: 'Your Coach OS Pro Subscription is Active',
       html: `
@@ -104,7 +107,7 @@ export async function sendSubscriptionActivatedEmail(to: string, userName: strin
             <ul style="padding-left: 20px;">
               <li>Plan: Coach OS Pro</li>
               <li>Price: £40/month</li>
-              <li>Renews: ${expiresAt.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</li>
+              <li>Renews: ${renewalDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</li>
             </ul>
 
             <div style="text-align: center; margin: 30px 0;">
