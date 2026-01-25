@@ -98,13 +98,25 @@ export default function HomePage() {
               </h1>
 
               {/* Subtitle */}
-              <p className="mb-8 mx-auto max-w-2xl text-lg text-silver-light md:text-xl leading-relaxed">
+              <p className="mb-6 mx-auto max-w-2xl text-lg text-silver-light md:text-xl leading-relaxed">
                 The sounding board you need, whenever you need it. No scheduling, full context,
-                real coaching frameworks. Voice or text.
+                proven frameworks like GROW. Voice or text.
               </p>
 
+              {/* ADHD Callout */}
+              <div className="mb-8">
+                <Link
+                  href="/adhd"
+                  className="inline-flex items-center gap-3 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-2 text-sm text-amber-300 hover:bg-amber-500/20 transition-all group"
+                >
+                  <Brain className="h-4 w-4" />
+                  <span>ADHD founder? We built a special mode for you</span>
+                  <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                </Link>
+              </div>
+
               {/* CTA Buttons */}
-              <div className="mb-12 flex flex-col gap-4 sm:flex-row sm:justify-center">
+              <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:justify-center">
                 <Link href="/auth/signup" className="btn btn-primary shadow-lg shadow-white/10">
                   Start Talking to Your Coach
                   <ArrowRight className="h-5 w-5" />
@@ -118,6 +130,11 @@ export default function HomePage() {
                   <span className="relative z-10">Hear Coach OS</span>
                 </button>
               </div>
+
+              {/* Credibility line */}
+              <p className="mb-8 text-sm text-silver-dark">
+                Built by founders with ADHD. Proven with real results.
+              </p>
 
               {/* Features bar */}
               <div className="mx-auto max-w-3xl">
@@ -266,9 +283,9 @@ export default function HomePage() {
                     <MessageSquare className="h-8 w-8 text-silver" />
                   </div>
                 </div>
-                <h3 className="mb-3 text-xl font-semibold">Asks, Doesn't Tell</h3>
+                <h3 className="mb-3 text-xl font-semibold">Proven Frameworks</h3>
                 <p className="text-sm text-silver-light">
-                  Uses Socratic method to help you think clearly, not just tell you what to do.
+                  Uses GROW, SWOT, and executive coaching frameworks. Not just conversation - real methodology.
                 </p>
               </motion.div>
 
@@ -411,16 +428,89 @@ export default function HomePage() {
               </motion.div>
             </div>
 
-            {/* ADHD-specific callout */}
-            <div className="mt-12 text-center">
-              <Link
-                href="/adhd"
-                className="inline-flex items-center gap-2 text-silver-dark hover:text-silver transition-colors"
-              >
-                <Brain className="h-4 w-4" />
-                <span className="text-sm">Have ADHD? We built a special coaching mode for you →</span>
-              </Link>
+          </div>
+        </section>
+
+        {/* Pricing Comparison */}
+        <section className="relative border-t border-white/5 py-24">
+          <div className="container mx-auto px-6">
+            <div className="mb-16 text-center">
+              <h2 className="mb-4 font-serif text-4xl font-bold md:text-5xl">
+                Executive Coaching, <span className="text-gradient">Accessible</span>
+              </h2>
+              <p className="mx-auto max-w-2xl text-lg text-silver-light">
+                The same frameworks used by Fortune 500 executives. 100x more accessible.
+              </p>
             </div>
+
+            <div className="mx-auto grid max-w-4xl gap-6 md:grid-cols-2">
+              {/* Human Coach Card */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5 }}
+                viewport={{ once: true }}
+                className="card border-white/5"
+              >
+                <div className="mb-4 text-sm font-medium uppercase tracking-wider text-silver-dark">
+                  Traditional Executive Coaching
+                </div>
+                <div className="mb-6">
+                  <span className="text-4xl font-bold text-white">£300-500</span>
+                  <span className="text-silver-light">/session</span>
+                </div>
+                <ul className="space-y-3 text-sm text-silver-light">
+                  <li className="flex items-center gap-3">
+                    <Clock className="h-4 w-4 text-silver-dark" />
+                    Book 2-4 weeks in advance
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <Clock className="h-4 w-4 text-silver-dark" />
+                    Re-explain context each session
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <Clock className="h-4 w-4 text-silver-dark" />
+                    £3,600-6,000/year for monthly sessions
+                  </li>
+                </ul>
+              </motion.div>
+
+              {/* Coach OS Card */}
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                viewport={{ once: true }}
+                className="card border-deep-blue-600/30 bg-deep-blue-950/30"
+              >
+                <div className="mb-4 inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-deep-blue-600 to-purple-600 px-3 py-1 text-xs font-semibold text-white">
+                  <Sparkles className="h-3 w-3" />
+                  COACH OS
+                </div>
+                <div className="mb-6">
+                  <span className="text-4xl font-bold text-white">£40</span>
+                  <span className="text-silver-light">/month</span>
+                </div>
+                <ul className="space-y-3 text-sm">
+                  <li className="flex items-center gap-3 text-green-400">
+                    <CheckCircle2 className="h-4 w-4" />
+                    Available 24/7, no scheduling
+                  </li>
+                  <li className="flex items-center gap-3 text-green-400">
+                    <CheckCircle2 className="h-4 w-4" />
+                    Remembers all context forever
+                  </li>
+                  <li className="flex items-center gap-3 text-green-400">
+                    <CheckCircle2 className="h-4 w-4" />
+                    £480/year - unlimited access
+                  </li>
+                </ul>
+              </motion.div>
+            </div>
+
+            <p className="mt-8 text-center text-sm text-silver-dark">
+              Same GROW framework. Same strategic thinking. 100x the accessibility.
+            </p>
           </div>
         </section>
 
@@ -581,6 +671,22 @@ export default function HomePage() {
                 </ul>
               </motion.div>
             </div>
+
+            {/* Task Extraction Callout */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              viewport={{ once: true }}
+              className="mx-auto mt-12 max-w-2xl rounded-xl border border-green-500/20 bg-green-500/5 p-8 text-center"
+            >
+              <ListTodo className="mx-auto mb-4 h-10 w-10 text-green-400" />
+              <h3 className="mb-3 text-xl font-semibold">Say It. It&apos;s Tracked.</h3>
+              <p className="text-silver-light">
+                "I need to follow up with Sarah on Friday" - Coach captures it automatically.
+                No app switching. No forgetting. Just talk naturally.
+              </p>
+            </motion.div>
           </div>
         </section>
 
@@ -642,6 +748,83 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* Social Proof Section */}
+        <section className="relative border-t border-white/5 py-24">
+          <div className="container mx-auto px-6">
+            <div className="mx-auto max-w-4xl text-center">
+              <h2 className="mb-4 font-serif text-4xl font-bold md:text-5xl">
+                Proven <span className="text-gradient">Results</span>
+              </h2>
+              <p className="mx-auto mb-12 max-w-2xl text-lg text-silver-light">
+                Built and tested with real founders facing real challenges.
+              </p>
+
+              {/* Pathfinder Results Card */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                viewport={{ once: true }}
+                className="card mx-auto max-w-2xl text-left"
+              >
+                <div className="flex items-start gap-4">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-green-500/10">
+                    <CheckCircle2 className="h-6 w-6 text-green-500" />
+                  </div>
+                  <div>
+                    <p className="mb-3 text-lg text-silver">
+                      "Solved problems I'd been stuck on for years"
+                    </p>
+                    <p className="text-sm text-silver-light">
+                      We built the core coaching approach for ADHD parents in a previous project.
+                      Two people used framework-based AI coaching to breakthrough challenges
+                      they'd been trying to solve for years. The combination of structured
+                      frameworks and automatic task capture made the difference.
+                    </p>
+                    <p className="mt-3 text-xs text-silver-dark">
+                      - Early Pathfinder Program Results
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Key Stats */}
+              <div className="mt-12 grid gap-6 md:grid-cols-3">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.1 }}
+                  viewport={{ once: true }}
+                  className="rounded-xl bg-titanium-900/50 p-6 text-center"
+                >
+                  <p className="text-3xl font-bold text-white">24/7</p>
+                  <p className="text-sm text-silver-light">Available when you need it</p>
+                </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                  viewport={{ once: true }}
+                  className="rounded-xl bg-titanium-900/50 p-6 text-center"
+                >
+                  <p className="text-3xl font-bold text-white">100x</p>
+                  <p className="text-sm text-silver-light">More accessible than human coaching</p>
+                </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.3 }}
+                  viewport={{ once: true }}
+                  className="rounded-xl bg-titanium-900/50 p-6 text-center"
+                >
+                  <p className="text-3xl font-bold text-white">GROW+</p>
+                  <p className="text-sm text-silver-light">Proven coaching frameworks</p>
+                </motion.div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* CTA Section */}
         <section className="relative border-t border-white/5 py-24">
           <div className="container mx-auto px-6">
@@ -650,10 +833,10 @@ export default function HomePage() {
                 Ready to Think <span className="text-gradient">More Clearly</span>?
               </h2>
               <p className="mb-8 text-lg text-silver-light">
-                Join founders who've found their strategic thinking partner.
+                £40/month for unlimited access. No scheduling. Full context forever.
               </p>
               <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
-                <Link href="/auth/signup" className="btn btn-primary">
+                <Link href="/auth/signup" className="btn btn-primary shadow-lg shadow-white/10">
                   Start Talking to Your Coach
                   <ArrowRight className="h-5 w-5" />
                 </Link>
@@ -665,7 +848,7 @@ export default function HomePage() {
                   Try a Voice Demo
                 </button>
               </div>
-              <p className="mt-6 text-sm text-gray-500">Free to try. No credit card required.</p>
+              <p className="mt-6 text-sm text-silver-dark">Free to try. No credit card required.</p>
             </div>
           </div>
         </section>
