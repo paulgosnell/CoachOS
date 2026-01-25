@@ -1,7 +1,7 @@
 # CoachOS Project
 
 **Last Updated:** January 2025
-**Status:** Live - Product complete, content engine built
+**Status:** Live - Product complete, content engine built, landing page optimised
 **Current Phase:** Phase 6 (Validation) - Content live, tracking results
 **URL:** ceocoachos.com
 
@@ -247,7 +247,7 @@ Built as a client project for ADHD parents. Results:
 ### LLM Optimisation
 
 - [x] llms.txt file
-- [ ] FAQ schema
+- [x] FAQ schema
 - [x] Clear definitive answers
 - [x] Framework explanations
 
@@ -274,7 +274,7 @@ Built as a client project for ADHD parents. Results:
 
 ---
 
-## Phase 5: Website & Content 🔄 IN PROGRESS
+## Phase 5: Website & Content ✅ COMPLETE
 
 ### Current State
 
@@ -284,13 +284,13 @@ Built as a client project for ADHD parents. Results:
 - Voice + chat working
 - ADHD version live
 
-### Landing Page Updates Needed
+### Landing Page Updates ✅ DONE
 
-- [ ] Clearer ICP messaging (ADHD founder angle?)
-- [ ] Value prop comparison (vs human coaching cost)
-- [ ] Feature showcase (task extraction, 24/7, frameworks)
-- [ ] Social proof (Pathfinder results)
-- [ ] Multiple pricing tiers?
+- [x] Clearer ICP messaging (ADHD founder callout in hero)
+- [x] Value prop comparison (pricing comparison section: £40 vs £300-500)
+- [x] Feature showcase (task extraction callout, frameworks card)
+- [x] Social proof (Pathfinder results section)
+- [x] Public /pricing page created
 
 ### Content Publishing
 
@@ -448,6 +448,8 @@ Some users from LinkedIn mention. Need to:
 | Jan 2025 | Mega menu navbar deployed |
 | Jan 2025 | llms.txt, sitemap, robots.txt configured |
 | Jan 2025 | FAQ schema markup added |
+| Jan 2025 | Landing page overhaul (ADHD callout, pricing comparison, social proof) |
+| Jan 2025 | Public /pricing page created |
 | | |
 
 ---
@@ -465,7 +467,7 @@ Some users from LinkedIn mention. Need to:
 9. [ ] Set up Google Search Console
 10. [ ] Set up Bing Webmaster Tools
 11. [x] ~~Add FAQ schema markup~~
-12. [ ] Update landing page (clearer ICP messaging, social proof)
+12. [x] ~~Update landing page (clearer ICP messaging, social proof)~~
 
 ---
 
@@ -491,4 +493,4 @@ Some users from LinkedIn mention. Need to:
 
 ---
 
-*Product built. Framework proven. ADHD angle is the edge. Content engine live with 500+ articles. Now tracking results and gathering social proof.*
+*Product built. Framework proven. ADHD angle is the edge. Content engine live with 500+ articles. Landing page optimised with pricing comparison and social proof. Now tracking results.*
