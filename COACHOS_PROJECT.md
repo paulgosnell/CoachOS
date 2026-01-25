@@ -305,10 +305,12 @@ Built as a client project for ADHD parents. Results:
 - [x] XML sitemap
 - [x] robots.txt
 - [x] Google Search Console
-- [ ] Bing Webmaster
+- [x] Bing Webmaster
 - [x] llms.txt
 - [x] FAQ schema
 - [x] Analytics
+- [x] Custom error pages (404, error)
+- [x] Payment webhook handler
 
 ---
 
@@ -451,6 +453,9 @@ Some users from LinkedIn mention. Need to:
 | Jan 2025 | Landing page overhaul (ADHD callout, pricing comparison, social proof) |
 | Jan 2025 | Public /pricing page created |
 | Jan 2025 | Google Search Console setup, sitemap submitted |
+| Jan 2025 | Payment webhook handler added (Revolut ORDER_COMPLETED) |
+| Jan 2025 | Custom 404 and error pages created |
+| Jan 2025 | Bing Webmaster Tools setup, sitemap submitted |
 | | |
 
 ---
@@ -466,7 +471,7 @@ Some users from LinkedIn mention. Need to:
 7. [x] ~~Confirm pricing strategy~~ (£40/month)
 8. [ ] Gather Pathfinder testimonials
 9. [x] ~~Set up Google Search Console~~
-10. [ ] Set up Bing Webmaster Tools
+10. [x] ~~Set up Bing Webmaster Tools~~
 11. [x] ~~Add FAQ schema markup~~
 12. [x] ~~Update landing page (clearer ICP messaging, social proof)~~
 
@@ -494,4 +499,4 @@ Some users from LinkedIn mention. Need to:
 
 ---
 
-*Product built. Framework proven. ADHD angle is the edge. Content engine live with 500+ articles. Landing page optimised with pricing comparison and social proof. Now tracking results.*
+*Product built. Framework proven. ADHD angle is the edge. Content engine live with 500+ articles. Landing page optimised with pricing comparison and social proof. Payment webhooks configured. GSC + Bing Webmaster active. Production ready - now tracking results.*
