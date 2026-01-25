@@ -114,7 +114,7 @@ const navItems: NavItem[] = [
   },
   {
     label: 'Pricing',
-    href: '/subscribe',
+    href: '/pricing',
   },
   {
     label: 'About',
