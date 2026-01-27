@@ -1,76 +1,87 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Mic, Plus } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
-import { GeminiVoiceConversation } from '@/components/voice/GeminiVoiceConversation'
 
 export default function VoiceCoachPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [sessionConfig, setSessionConfig] = useState<any>(null)
+  const [hasConversations, setHasConversations] = useState(false)
 
   useEffect(() => {
-    checkAuthAndFetchConfig()
+    checkForRecentConversation()
   }, [])
 
-  const checkAuthAndFetchConfig = async () => {
+  const checkForRecentConversation = async () => {
     try {
       const supabase = createClient()
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
+      const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {
         router.push('/auth/login')
         return
       }
 
-      // Fetch conversation configuration with user context
-      const response = await fetch('/api/voice/conversation', {
-        method: 'POST',
-      })
+      // Check for most recent voice conversation
+      const { data: recentConversation } = await supabase
+        .from('conversations')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('session_type', 'voice')
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
 
-      if (!response.ok) {
-        throw new Error('Failed to load conversation configuration')
+      if (recentConversation) {
+        // Redirect to most recent conversation
+        router.replace(`/voice-coach/${recentConversation.id}`)
+      } else {
+        // No conversations yet - show start new UI
+        setHasConversations(false)
+        setLoading(false)
       }
-
-      const data = await response.json()
-      setSessionConfig(data)
-      setLoading(false)
-    } catch (err: any) {
-      console.error('Failed to initialize:', err)
-      setError(err.message || 'Failed to initialize voice coach')
+    } catch (error) {
+      console.error('Failed to check conversations:', error)
       setLoading(false)
     }
   }
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex h-full items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-silver" />
       </div>
     )
   }
 
-  if (error) {
-    return (
-      <div className="flex min-h-screen items-center justify-center p-8">
-        <div className="text-center">
-          <p className="mb-4 text-red-400">{error}</p>
-          <button onClick={() => router.push('/chat')} className="btn btn-primary">
-            Back to Chat
-          </button>
+  // No conversations - show welcome screen
+  return (
+    <div className="flex h-full flex-col items-center justify-center p-8">
+      <div className="max-w-md text-center">
+        <div className="mb-6 flex h-24 w-24 mx-auto items-center justify-center rounded-full bg-gradient-to-br from-amber-600/20 to-amber-800/20 ring-2 ring-amber-500/30">
+          <Mic className="h-12 w-12 text-amber-400" />
+        </div>
+
+        <h1 className="mb-3 text-2xl font-semibold text-silver">Voice Coach</h1>
+        <p className="mb-8 text-silver-light">
+          Have a real-time voice conversation with your AI coach.
+          Just talk naturally - no typing needed.
+        </p>
+
+        <button
+          onClick={() => router.push('/voice-coach/new')}
+          className="btn btn-primary mx-auto"
+        >
+          <Plus className="h-4 w-4" />
+          Start Your First Session
+        </button>
+
+        <div className="mt-8 text-sm text-silver-light">
+          <p>Use headphones for best quality</p>
         </div>
       </div>
-    )
-  }
-
-  if (!sessionConfig) {
-    return null
-  }
-
-  return <GeminiVoiceConversation config={sessionConfig} router={router} />
+    </div>
+  )
 }

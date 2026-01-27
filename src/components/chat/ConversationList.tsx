@@ -1,9 +1,11 @@
 'use client'
 
-import { Plus, MessageSquare } from 'lucide-react'
+import { Plus, MessageSquare, Mic } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { trackNewConversation, trackConversationOpened } from '@/lib/analytics'
+
+export type SessionType = 'chat' | 'voice'
 
 interface Conversation {
   id: string
@@ -15,10 +17,24 @@ interface Conversation {
 interface ConversationListProps {
   conversations: Conversation[]
   onNewConversation: () => void
+  sessionType: SessionType
 }
 
-export function ConversationList({ conversations, onNewConversation }: ConversationListProps) {
+export function ConversationList({
+  conversations,
+  onNewConversation,
+  sessionType
+}: ConversationListProps) {
   const pathname = usePathname()
+
+  const isVoice = sessionType === 'voice'
+  const basePath = isVoice ? '/voice-coach' : '/chat'
+  const Icon = isVoice ? Mic : MessageSquare
+  const emptyMessage = isVoice ? 'No voice sessions yet' : 'No conversations yet'
+  const emptySubMessage = isVoice
+    ? 'Start a voice session to talk with your coach'
+    : 'Start a new conversation to get coaching'
+  const newButtonText = isVoice ? 'New Voice Session' : 'New Conversation'
 
   const formatDate = (date: Date) => {
     const now = new Date()
@@ -43,7 +59,7 @@ export function ConversationList({ conversations, onNewConversation }: Conversat
           className="btn btn-primary w-full justify-center text-sm"
         >
           <Plus className="h-4 w-4" />
-          New Conversation
+          {newButtonText}
         </button>
       </div>
 
@@ -51,19 +67,22 @@ export function ConversationList({ conversations, onNewConversation }: Conversat
       <div className="flex-1 overflow-y-auto">
         {conversations.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-8 text-center">
-            <MessageSquare className="mb-3 h-12 w-12 text-gray-600" />
-            <p className="text-sm text-gray-500">No conversations yet</p>
-            <p className="mt-1 text-xs text-gray-600">Start a new conversation to get coaching</p>
+            <Icon className="mb-3 h-12 w-12 text-gray-600" />
+            <p className="text-sm text-gray-500">{emptyMessage}</p>
+            <p className="mt-1 text-xs text-gray-600">{emptySubMessage}</p>
           </div>
         ) : (
           <div className="space-y-1 p-2">
             {conversations.map((conversation) => {
-              const isActive = pathname === `/chat/${conversation.id}`
+              const conversationPath = isVoice
+                ? `/voice-coach/${conversation.id}`
+                : `/chat/${conversation.id}`
+              const isActive = pathname === conversationPath
 
               return (
                 <Link
                   key={conversation.id}
-                  href={`/chat/${conversation.id}`}
+                  href={conversationPath}
                   onClick={() => trackConversationOpened(conversation.id)}
                   className={`block rounded-lg p-3 transition-colors ${
                     isActive
@@ -72,9 +91,12 @@ export function ConversationList({ conversations, onNewConversation }: Conversat
                   }`}
                 >
                   <div className="mb-1 flex items-start justify-between gap-2">
-                    <h3 className="line-clamp-1 text-sm font-semibold text-silver">
-                      {conversation.title}
-                    </h3>
+                    <div className="flex items-center gap-2">
+                      {isVoice && <Mic className="h-3 w-3 text-amber-400 flex-shrink-0" />}
+                      <h3 className="line-clamp-1 text-sm font-semibold text-silver">
+                        {conversation.title}
+                      </h3>
+                    </div>
                     <span className="flex-shrink-0 text-xs text-gray-500">
                       {formatDate(conversation.updatedAt)}
                     </span>

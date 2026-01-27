@@ -505,6 +505,14 @@ export function GeminiVoiceConversation({ config, router }: GeminiVoiceConversat
 
       setTranscript([])
       transcriptRef.current = []
+
+      // Navigate to the conversation page to show summary
+      if (conversationIdRef.current) {
+        // Small delay to let toast show
+        setTimeout(() => {
+          router.push(`/voice-coach/${conversationIdRef.current}`)
+        }, 1500)
+      }
     } catch (err) {
       console.error('Failed to end conversation:', err)
     }

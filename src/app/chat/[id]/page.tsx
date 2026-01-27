@@ -8,6 +8,7 @@ import { TypingIndicator } from '@/components/chat/TypingIndicator'
 import { VoiceRecorder } from '@/components/voice/VoiceRecorder'
 import { AudioPlayer } from '@/components/voice/AudioPlayer'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
+import { SessionSummaryBanner } from '@/components/SessionSummaryBanner'
 import { createClient } from '@/lib/supabase/client'
 import { Loader2, Mic, Keyboard, ArrowLeft, Phone, Menu } from 'lucide-react'
 
@@ -32,6 +33,7 @@ export default function ChatPage() {
   const [greeting, setGreeting] = useState<string | null>(null)
   const [showMobileMenu, setShowMobileMenu] = useState(false)
   const [conversations, setConversations] = useState<Array<{ id: string; title: string; updated_at: string }>>([])
+  const [userId, setUserId] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -68,6 +70,7 @@ export default function ChatPage() {
         .from('conversations')
         .select('id, title, updated_at')
         .eq('user_id', user.id)
+        .eq('session_type', 'quick-checkin')
         .order('updated_at', { ascending: false })
         .limit(20)
 
@@ -96,6 +99,8 @@ export default function ChatPage() {
         router.push('/auth/login')
         return
       }
+
+      setUserId(user.id)
 
       // Verify conversation belongs to user
       const { data: conversation, error: convError } = await supabase
@@ -350,6 +355,15 @@ export default function ChatPage() {
         {/* Messages Area */}
         <div className="flex-1 overflow-y-auto p-4 md:p-6">
         <div className="mx-auto max-w-4xl space-y-6">
+          {/* Last Session Summary Banner */}
+          {userId && (
+            <SessionSummaryBanner
+              userId={userId}
+              sessionType="chat"
+              currentConversationId={conversationId}
+            />
+          )}
+
           {messages.length === 0 ? (
             <div className="flex h-full items-center justify-center py-12 text-center">
               <div className="max-w-lg px-4">

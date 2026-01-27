@@ -13,7 +13,7 @@ interface Conversation {
   updatedAt: Date
 }
 
-export default function ChatLayout({ children }: { children: React.ReactNode }) {
+export default function VoiceCoachLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const [conversations, setConversations] = useState<Conversation[]>([])
   const [loading, setLoading] = useState(true)
@@ -32,7 +32,7 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
         return
       }
 
-      // Fetch chat conversations only (not voice)
+      // Fetch voice conversations only
       const { data: conversationsData, error } = await supabase
         .from('conversations')
         .select(`
@@ -45,55 +45,29 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
           )
         `)
         .eq('user_id', user.id)
-        .eq('session_type', 'quick-checkin')
+        .eq('session_type', 'voice')
         .order('updated_at', { ascending: false })
 
       if (error) throw error
 
-      const formattedConversations: Conversation[] = conversationsData.map((conv: any) => ({
+      const formattedConversations: Conversation[] = (conversationsData || []).map((conv: any) => ({
         id: conv.id,
-        title: conv.title,
+        title: conv.title || 'Voice Session',
         lastMessage: conv.messages?.[0]?.content,
         updatedAt: new Date(conv.updated_at),
       }))
 
       setConversations(formattedConversations)
     } catch (error) {
-      console.error('Failed to load conversations:', error)
+      console.error('Failed to load voice conversations:', error)
     } finally {
       setLoading(false)
     }
   }
 
-  const handleNewConversation = async () => {
-    try {
-      const supabase = createClient()
-
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        router.push('/auth/login')
-        return
-      }
-
-      // Create new conversation
-      const { data: newConversation, error } = await supabase
-        .from('conversations')
-        .insert({
-          user_id: user.id,
-          session_type: 'quick-checkin',
-          title: 'New Conversation',
-        })
-        .select()
-        .single()
-
-      if (error) throw error
-
-      // Reload conversations and navigate to new one
-      await loadConversations()
-      router.push(`/chat/${newConversation.id}`)
-    } catch (error) {
-      console.error('Failed to create conversation:', error)
-    }
+  const handleNewConversation = () => {
+    // Navigate to new voice session page
+    router.push('/voice-coach/new')
   }
 
   return (
@@ -104,11 +78,11 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
           <ConversationList
             conversations={conversations}
             onNewConversation={handleNewConversation}
-            sessionType="chat"
+            sessionType="voice"
           />
         </aside>
 
-        {/* Main Chat Area */}
+        {/* Main Voice Area */}
         <main className="flex flex-1 flex-col">{children}</main>
       </div>
     </ErrorBoundary>

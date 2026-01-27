@@ -22,14 +22,15 @@ export default async function ChatIndexPage() {
     redirect('/onboarding')
   }
 
-  // Try to get the most recent conversation
+  // Try to get the most recent chat conversation (not voice)
   const { data: recentConversation } = await supabase
     .from('conversations')
     .select('id')
     .eq('user_id', user.id)
+    .eq('session_type', 'quick-checkin')
     .order('updated_at', { ascending: false })
     .limit(1)
-    .single()
+    .maybeSingle()
 
   // If there's a recent conversation, redirect to it
   if (recentConversation) {
