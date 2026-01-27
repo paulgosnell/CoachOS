@@ -30,7 +30,13 @@ export async function PUT(request: Request) {
         .update(updates)
         .eq('id', user.id)
 
-      if (profileError) throw profileError
+      if (profileError) {
+        console.error('Profile update error:', profileError)
+        return NextResponse.json(
+          { error: `Profile update failed: ${profileError.message}` },
+          { status: 500 }
+        )
+      }
     }
 
     // Update business profile (upsert)
@@ -48,7 +54,13 @@ export async function PUT(request: Request) {
           }
         )
 
-      if (businessError) throw businessError
+      if (businessError) {
+        console.error('Business profile update error:', businessError)
+        return NextResponse.json(
+          { error: `Business profile update failed: ${businessError.message}` },
+          { status: 500 }
+        )
+      }
     }
 
     return NextResponse.json({ success: true })

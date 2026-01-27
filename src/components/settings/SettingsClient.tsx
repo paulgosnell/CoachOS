@@ -125,7 +125,8 @@ export function SettingsClient({ profile, businessProfile }: SettingsClientProps
       })
 
       if (!response.ok) {
-        throw new Error('Failed to save settings')
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || 'Failed to save settings')
       }
 
       const changedFields: string[] = []
@@ -136,10 +137,11 @@ export function SettingsClient({ profile, businessProfile }: SettingsClientProps
       setMessage({ type: 'success', text: 'Settings saved!' })
       setTimeout(() => setMessage(null), 3000)
       router.refresh()
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to save settings:', error)
-      setMessage({ type: 'error', text: 'Failed to save settings' })
-      trackFormError('settings', 'Failed to save settings')
+      const errorMsg = error?.message || 'Failed to save settings'
+      setMessage({ type: 'error', text: errorMsg })
+      trackFormError('settings', errorMsg)
     } finally {
       setSaving(false)
     }
