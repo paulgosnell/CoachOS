@@ -1,7 +1,8 @@
+import { Suspense } from 'react'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Loader2 } from 'lucide-react'
 import { MobileHeader } from '@/components/MobileHeader'
 import { SessionsList } from '@/components/sessions/SessionsList'
 
@@ -37,7 +38,9 @@ export default async function SessionsPage() {
             </p>
           </div>
 
-          <SessionsList />
+          <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-deep-blue-600" /></div>}>
+            <SessionsList />
+          </Suspense>
         </div>
       </div>
     </div>

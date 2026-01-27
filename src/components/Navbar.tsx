@@ -144,12 +144,6 @@ export function Navbar() {
   const dropdownRef = useRef<HTMLDivElement>(null)
   const pathname = usePathname()
 
-  // Hide navbar on authenticated routes
-  const isAuthenticatedRoute = AUTHENTICATED_ROUTES.some(route => pathname?.startsWith(route))
-  if (isAuthenticatedRoute) {
-    return null
-  }
-
   // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -166,6 +160,12 @@ export function Navbar() {
     setMobileMenuOpen(false)
     setOpenDropdown(null)
   }, [pathname])
+
+  // Hide navbar on authenticated routes - MUST be after all hooks
+  const isAuthenticatedRoute = AUTHENTICATED_ROUTES.some(route => pathname?.startsWith(route))
+  if (isAuthenticatedRoute) {
+    return null
+  }
 
   const isActive = (href: string) => {
     if (href === '/blog') {
