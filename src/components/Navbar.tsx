@@ -18,6 +18,22 @@ import {
   BookOpen,
 } from 'lucide-react'
 
+// Routes where the public navbar should be hidden (authenticated pages)
+const AUTHENTICATED_ROUTES = [
+  '/dashboard',
+  '/chat',
+  '/voice-coach',
+  '/sessions',
+  '/goals',
+  '/tasks',
+  '/progress',
+  '/settings',
+  '/brain-dump',
+  '/onboarding',
+  '/subscribe',
+  '/admin',
+]
+
 interface NavItem {
   label: string
   href?: string
@@ -127,6 +143,12 @@ export function Navbar() {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const pathname = usePathname()
+
+  // Hide navbar on authenticated routes
+  const isAuthenticatedRoute = AUTHENTICATED_ROUTES.some(route => pathname?.startsWith(route))
+  if (isAuthenticatedRoute) {
+    return null
+  }
 
   // Close dropdown when clicking outside
   useEffect(() => {
