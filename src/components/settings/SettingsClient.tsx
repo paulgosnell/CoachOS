@@ -109,7 +109,7 @@ export function SettingsClient({ profile, businessProfile }: SettingsClientProps
             company_stage: companyStage || null,
             company_name: companyName || null,
             role: role || null,
-            team_size: teamSize ? parseInt(teamSize.split('-')[0]) : null,
+            team_size: teamSize ? parseInt(String(teamSize).split('-')[0]) : null,
             revenue_range: revenueRange || null,
             location: location || null,
             markets: targetMarkets
