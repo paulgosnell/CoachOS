@@ -447,6 +447,7 @@ export function GeminiVoiceConversation({ config, router }: GeminiVoiceConversat
           console.log('Extracting action items from transcript:', currentTranscript.length, 'messages')
 
           if (currentTranscript.length > 0) {
+            // Extract action items
             try {
               const response = await fetch('/api/actions/extract', {
                 method: 'POST',
@@ -472,6 +473,29 @@ export function GeminiVoiceConversation({ config, router }: GeminiVoiceConversat
               }
             } catch (err) {
               console.error('Failed to extract action items:', err)
+            }
+
+            // Generate MemoryOS summary - CRITICAL for coaching continuity
+            // This ensures the coach remembers everything from this session
+            try {
+              console.log('[MemoryOS] Generating session summary...')
+              const summaryResponse = await fetch(`/api/conversations/${conversationIdRef.current}/summarize`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+              })
+
+              if (summaryResponse.ok) {
+                const summaryData = await summaryResponse.json()
+                if (summaryData.success) {
+                  console.log('[MemoryOS] Summary generated:', summaryData.summary)
+                } else {
+                  console.log('[MemoryOS] Summary skipped:', summaryData.reason)
+                }
+              } else {
+                console.error('[MemoryOS] Summary generation failed:', summaryResponse.status)
+              }
+            } catch (err) {
+              console.error('[MemoryOS] Failed to generate summary:', err)
             }
           }
         } catch (err) {

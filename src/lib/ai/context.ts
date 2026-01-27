@@ -171,6 +171,181 @@ export async function assembleUserContext(
 }
 
 /**
+ * Assembles user context with full memory (session summaries, patterns, milestones)
+ * Used for voice sessions where we don't have a current message for semantic search
+ *
+ * CRITICAL: This ensures the coach NEVER forgets previous sessions
+ * Every breakthrough, decision, pattern, and sensitive topic must be available
+ */
+export async function assembleUserContextWithMemory(
+  userId: string
+): Promise<UserContext> {
+  const supabase = await createClient()
+
+  // Fetch user profile
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('full_name, email')
+    .eq('id', userId)
+    .single()
+
+  // Fetch business profile
+  const { data: businessProfile } = await supabase
+    .from('business_profiles')
+    .select('*')
+    .eq('user_id', userId)
+    .single()
+
+  // Fetch active goals
+  const { data: goals } = await supabase
+    .from('goals')
+    .select('title, description, category, priority, target_date, status')
+    .eq('user_id', userId)
+    .eq('status', 'active')
+    .order('priority', { ascending: true })
+    .limit(5)
+
+  // Fetch pending action items
+  const { data: actionItems } = await supabase
+    .from('action_items')
+    .select('task, description, priority, due_date, status, created_at')
+    .eq('user_id', userId)
+    .eq('status', 'pending')
+    .order('due_date', { ascending: true, nullsFirst: false })
+    .limit(10)
+
+  // Build base context
+  const context: UserContext = {
+    profile: {
+      fullName: profile?.full_name || 'User',
+      email: profile?.email || '',
+    },
+    business: {
+      industry: businessProfile?.industry,
+      companyStage: businessProfile?.company_stage,
+      role: businessProfile?.role,
+      companyName: businessProfile?.company_name,
+      teamSize: businessProfile?.team_size,
+      location: businessProfile?.location,
+      revenueRange: businessProfile?.revenue_range,
+      markets: businessProfile?.markets,
+      keyChallenges: businessProfile?.key_challenges,
+      reportsTo: businessProfile?.reports_to,
+      directReports: businessProfile?.direct_reports,
+    },
+    goals: (goals || []).map((g) => ({
+      title: g.title,
+      description: g.description || undefined,
+      category: g.category || undefined,
+      priority: g.priority,
+      targetDate: g.target_date || undefined,
+      status: g.status,
+    })),
+    actionItems: (actionItems || []).map((a) => ({
+      task: a.task,
+      description: a.description || undefined,
+      priority: a.priority as 'low' | 'medium' | 'high',
+      dueDate: a.due_date || undefined,
+      status: a.status,
+      createdAt: new Date(a.created_at),
+    })),
+    recentHistory: [], // No conversation history for voice init
+  }
+
+  // Now add memory context - this is the critical part
+  try {
+    const { getRecentSummaries } = await import('@/lib/memory/summaries')
+    const { getRecentConversationSummaries, getMilestoneSummaries } = await import('@/lib/memory/conversation-summary')
+
+    const now = Date.now()
+
+    // Get weekly and monthly summaries
+    const summaries = await getRecentSummaries(userId, 4) // Last 4 weeks
+
+    if (summaries.weeklySummaries.length > 0) {
+      context.weeklySummaries = summaries.weeklySummaries.map((s) => ({
+        summary: s.summary,
+        wins: s.wins || [],
+        challenges: s.challenges_faced || [],
+        decisions: s.key_decisions || [],
+        weeksAgo: Math.floor((now - new Date(s.week_start).getTime()) / (1000 * 60 * 60 * 24 * 7)),
+      }))
+    }
+
+    if (summaries.monthlySummaries.length > 0) {
+      const latest = summaries.monthlySummaries[0]
+      context.monthlySummary = {
+        summary: latest.summary,
+        patterns: latest.behavioral_patterns || [],
+        growthAreas: latest.growth_areas || [],
+        focusAreas: latest.focus_areas_next_month || [],
+        coachObservations: latest.coach_observations,
+      }
+    }
+
+    // Get recent session summaries - these are the building blocks of coaching continuity
+    const sessionSummaries = await getRecentConversationSummaries(userId, 10)
+
+    // Get milestone summaries - breakthroughs and decisions that should ALWAYS be available
+    // These are never forgotten, regardless of how old they are
+    const milestoneSummaries = await getMilestoneSummaries(userId, 10)
+
+    // Merge summaries, prioritizing milestones
+    const seenIds = new Set<string>()
+    const allSummaries: typeof context.recentSessionSummaries = []
+
+    // Add milestone summaries first (breakthroughs, decisions) - these are ALWAYS included
+    for (const s of milestoneSummaries) {
+      if (!seenIds.has(s.conversation_id)) {
+        seenIds.add(s.conversation_id)
+        allSummaries.push({
+          summary: s.summary,
+          keyTopics: s.key_topics || [],
+          decisions: s.decisions_made || [],
+          breakthroughs: s.breakthroughs || [],
+          patterns: s.patterns_noticed || [],
+          userState: s.user_state,
+          daysAgo: Math.floor((now - new Date(s.generated_at).getTime()) / (1000 * 60 * 60 * 24)),
+          isMilestone: true,
+        })
+      }
+    }
+
+    // Add recent summaries
+    for (const s of sessionSummaries) {
+      if (!seenIds.has(s.conversation_id)) {
+        seenIds.add(s.conversation_id)
+        allSummaries.push({
+          summary: s.summary,
+          keyTopics: s.key_topics || [],
+          decisions: s.decisions_made || [],
+          breakthroughs: s.breakthroughs || [],
+          patterns: s.patterns_noticed || [],
+          userState: s.user_state,
+          daysAgo: Math.floor((now - new Date(s.generated_at).getTime()) / (1000 * 60 * 60 * 24)),
+        })
+      }
+    }
+
+    // Sort by importance (milestones first) then by recency
+    allSummaries.sort((a, b) => {
+      if (a.isMilestone && !b.isMilestone) return -1
+      if (!a.isMilestone && b.isMilestone) return 1
+      return a.daysAgo - b.daysAgo
+    })
+
+    if (allSummaries.length > 0) {
+      context.recentSessionSummaries = allSummaries
+    }
+  } catch (error) {
+    console.error('[MemoryOS] Failed to fetch memory context:', error)
+    // Continue without memory if it fails - better than crashing
+  }
+
+  return context
+}
+
+/**
  * Assembles enhanced user context with RAG (Retrieval Augmented Generation)
  * Includes relevant memories from past conversations via vector search
  */

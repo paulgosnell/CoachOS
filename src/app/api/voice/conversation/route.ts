@@ -4,6 +4,7 @@ import { generateADHDCoachPrompt } from '@/lib/ai/prompts-adhd'
 import { generateLifeCoachPrompt } from '@/lib/ai/prompts-life'
 import { generateADHDLifeCoachPrompt } from '@/lib/ai/prompts-adhd-life'
 import { normalizeCoachType, CoachType } from '@/lib/ai/coach-types'
+import { assembleUserContextWithMemory } from '@/lib/ai/context'
 import type { UserContext } from '@/lib/ai/context'
 
 /**
@@ -65,71 +66,18 @@ export async function POST(req: Request) {
     const voicePreference = (profile?.coach_preference as Record<string, unknown>) || {}
     const coachType = normalizeCoachType(voicePreference.coach_type as string)
 
-    // Get business profile (may not exist)
-    step = 'fetchBusinessProfile'
-    const { data: businessProfile } = await supabase
-      .from('business_profiles')
-      .select('*')
-      .eq('user_id', user.id)
-      .maybeSingle()
+    // Build context with full memory - CRITICAL for coaching continuity
+    // This includes all previous session summaries, breakthroughs, patterns, and milestones
+    // The coach must NEVER forget what was discussed in previous sessions
+    step = 'buildContextWithMemory'
+    const context = await assembleUserContextWithMemory(user.id)
 
-    // Get active goals (may be empty)
-    step = 'fetchGoals'
-    const { data: goals } = await supabase
-      .from('goals')
-      .select('title, description, category, priority, target_date, status')
-      .eq('user_id', user.id)
-      .eq('status', 'active')
-      .order('priority', { ascending: true })
-      .limit(5)
-
-    // Get pending action items (may be empty)
-    step = 'fetchActionItems'
-    const { data: actionItems } = await supabase
-      .from('action_items')
-      .select('task, description, priority, due_date, status, created_at')
-      .eq('user_id', user.id)
-      .eq('status', 'pending')
-      .order('created_at', { ascending: false })
-      .limit(10)
-
-    // Build context directly (simpler, no conversation history needed for voice init)
-    step = 'buildContext'
-    const context: UserContext = {
-      profile: {
-        fullName: profile?.full_name || 'User',
-        email: profile?.email || '',
-      },
-      business: {
-        industry: businessProfile?.industry || undefined,
-        companyStage: businessProfile?.company_stage || undefined,
-        role: businessProfile?.role || undefined,
-        companyName: businessProfile?.company_name || undefined,
-        teamSize: businessProfile?.team_size?.toString() || undefined,
-        location: businessProfile?.location || undefined,
-        revenueRange: businessProfile?.revenue_range || undefined,
-        markets: businessProfile?.markets || undefined,
-        keyChallenges: businessProfile?.key_challenges || undefined,
-        reportsTo: businessProfile?.reports_to || undefined,
-        directReports: businessProfile?.direct_reports || undefined,
-      },
-      goals: (goals || []).map((g) => ({
-        title: g.title,
-        description: g.description || undefined,
-        category: g.category || undefined,
-        priority: g.priority,
-        targetDate: g.target_date || undefined,
-        status: g.status,
-      })),
-      actionItems: (actionItems || []).map((a) => ({
-        task: a.task,
-        description: a.description || undefined,
-        priority: (a.priority as 'low' | 'medium' | 'high') || 'medium',
-        dueDate: a.due_date || undefined,
-        status: a.status,
-        createdAt: new Date(a.created_at),
-      })),
-      recentHistory: [],
+    // Override profile name if we have it from the direct query (more reliable)
+    if (profile?.full_name) {
+      context.profile.fullName = profile.full_name
+    }
+    if (profile?.email) {
+      context.profile.email = profile.email
     }
 
     // Generate system prompt based on coach type

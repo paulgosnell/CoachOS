@@ -7,8 +7,12 @@ import { generateADHDLifeCoachPrompt } from '@/lib/ai/prompts-adhd-life'
 import { normalizeCoachType, CoachType } from '@/lib/ai/coach-types'
 import { processMessageEmbedding } from '@/lib/memory/embeddings'
 import { extractActionItems, saveActionItems } from '@/lib/ai/actions'
+import { generateConversationSummary, getConversationSummary } from '@/lib/memory/conversation-summary'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { UserContext } from '@/lib/ai/context'
+
+// Generate summary every N messages to capture key moments
+const SUMMARY_THRESHOLD = 10
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30
@@ -241,6 +245,38 @@ export async function POST(req: Request) {
             extractActionItems(conversationId, user.id, recentMessages)
               .then((actions) => saveActionItems(conversationId, user.id, actions))
               .catch((err) => console.error('Failed to extract/save action items:', err))
+          }
+
+          // MemoryOS: Generate summary periodically to capture key moments
+          // This ensures no breakthrough, decision, or pattern is lost
+          try {
+            // Get current message count
+            const { count: messageCount } = await supabase
+              .from('messages')
+              .select('*', { count: 'exact', head: true })
+              .eq('conversation_id', conversationId)
+
+            // Check if we have an existing summary
+            const existingSummary = await getConversationSummary(conversationId)
+            const lastSummaryCount = existingSummary?.message_count || 0
+
+            // Generate new summary if we've had enough new messages since last summary
+            if (messageCount && (messageCount - lastSummaryCount) >= SUMMARY_THRESHOLD) {
+              console.log(`[MemoryOS] Generating summary for conversation ${conversationId} (${messageCount} messages, last summary at ${lastSummaryCount})`)
+              generateConversationSummary(conversationId)
+                .then((summary) => {
+                  if (summary) {
+                    console.log(`[MemoryOS] Summary generated:`, {
+                      topics: summary.key_topics?.length || 0,
+                      decisions: summary.decisions_made?.length || 0,
+                      breakthroughs: summary.breakthroughs?.length || 0,
+                    })
+                  }
+                })
+                .catch((err) => console.error('[MemoryOS] Failed to generate summary:', err))
+            }
+          } catch (err) {
+            console.error('[MemoryOS] Summary check failed:', err)
           }
         } catch (error) {
           console.error('Failed to save assistant message:', error)
