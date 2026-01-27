@@ -37,9 +37,9 @@ const growFramework: Framework = {
   duration: 45,
   bestFor: [
     'Setting and achieving specific goals',
-    'Problem-solving',
-    'Performance improvement',
-    'Decision making',
+    'Working through challenges',
+    'Making progress on what matters',
+    'Clarifying decisions',
   ],
   stages: [
     {
@@ -145,8 +145,8 @@ const clearFramework: Framework = {
   bestFor: [
     'Complex, multi-faceted challenges',
     'Situations requiring deep reflection',
-    'Leadership development',
-    'Relationship issues',
+    'Personal or professional growth',
+    'Navigating relationships and dynamics',
   ],
   stages: [
     {
@@ -438,7 +438,7 @@ ${sessionGoal ? `\nSession Goal: ${sessionGoal}\n` : ''}
 User Context:
 ${userContext}
 
-Remember: You are a professional business coach using the ${fw.name} framework. Stay focused on the ${stage.name} stage. Be supportive, curious, and help the user gain clarity and insight.`
+Remember: You are a professional coach using the ${fw.name} framework. Stay focused on the ${stage.name} stage. Be supportive, curious, and help the user gain clarity and insight.`
 }
 
 /**
