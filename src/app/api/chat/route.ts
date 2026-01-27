@@ -2,12 +2,34 @@ import { createClient } from '@/lib/supabase/server'
 import { assembleUserContextWithRAG } from '@/lib/ai/context'
 import { generateSystemPrompt } from '@/lib/ai/prompts'
 import { generateADHDCoachPrompt } from '@/lib/ai/prompts-adhd'
+import { generateLifeCoachPrompt } from '@/lib/ai/prompts-life'
+import { generateADHDLifeCoachPrompt } from '@/lib/ai/prompts-adhd-life'
+import { normalizeCoachType, CoachType } from '@/lib/ai/coach-types'
 import { processMessageEmbedding } from '@/lib/memory/embeddings'
 import { extractActionItems, saveActionItems } from '@/lib/ai/actions'
 import { GoogleGenerativeAI } from '@google/generative-ai'
+import { UserContext } from '@/lib/ai/context'
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30
+
+/**
+ * Get the appropriate system prompt based on coach type
+ */
+function getSystemPromptForCoachType(coachType: CoachType, context: UserContext): string {
+  switch (coachType) {
+    case 'business':
+      return generateSystemPrompt(context)
+    case 'adhd-business':
+      return generateADHDCoachPrompt(context)
+    case 'life':
+      return generateLifeCoachPrompt(context)
+    case 'adhd-life':
+      return generateADHDLifeCoachPrompt(context)
+    default:
+      return generateSystemPrompt(context)
+  }
+}
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY || '')
 
@@ -76,15 +98,13 @@ export async function POST(req: Request) {
       .eq('id', user.id)
       .single()
 
-    const coachType = profile?.coach_preference?.coach_type || 'standard'
+    const coachType = normalizeCoachType(profile?.coach_preference?.coach_type)
 
     // Assemble user context with RAG (semantic search for relevant past conversations)
     const context = await assembleUserContextWithRAG(user.id, conversationId, message, 20, 5)
 
     // Generate system prompt based on coach type
-    const systemPrompt = coachType === 'adhd'
-      ? generateADHDCoachPrompt(context)
-      : generateSystemPrompt(context)
+    const systemPrompt = getSystemPromptForCoachType(coachType, context)
 
     // Prepare chat history for Gemini
     // Gemini requires first message to be from 'user', so filter out any leading assistant messages

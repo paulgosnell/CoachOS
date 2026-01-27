@@ -1,7 +1,28 @@
 import { createClient } from '@/lib/supabase/server'
 import { generateSystemPrompt } from '@/lib/ai/prompts'
 import { generateADHDCoachPrompt } from '@/lib/ai/prompts-adhd'
+import { generateLifeCoachPrompt } from '@/lib/ai/prompts-life'
+import { generateADHDLifeCoachPrompt } from '@/lib/ai/prompts-adhd-life'
+import { normalizeCoachType, CoachType } from '@/lib/ai/coach-types'
 import type { UserContext } from '@/lib/ai/context'
+
+/**
+ * Get the appropriate system prompt based on coach type
+ */
+function getSystemPromptForCoachType(coachType: CoachType, context: UserContext): string {
+  switch (coachType) {
+    case 'business':
+      return generateSystemPrompt(context)
+    case 'adhd-business':
+      return generateADHDCoachPrompt(context)
+    case 'life':
+      return generateLifeCoachPrompt(context)
+    case 'adhd-life':
+      return generateADHDLifeCoachPrompt(context)
+    default:
+      return generateSystemPrompt(context)
+  }
+}
 
 export async function POST(req: Request) {
   let step = 'init'
@@ -42,7 +63,7 @@ export async function POST(req: Request) {
 
     step = 'parseVoicePreference'
     const voicePreference = (profile?.coach_preference as Record<string, unknown>) || {}
-    const coachType = (voicePreference.coach_type as string) || 'standard'
+    const coachType = normalizeCoachType(voicePreference.coach_type as string)
 
     // Get business profile (may not exist)
     step = 'fetchBusinessProfile'
@@ -113,9 +134,7 @@ export async function POST(req: Request) {
 
     // Generate system prompt based on coach type
     step = 'generatePrompt'
-    const systemPrompt = coachType === 'adhd'
-      ? generateADHDCoachPrompt(context)
-      : generateSystemPrompt(context)
+    const systemPrompt = getSystemPromptForCoachType(coachType, context)
 
     step = 'extractFirstName'
     const firstName = (context.profile.fullName || 'User').split(' ')[0]

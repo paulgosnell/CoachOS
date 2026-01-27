@@ -2,16 +2,17 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Loader2, Save, Building2, User, Mic } from 'lucide-react'
+import { Loader2, Save, Building2, User, Mic, Briefcase, Zap, Heart, Sparkles } from 'lucide-react'
 import { trackSettingsSaved, trackFormError } from '@/lib/analytics'
 import { Tabs, TabPanel } from '@/components/ui/Tabs'
+import { COACH_TYPE_LIST, CoachType, normalizeCoachType } from '@/lib/ai/coach-types'
 
 interface SettingsClientProps {
   profile: {
     full_name: string
     email: string
     coach_preference?: {
-      coach_type?: 'standard' | 'adhd'
+      coach_type?: string
       voice?: string
       gemini_voice?: string
       voice_speed?: number
@@ -34,6 +35,13 @@ interface SettingsClientProps {
   } | null
 }
 
+const COACH_ICONS = {
+  briefcase: Briefcase,
+  zap: Zap,
+  heart: Heart,
+  sparkles: Sparkles,
+}
+
 export function SettingsClient({ profile, businessProfile }: SettingsClientProps) {
   const router = useRouter()
   const [saving, setSaving] = useState(false)
@@ -44,7 +52,7 @@ export function SettingsClient({ profile, businessProfile }: SettingsClientProps
   const [fullName, setFullName] = useState(profile.full_name)
 
   // Coach type
-  const [coachType, setCoachType] = useState<'standard' | 'adhd'>(profile.coach_preference?.coach_type || 'standard')
+  const [coachType, setCoachType] = useState<CoachType>(normalizeCoachType(profile.coach_preference?.coach_type))
 
   // Voice preferences
   const [geminiVoice, setGeminiVoice] = useState(profile.coach_preference?.gemini_voice || 'Puck')
@@ -194,35 +202,30 @@ export function SettingsClient({ profile, businessProfile }: SettingsClientProps
                 Coaching Style
               </label>
               <div className="grid gap-3 grid-cols-1 sm:grid-cols-2">
-                <button
-                  type="button"
-                  onClick={() => setCoachType('standard')}
-                  className={`rounded-lg border p-4 text-left transition-all ${
-                    coachType === 'standard'
-                      ? 'border-deep-blue-500 bg-deep-blue-900/30'
-                      : 'border-white/10 bg-titanium-800 hover:border-white/20'
-                  }`}
-                >
-                  <div className="font-medium text-silver">Standard</div>
-                  <p className="mt-1 text-xs text-silver-light">
-                    General business coaching
-                  </p>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setCoachType('adhd')}
-                  className={`rounded-lg border p-4 text-left transition-all ${
-                    coachType === 'adhd'
-                      ? 'border-amber-500 bg-amber-900/20'
-                      : 'border-white/10 bg-titanium-800 hover:border-white/20'
-                  }`}
-                >
-                  <div className="font-medium text-silver">ADHD</div>
-                  <p className="mt-1 text-xs text-silver-light">
-                    Single-action focus, no lists
-                  </p>
-                </button>
+                {COACH_TYPE_LIST.map((coach) => {
+                  const Icon = COACH_ICONS[coach.icon]
+                  const isSelected = coachType === coach.id
+                  return (
+                    <button
+                      key={coach.id}
+                      type="button"
+                      onClick={() => setCoachType(coach.id)}
+                      className={`rounded-lg border p-4 text-left transition-all ${
+                        isSelected
+                          ? `${coach.borderColor} ${coach.bgColor}`
+                          : 'border-white/10 bg-titanium-800 hover:border-white/20'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <Icon className={`h-4 w-4 ${isSelected ? coach.color : 'text-silver-light'}`} />
+                        <span className="font-medium text-silver">{coach.name}</span>
+                      </div>
+                      <p className="mt-1.5 text-xs text-silver-light">
+                        {coach.longDescription}
+                      </p>
+                    </button>
+                  )
+                })}
               </div>
             </div>
 
