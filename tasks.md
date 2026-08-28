@@ -1,5 +1,17 @@
 # CoachOS Tasks
 
+## Operator-Desk Handshake
+
+**Session active.** Coordination via DESK.md protocol.
+
+**Lanes:**
+- `coding` → Grok CLI
+- `ops` → CoachOS Grok Bot.app
+
+See [DESK.md](./DESK.md) for handshake protocol.
+
+---
+
 ## Current Sprint
 
 ### Phase 2: Content Strategy Foundation
