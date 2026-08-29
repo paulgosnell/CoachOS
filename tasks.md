@@ -1,14 +1,20 @@
 # CoachOS Tasks
 
-## Operator-Desk Handshake
+Session log. Newest at top. Live claims live in [DESK.md](./DESK.md). Backlog is GitHub Issues.
 
-**Session active.** Coordination via DESK.md protocol.
+## 2026-08-29 — ops
+
+CoachOS Grok Bot.app stood up. Claimed ops on DESK.md (live board, not protocol-only). Weekday morning check saved (`coachos-weekday-morning`, 8:44 London weekdays). Awaiting Paul confirm in Routines. No GTM/social. No CoachOS-specific connectors.
+
+---
+
+## Operator-Desk Handshake
 
 **Lanes:**
 - `coding` → Grok CLI
 - `ops` → CoachOS Grok Bot.app
 
-See [DESK.md](./DESK.md) for handshake protocol.
+See [DESK.md](./DESK.md) for the live claims board.
 
 ---
 
