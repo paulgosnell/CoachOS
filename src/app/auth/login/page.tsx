@@ -2,13 +2,15 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { ArrowRight, Loader2 } from 'lucide-react'
 import { trackSignIn, trackFormError } from '@/lib/analytics'
 
 export default function LoginPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const returnTo = searchParams.get('returnTo')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -31,6 +33,12 @@ export default function LoginPage() {
       if (data?.user) {
         // Track successful sign in
         trackSignIn('email')
+
+        // If there's a return URL, validate it's a safe relative path
+        if (returnTo && returnTo.startsWith('/') && !returnTo.startsWith('//') && !returnTo.includes('://')) {
+          router.push(returnTo)
+          return
+        }
 
         // Check if onboarding is completed
         const { data: profile } = await supabase
