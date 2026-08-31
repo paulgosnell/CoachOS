@@ -34,8 +34,8 @@ export default function LoginPage() {
         // Track successful sign in
         trackSignIn('email')
 
-        // If there's a return URL, use it
-        if (returnTo) {
+        // If there's a return URL, validate it's a safe relative path
+        if (returnTo && returnTo.startsWith('/') && !returnTo.startsWith('//') && !returnTo.includes('://')) {
           router.push(returnTo)
           return
         }
