@@ -9,7 +9,7 @@ export default async function SubscribePage() {
   } = await supabase.auth.getUser()
 
   if (!user) {
-    redirect('/login')
+    redirect('/auth/login?returnTo=/subscribe')
   }
 
   // Get user profile with subscription status
