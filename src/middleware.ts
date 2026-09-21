@@ -1,5 +1,6 @@
 import { type NextRequest, type NextFetchEvent } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
+import { MAINTENANCE_MODE } from '@/lib/maintenance'
 
 /**
  * Crawler logging.
@@ -84,6 +85,12 @@ async function logCrawlerHit(row: Record<string, string | null>) {
 }
 
 export async function middleware(request: NextRequest, event: NextFetchEvent) {
+  // Maintenance mode: skip crawler logging too, it is a Supabase call and the
+  // database is down. updateSession() carries the full maintenance gate.
+  if (MAINTENANCE_MODE) {
+    return await updateSession(request)
+  }
+
   // Logging must never be able to break auth or a page render, so everything
   // here is wrapped and the existing auth logic below always runs regardless
   // of what happens in this block.

@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { MAINTENANCE_MODE } from '@/lib/maintenance'
 import Link from 'next/link'
 import {
   ArrowRight,
@@ -30,6 +31,10 @@ function EmailConfirmationHandler() {
   useEffect(() => {
     const code = searchParams.get('code')
     if (code) {
+      if (MAINTENANCE_MODE) {
+        router.push('/maintenance')
+        return
+      }
       const handleConfirmation = async () => {
         const supabase = createClient()
         const { error } = await supabase.auth.exchangeCodeForSession(code)
