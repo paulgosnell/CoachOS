@@ -9,7 +9,7 @@ Session log. Newest at top. Live claims live in [DESK.md](./DESK.md). Backlog is
 - [x] Both keys tested 200 before adding; redeployed.
 - [ ] Homepage demo voice (`/api/demo-voice-session`) returns 500: it calls OpenAI's retired `/v1/realtime/sessions` with `gpt-4o-realtime-preview-2024-12-17`. Code fix, not the key.
 - [ ] /chat and /voice-coach not checked in the UI: they need a login and no test account exists.
-- [ ] SECURITY: `/api/gemini-live-session` returns a wsUrl with the raw Gemini key to any logged-in user.
+- [x] SECURITY: `/api/gemini-live-session` returned a wsUrl with the raw Gemini key to any logged-in user (and logged the key prefix). Now mints a single-use ephemeral token (`src/lib/ai/gemini-live-token.ts`, Constrained endpoint). Live: route returns 401 signed out; the voice-coach setup (09-2025 model, Puck, thinking off) connects on a token and returns audio. Signed-in UI click not tested: no test account.
 
 ## 2026-08-29 — ops
 
