@@ -2,6 +2,15 @@
 
 Session log. Newest at top. Live claims live in [DESK.md](./DESK.md). Backlog is GitHub Issues.
 
+## 2026-10-14: own AI keys (keys live, UI only partly verified)
+
+- [x] `GOOGLE_AI_API_KEY` was the "CoachOS" key in the CoachOS GCP project (denied, no billing) with a literal trailing `\n`. Now own key `gemini-coachos` (AccountsOS GCP project), sensitive.
+- [x] `OPENAI_API_KEY` was an invalid key. New OpenAI project "CoachOS" in the TVL org, service-account key `coachos`, never expires, sensitive.
+- [x] Both keys tested 200 before adding; redeployed.
+- [ ] Homepage demo voice (`/api/demo-voice-session`) returns 500: it calls OpenAI's retired `/v1/realtime/sessions` with `gpt-4o-realtime-preview-2024-12-17`. Code fix, not the key.
+- [ ] /chat and /voice-coach not checked in the UI: they need a login and no test account exists.
+- [ ] SECURITY: `/api/gemini-live-session` returns a wsUrl with the raw Gemini key to any logged-in user.
+
 ## 2026-08-29 — ops
 
 CoachOS Grok Bot.app stood up. Claimed ops on DESK.md (live board, not protocol-only). Weekday morning check saved (`coachos-weekday-morning`, 8:44 London weekdays). Awaiting Paul confirm in Routines. No GTM/social. No CoachOS-specific connectors.
