@@ -109,14 +109,19 @@ export function DemoVoice({ onClose }: DemoVoiceProps) {
                         dataChannelRef.current.send(JSON.stringify({
                             type: 'session.update',
                             session: {
+                                type: 'realtime',
                                 instructions: DEMO_SYSTEM_PROMPT,
-                                voice: selectedVoiceRef.current,
-                                input_audio_transcription: { model: 'whisper-1' },
-                                turn_detection: {
-                                    type: 'server_vad',
-                                    threshold: 0.5,
-                                    prefix_padding_ms: 300,
-                                    silence_duration_ms: 700
+                                audio: {
+                                    input: {
+                                        transcription: { model: 'whisper-1' },
+                                        turn_detection: {
+                                            type: 'server_vad',
+                                            threshold: 0.5,
+                                            prefix_padding_ms: 300,
+                                            silence_duration_ms: 700
+                                        }
+                                    },
+                                    output: { voice: selectedVoiceRef.current }
                                 }
                             }
                         }))
@@ -132,19 +137,19 @@ export function DemoVoice({ onClose }: DemoVoiceProps) {
                         dataChannelRef.current.send(JSON.stringify({
                             type: 'response.create',
                             response: {
-                                modalities: ['text', 'audio'],
+                                output_modalities: ['audio'],
                                 instructions: 'Greet the user briefly and warmly, then ask what\'s on their mind today. Keep it under 10 seconds.'
                             }
                         }))
                     }
                     break
 
-                case 'response.audio_transcript.delta':
-                case 'response.audio.delta':
+                case 'response.output_audio_transcript.delta':
+                case 'response.output_audio.delta':
                     setIsAiSpeaking(true)
                     break
 
-                case 'response.audio_transcript.done':
+                case 'response.output_audio_transcript.done':
                 case 'response.done':
                     setIsAiSpeaking(false)
                     break
@@ -224,7 +229,7 @@ export function DemoVoice({ onClose }: DemoVoiceProps) {
             await pc.setLocalDescription(offer)
 
             // Send SDP to OpenAI
-            const sdpResponse = await fetch('https://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview-2024-12-17', {
+            const sdpResponse = await fetch('https://api.openai.com/v1/realtime/calls', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${ client_secret.value }`,

@@ -46,29 +46,31 @@ export async function POST(req: Request) {
             )
         }
 
-        // Create ephemeral session token
-        const response = await fetch('https://api.openai.com/v1/realtime/sessions', {
+        // Mint an ephemeral client secret (GA Realtime API). The browser sets
+        // voice and instructions over the data channel with session.update.
+        const response = await fetch('https://api.openai.com/v1/realtime/client_secrets', {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                model: 'gpt-4o-realtime-preview-2024-12-17',
-                voice: 'verse' // Same voice as the main app
+                // The secret only has to be used to open the call.
+                expires_after: { anchor: 'created_at', seconds: 600 },
+                session: { type: 'realtime', model: 'gpt-realtime' }
             })
         })
 
         if (!response.ok) {
             const errorData = await response.text()
-            console.error('OpenAI Realtime API error:', errorData)
+            console.error('OpenAI Realtime API error:', response.status, errorData)
             throw new Error(`Failed to create session: ${response.status}`)
         }
 
         const data = await response.json()
 
         return NextResponse.json({
-            client_secret: data.client_secret
+            client_secret: { value: data.value, expires_at: data.expires_at }
         })
     } catch (error: any) {
         console.error('Demo voice session creation error:', error)
